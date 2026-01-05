@@ -82,7 +82,7 @@ export const translations = {
       success: "Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất."
     },
     about: {
-      brandName: "SnapVideoTools",
+      brandName: "AIO Video Downloader",
       description: "Một công cụ xóa watermark và tải video miễn phí hỗ trợ các nền tảng video lớn như Douyin, Xiaohongshu, Kuaishou, Bilibili, Xigua Video, Toutiao và Weibo."
     }
   },
@@ -168,7 +168,7 @@ export const translations = {
       success: "Thanks for contacting us! We'll reply shortly."
     },
     about: {
-      brandName: "SnapVideoTools",
+      brandName: "AIO Video Downloader",
       description: "A free watermark remover and video downloader tool supporting major video platforms like Douyin, Xiaohongshu, Kuaishou, Bilibili, Xigua Video, Toutiao, and Weibo."
     }
   },
@@ -254,7 +254,7 @@ export const translations = {
       success: "感谢您与我们联系！我们会尽快回复。"
     },
     about: {
-      brandName: "SnapVideoTools",
+      brandName: "AIO Video Downloader",
       description: "一个免费的去水印和视频下载工具，支持 Douyin, Xiaohongshu, Kuaishou, Bilibili, Xigua Video, Toutiao 和 Weibo 等主要视频平台。"
     }
   },
@@ -340,7 +340,7 @@ export const translations = {
       success: "문의해 주셔서 감사합니다! 곧 답변 드리겠습니다."
     },
     about: {
-      brandName: "SnapVideoTools",
+      brandName: "AIO Video Downloader",
       description: "Douyin, Xiaohongshu, Kuaishou, Bilibili, Xigua Video, Toutiao 및 Weibo와 같은 주요 비디오 플랫폼을 지원하는 무료 워터마크 제거 및 비디오 다운로드 도구입니다."
     }
   },
@@ -426,7 +426,7 @@ export const translations = {
       success: "ご連絡ありがとうございます！ すぐに返信いたします。"
     },
     about: {
-      brandName: "SnapVideoTools",
+      brandName: "AIO Video Downloader",
       description: "Douyin、Xiaohongshu、Kuaishou、Bilibili、Xigua Video、Toutiao、Weiboなどの主要な動画プラットフォームをサポートする無料の透かし除去および動画ダウンロードツールです。"
     }
   },
@@ -512,7 +512,7 @@ export const translations = {
       success: "Terima kasih telah menghubungi kami! Kami akan segera membalasnya."
     },
     about: {
-      brandName: "SnapVideoTools",
+      brandName: "AIO Video Downloader",
       description: "Alat penghapus watermark dan pengunduh video gratis yang mendukung platform video utama seperti Douyin, Xiaohongshu, Kuaishou, Bilibili, Xigua Video, Toutiao, dan Weibo."
     }
   },
@@ -598,7 +598,7 @@ export const translations = {
       success: "ขอบคุณที่ติดต่อเรา! เราจะตอบกลับในไม่ช้า"
     },
     about: {
-      brandName: "SnapVideoTools",
+      brandName: "AIO Video Downloader",
       description: "เครื่องมือลบลายน้ำและดาวน์โหลดวิดีโอฟรีที่รองรับแพลตฟอร์มวิดีโอหลักๆ เช่น Douyin, Xiaohongshu, Kuaishou, Bilibili, Xigua Video, Toutiao และ Weibo"
     }
   },
@@ -684,7 +684,7 @@ export const translations = {
       success: "¡Gracias por contactarnos! Responderemos a la brevedad."
     },
     about: {
-      brandName: "SnapVideoTools",
+      brandName: "AIO Video Downloader",
       description: "Una herramienta gratuita de eliminación de marcas de agua y descarga de videos que soporta las principales plataformas de video como Douyin, Xiaohongshu, Kuaishou, Bilibili, Xigua Video, Toutiao y Weibo."
     }
   },
@@ -770,7 +770,7 @@ export const translations = {
       success: "Merci de nous avoir contactés ! Nous vous répondrons sous peu."
     },
     about: {
-      brandName: "SnapVideoTools",
+      brandName: "AIO Video Downloader",
       description: "Un outil gratuit de suppression de filigrane et de téléchargement de vidéos prenant en charge les principales plateformes vidéo comme Douyin, Xiaohongshu, Kuaishou, Bilibili, Xigua Video, Toutiao et Weibo."
     }
   }

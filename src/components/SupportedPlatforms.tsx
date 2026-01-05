@@ -48,70 +48,25 @@ const SupportedPlatforms: React.FC<SupportedPlatformsProps> = ({ t }) => {
 
   const platforms: Platform[] = [
     { name: 'Shopee Video', color: 'text-orange-500', icon: ShoppingBag },
-    { 
-      name: 'Tiktok', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/tiktok.png?t=20241122' 
-    },
+    { name: 'Tiktok', customIconUrl: '/icon/tiktok.png' },
     { name: 'Facebook', color: 'text-blue-600', icon: Facebook },
     { name: 'Instagram', color: 'text-pink-500', icon: Instagram },
     { name: 'Threads', color: 'text-black dark:text-white', icon: AtSign },
     { name: 'X (Twitter)', color: 'text-black dark:text-white', icon: Twitter },
-    { 
-      name: 'Douyin (TikTok China)', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/douyin.png?t=20241122' 
-    },
-    { 
-      name: 'Kuaishou', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/kuaishou.png?t=20241122' 
-    },
-    { 
-      name: 'Xiaohongshu', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/xiaohongshu.png?t=20241122' 
-    },
-    { 
-      name: 'Bilibili', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/bilibili.png?t=20241122' 
-    },
-    { 
-      name: 'Ixigua', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/ixigua.png?t=20241122' 
-    },
-    { 
-      name: 'Toutiao', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/toutiao.png?t=20241122' 
-    },
-    { 
-      name: 'Weibo', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/weibo.png?t=20241122' 
-    },
-    { 
-      name: 'Pipix', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/pipix.png?t=20241122' 
-    },
-    { 
-      name: 'Izuiyou', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/izuiyou.png?t=20241122' 
-    },
-    { 
-      name: 'PearVideo', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/pearvideo.png?t=20241122' 
-    },
-    { 
-      name: 'Xinpianchang', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/xinpianchang.png?t=20241122' 
-    },
-    { 
-      name: 'Haokan', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/haokan.png?t=20241122' 
-    },
-    { 
-      name: 'Huya', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/huya.png?t=20241122' 
-    },
-    { 
-      name: 'AcFun', 
-      customIconUrl: 'https://sg-social-media.oss-ap-southeast-1.aliyuncs.com/snapvideotools/assets/img/brand/acfun.png?t=20241122' 
-    }
+    { name: 'Douyin (Tiktok Trung Quốc)', customIconUrl: '/icon/douyin.png' },
+    { name: 'Kuaishou', customIconUrl: '/icon/kuaishou.png' },
+    { name: 'Xiaohongshu', customIconUrl: '/icon/xiaohongshu.png' },
+    { name: 'Bilibili', customIconUrl: '/icon/bilibili.png' },
+    { name: 'Ixigua', customIconUrl: '/icon/ixigua.png' },
+    { name: 'Toutiao', customIconUrl: '/icon/toutiao.png' },
+    { name: 'Weibo', customIconUrl: '/icon/weibo.png' },
+    { name: 'Pipix', customIconUrl: '/icon/pipix.png' },
+    { name: 'Izuiyou', customIconUrl: '/icon/izuiyou.png' },
+    { name: 'PearVideo', customIconUrl: '/icon/pearvideo.png' },
+    { name: 'Xinpianchang', customIconUrl: '/icon/xinpianchang.png' },
+    { name: 'Haokan', customIconUrl: '/icon/haokan.png' },
+    { name: 'Huya', customIconUrl: '/icon/huya.png' },
+    { name: 'AcFun', customIconUrl: '/icon/acfun.png' }
   ];
 
   return (
