@@ -54,13 +54,20 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
     } catch (error) {
       console.error('Download failed:', error);
 
-      // Fallback: Nếu fetch blob thất bại (thường gặp trên mobile hoặc CORS)
-      // Chuyển hướng trực tiếp để tránh popup blocker chặn
       const btn = document.getElementById(`btn-dl-${result.id}`);
       if (btn) btn.innerHTML = '⚠️ Mở Video...';
 
+      // Fallback strategy check
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
       setTimeout(() => {
-        window.location.href = result.downloadUrl!;
+        if (isMobile) {
+          // Mobile: Tránh popup blocker bằng cách chuyển hướng trực tiếp
+          window.location.href = result.downloadUrl!;
+        } else {
+          // PC: Mở tab mới để không mất trang hiện tại
+          window.open(result.downloadUrl, '_blank');
+        }
       }, 500);
 
       // Reset nút sau 3s
