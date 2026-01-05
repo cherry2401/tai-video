@@ -30,7 +30,52 @@ const App: React.FC = () => {
   const [isAffiliateHidden, setIsAffiliateHidden] = useState(false); // NEW: Hidden mode state
   const [isProcessingDownload, setIsProcessingDownload] = useState(false);
 
-  // ... (lines 32-78 skipped)
+  // State for Theme, Language, Active Tab, and Current View
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [language, setLanguage] = useState<Language>('vi');
+  const [activeTab, setActiveTab] = useState<NavItem>(NavItem.VIDEO);
+  const [currentView, setCurrentView] = useState<'home' | 'privacy' | 'terms' | 'contact' | 'about'>('home');
+
+  // State for Redirect Logic
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  // Translation Helper
+  const t = translations[language];
+
+  // Theme Logic
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
+  // Handle URL Redirection (Link Shortener Logic)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const shortCode = params.get('s');
+
+    if (shortCode) {
+      setIsRedirecting(true);
+      // Simulate lookup delay
+      setTimeout(() => {
+        const originalUrl = localStorage.getItem(`short_${shortCode}`);
+        if (originalUrl) {
+          window.location.href = originalUrl;
+        } else {
+          setIsRedirecting(false);
+          alert('Link rút gọn không tồn tại hoặc đã hết hạn.');
+          // Remove query param to show the app cleanly
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }, 1500);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
 
   // NEW: Enhanced download handler với n8n + affiliate tracking
   const handleDownload = async (links: string[]) => {
@@ -63,9 +108,6 @@ const App: React.FC = () => {
         setIsAffiliateHidden(true);
       }
 
-      // Note: Logic tải n8n sẽ được gọi trong callback handleAffiliateTrackingComplete
-      // để đảm bảo cookie được set xong mới cho user tải file.
-
     } catch (error) {
       console.error("Error processing links:", error);
       alert("Có lỗi xảy ra khi xử lý links. Vui lòng thử lại.");
@@ -83,34 +125,97 @@ const App: React.FC = () => {
     await enrichResultsWithDownloadLinks(results);
   };
 
-  // ... (lines 123-191 skipped)
+  // NEW: Enrich results với download links từ n8n
+  const enrichResultsWithDownloadLinks = async (resultsToEnrich: DownloadResult[]) => {
+    setIsProcessingDownload(true);
 
-  {/* NEW: Shopee Affiliate Iframe (Updated with hidden support) */ }
-  {
-    currentShopeeUrl && !affiliateTracked && (
-      <div className={isAffiliateHidden ? "sr-only" : "w-full max-w-4xl mx-auto mt-8 animate-fadeIn"}>
-        <ShopeeAffiliate
-          url={currentShopeeUrl}
-          onTrackingComplete={handleAffiliateTrackingComplete}
-          forceHidden={isAffiliateHidden}
-        />
-      </div>
-    )
-  }
+    try {
+      console.log('📥 Step 4: Fetching download links from n8n...');
 
-  {/* Processing indicator */ }
-  {
-    isProcessingDownload && (
-      <div className="w-full max-w-4xl mx-auto mt-8 text-center animate-fadeIn">
-        <div className="flex items-center justify-center gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-          <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
-          <p className="text-sm text-blue-700 dark:text-blue-300">
-            Đang lấy link download từ server...
+      // Gọi n8n webhook cho từng result
+      const enrichedResults = await Promise.all(
+        resultsToEnrich.map(result => enrichResultWithDownload(result))
+      );
+
+      console.log('✅ Download links fetched:', enrichedResults);
+      setResults(enrichedResults);
+
+    } catch (error) {
+      console.error('Error enriching results:', error);
+      alert('Không thể lấy link download. Vui lòng thử lại.');
+    } finally {
+      setIsProcessingDownload(false);
+    }
+  };
+
+  const renderContent = () => {
+    if (currentView === 'privacy') {
+      return <PrivacyPolicy />;
+    }
+
+    if (currentView === 'terms') {
+      return <TermsOfService />;
+    }
+
+    if (currentView === 'contact') {
+      return <ContactForm t={t} />;
+    }
+
+    if (currentView === 'about') {
+      return <AboutUs t={t} />;
+    }
+
+    if (activeTab === NavItem.RUT_GON) {
+      return <ShortenForm t={t} />;
+    }
+
+    if (activeTab === NavItem.TOOL) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 animate-fadeIn space-y-6">
+          <Construction size={64} className="text-gray-400 dark:text-gray-600" />
+          <h2 className="text-xl md:text-2xl font-semibold text-center text-gray-700 dark:text-gray-300 max-w-2xl px-4 leading-relaxed">
+            {t.underConstruction}
+          </h2>
+        </div>
+      );
+    }
+
+    // Default view (Video/Home/Flashsale - sharing the same UI for now)
+    return (
+      <>
+        <div className="text-center mb-10 space-y-2 animate-fadeIn">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 transition-colors">
+            {t.title}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base transition-colors">
+            {t.subtitle}
           </p>
         </div>
-      </div>
-    )
-  }
+
+        <DownloadForm onDownload={handleDownload} isLoading={isLoading || isProcessingDownload} t={t} />
+
+        {/* NEW: Shopee Affiliate Iframe (Updated with hidden support) */}
+        {currentShopeeUrl && !affiliateTracked && (
+          <div className={isAffiliateHidden ? "sr-only" : "w-full max-w-4xl mx-auto mt-8 animate-fadeIn"}>
+            <ShopeeAffiliate
+              url={currentShopeeUrl}
+              onTrackingComplete={handleAffiliateTrackingComplete}
+              forceHidden={isAffiliateHidden}
+            />
+          </div>
+        )}
+
+        {/* Processing indicator */}
+        {isProcessingDownload && (
+          <div className="w-full max-w-4xl mx-auto mt-8 text-center animate-fadeIn">
+            <div className="flex items-center justify-center gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Đang lấy link download từ server...
+              </p>
+            </div>
+          </div>
+        )}
 
         <ResultList results={results} t={t} />
 
@@ -125,57 +230,57 @@ const App: React.FC = () => {
     );
   };
 
-// If redirecting, show a simple loading screen instead of the main app
-if (isRedirecting) {
+  // If redirecting, show a simple loading screen instead of the main app
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8fafc] dark:bg-gray-950 text-gray-600 dark:text-gray-300">
+        <Loader2 size={48} className="animate-spin text-blue-500 mb-4" />
+        <h2 className="text-xl font-semibold">Đang chuyển hướng...</h2>
+        <p className="text-sm mt-2">Vui lòng đợi trong giây lát</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8fafc] dark:bg-gray-950 text-gray-600 dark:text-gray-300">
-      <Loader2 size={48} className="animate-spin text-blue-500 mb-4" />
-      <h2 className="text-xl font-semibold">Đang chuyển hướng...</h2>
-      <p className="text-sm mt-2">Vui lòng đợi trong giây lát</p>
+    <div className="flex flex-col min-h-screen bg-[#f8fafc] dark:bg-gray-950 transition-colors duration-300">
+      <Header
+        theme={theme}
+        toggleTheme={toggleTheme}
+        language={language}
+        setLanguage={setLanguage}
+        t={t}
+        activeTab={activeTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          setCurrentView('home');
+        }}
+      />
+
+      <main className="flex-1 w-full container mx-auto px-4 py-10 flex flex-col items-center">
+        {renderContent()}
+      </main>
+
+      <Footer
+        t={t}
+        onPrivacyClick={() => {
+          setCurrentView('privacy');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onTermsClick={() => {
+          setCurrentView('terms');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onContactClick={() => {
+          setCurrentView('contact');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onAboutClick={() => {
+          setCurrentView('about');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
-}
-
-return (
-  <div className="flex flex-col min-h-screen bg-[#f8fafc] dark:bg-gray-950 transition-colors duration-300">
-    <Header
-      theme={theme}
-      toggleTheme={toggleTheme}
-      language={language}
-      setLanguage={setLanguage}
-      t={t}
-      activeTab={activeTab}
-      setActiveTab={(tab) => {
-        setActiveTab(tab);
-        setCurrentView('home');
-      }}
-    />
-
-    <main className="flex-1 w-full container mx-auto px-4 py-10 flex flex-col items-center">
-      {renderContent()}
-    </main>
-
-    <Footer
-      t={t}
-      onPrivacyClick={() => {
-        setCurrentView('privacy');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }}
-      onTermsClick={() => {
-        setCurrentView('terms');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }}
-      onContactClick={() => {
-        setCurrentView('contact');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }}
-      onAboutClick={() => {
-        setCurrentView('about');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }}
-    />
-  </div>
-);
 };
 
 export default App;
