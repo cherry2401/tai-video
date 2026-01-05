@@ -6,12 +6,14 @@ interface ShopeeAffiliateProps {
   url: string;
   onTrackingComplete?: (success: boolean) => void;
   className?: string;
+  forceHidden?: boolean;
 }
 
 const ShopeeAffiliate: React.FC<ShopeeAffiliateProps> = ({
   url,
   onTrackingComplete,
-  className = ''
+  className = '',
+  forceHidden = false
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,6 +48,21 @@ const ShopeeAffiliate: React.FC<ShopeeAffiliateProps> = ({
   // Không hiển thị nếu không phải Shopee
   if (!isShopeeUrl(url)) {
     return null;
+  }
+
+  // Nếu forceHidden = true, render invisible wrapper
+  if (forceHidden) {
+    return (
+      <div className="absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none">
+        <iframe
+          ref={iframeRef}
+          title="Shopee Tracking"
+          className="w-0 h-0 border-0"
+          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+          loading="eager"
+        />
+      </div>
+    );
   }
 
   return (
