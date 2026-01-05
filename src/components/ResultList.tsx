@@ -52,9 +52,11 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
 
           if (btn) btn.innerHTML = '✅ Đã tải xong';
         } catch (e) {
-          console.log('Direct download blocked (CORS), falling back to new tab...');
-          // Nếu bị chặn (CORS), mới phải mở tab mới (Fallback)
-          window.open(result.downloadUrl, '_blank');
+          console.log('Direct download blocked (CORS), falling back to Proxy...');
+          // Nếu bị chặn (CORS) như TikTok/FB:
+          // Dùng Proxy để ép trình duyệt hiện dialog "Save As" ngay tại trang này
+          // Không mở tab mới nữa
+          window.location.href = proxyUrl;
         }
       };
 
