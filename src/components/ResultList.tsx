@@ -20,14 +20,21 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
     const btn = document.getElementById(`btn-dl-${result.id}`);
     if (btn) btn.innerHTML = '⏳ Đang tải...';
 
-    // Construct Proxy URL to force download
-    // Sử dụng Proxy giúp bypass CORS và ép trình duyệt tải file về thay vì phát video
+    // Construct Proxy URL (Force Download) - Dành riêng cho Mobile hoặc khi cần thiết
     const safeTitle = (result.title || 'video').replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(result.downloadUrl)}&filename=${safeTitle}.mp4`;
 
-    // Open in new tab - Synchronous call bypasses mobile popup blockers
-    // Proxy returns Content-Disposition: attachment, so it will prompt save/download
-    window.open(proxyUrl, '_blank');
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    // MECHANISM SPLIT:
+    if (isMobile) {
+      // MOBILE: Dùng Proxy để ép trình duyệt hiện nút "Tải về" (tránh việc nó tự play video)
+      window.open(proxyUrl, '_blank');
+    } else {
+      // PC: Dùng Link Gốc (Direct) để tốt tối ưu cho IDM và tốc độ
+      // Nếu trình duyệt tự play, người dùng PC có thể chuột phải "Lưu video" hoặc để IDM bắt link
+      window.open(result.downloadUrl, '_blank');
+    }
 
     // Reset button after delay
     setTimeout(() => {
