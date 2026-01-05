@@ -20,20 +20,45 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
     const btn = document.getElementById(`btn-dl-${result.id}`);
     if (btn) btn.innerHTML = '⏳ Đang tải...';
 
-    // Construct Proxy URL (Force Download) - Dành riêng cho Mobile hoặc khi cần thiết
+    // Construct Proxy URL (Force Download) - Dành riêng cho Mobile
     const safeTitle = (result.title || 'video').replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(result.downloadUrl)}&filename=${safeTitle}.mp4`;
 
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    // MECHANISM SPLIT:
     if (isMobile) {
-      // MOBILE: Dùng Proxy để ép trình duyệt hiện nút "Tải về" (tránh việc nó tự play video)
+      // MOBILE: Dùng Proxy để ép trình duyệt hiện nút "Tải về"
       window.open(proxyUrl, '_blank');
     } else {
-      // PC: Dùng Link Gốc (Direct) để tốt tối ưu cho IDM và tốc độ
-      // Nếu trình duyệt tự play, người dùng PC có thể chuột phải "Lưu video" hoặc để IDM bắt link
-      window.open(result.downloadUrl, '_blank');
+      // PC: Thử tải trực tiếp (Blob) để không chuyển tab -> hiện bảng Save As
+      // Cách này giống thói quen tải file trên PC nhất
+      const tryDirectDownload = async () => {
+        try {
+          if (btn) btn.innerHTML = '⏳ Đang tải về máy...';
+
+          const response = await fetch(result.downloadUrl!);
+          if (!response.ok) throw new Error('Fetch failed');
+
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = `${safeTitle}.mp4`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+
+          if (btn) btn.innerHTML = '✅ Đã tải xong';
+        } catch (e) {
+          console.log('Direct download blocked (CORS), falling back to new tab...');
+          // Nếu bị chặn (CORS), mới phải mở tab mới (Fallback)
+          window.open(result.downloadUrl, '_blank');
+        }
+      };
+
+      tryDirectDownload();
     }
 
     // Reset button after delay
