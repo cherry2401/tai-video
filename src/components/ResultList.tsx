@@ -55,9 +55,8 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
       console.error('Download failed:', error);
 
       const btn = document.getElementById(`btn-dl-${result.id}`);
-      if (btn) btn.innerHTML = '⚠️ Mở Video...';
+      if (btn) btn.innerHTML = '⚠️ Đang tải...'; // Changed to 'Downloading...'
 
-      // Fallback strategy check
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
       setTimeout(() => {
@@ -65,8 +64,13 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
           // Mobile: Tránh popup blocker bằng cách chuyển hướng trực tiếp
           window.location.href = result.downloadUrl!;
         } else {
-          // PC: Mở tab mới để không mất trang hiện tại
-          window.open(result.downloadUrl, '_blank');
+          // PC: Sử dụng Proxy để Force Download (Bypass CORS)
+          // Clean filename
+          const safeTitle = (result.title || 'video').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+          const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(result.downloadUrl!)}&filename=${safeTitle}.mp4`;
+
+          // Trigger download bằng cách gán location (vì có Content-Disposition attachment nên sẽ không reload trang)
+          window.location.href = proxyUrl;
         }
       }, 500);
 
