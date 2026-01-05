@@ -64,7 +64,7 @@ const Header: React.FC<HeaderProps> = ({
           className="text-xl md:text-3xl font-extrabold tracking-tight flex-shrink-0 cursor-pointer flex items-center"
           onClick={() => setActiveTab(NavItem.HOME)}
         >
-          <span className="text-blue-700 dark:text-blue-500 mr-2">AIO</span> Video Downloader
+          <span className="text-green-700 dark:text-green-500 mr-2">AIO</span> Video Downloader
         </div>
 
         {/* Navigation - Added scrollbar hiding classes */}
@@ -81,9 +81,9 @@ const Header: React.FC<HeaderProps> = ({
                   <a
                     href={`#${itemKey.toLowerCase()}`}
                     onClick={(e) => handleNavClick(itemKey, e)}
-                    className={`hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-200 whitespace-nowrap px-6 py-3 rounded-full text-lg font-bold ${isActive
-                        ? 'bg-blue-100 dark:bg-gray-800 text-blue-700 dark:text-blue-400 shadow-sm transform scale-105'
-                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    className={`hover:text-green-700 dark:hover:text-green-400 transition-all duration-200 whitespace-nowrap px-6 py-3 rounded-full text-lg font-bold ${isActive
+                      ? 'bg-green-100 dark:bg-gray-800 text-green-700 dark:text-green-400 shadow-sm transform scale-105'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                       }`}
                   >
                     {label}
