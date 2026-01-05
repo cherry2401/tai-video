@@ -13,11 +13,11 @@ interface HeaderProps {
   setActiveTab: (tab: NavItem) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ 
-  theme, 
-  toggleTheme, 
-  language, 
-  setLanguage, 
+const Header: React.FC<HeaderProps> = ({
+  theme,
+  toggleTheme,
+  language,
+  setLanguage,
   t,
   activeTab,
   setActiveTab
@@ -60,8 +60,8 @@ const Header: React.FC<HeaderProps> = ({
     <header className="bg-white dark:bg-gray-900 text-gray-800 dark:text-white py-6 px-6 shadow-sm dark:shadow-md transition-colors duration-300 border-b border-gray-200 dark:border-gray-800">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
         {/* Logo */}
-        <div 
-          className="text-3xl font-extrabold tracking-tight flex-shrink-0 cursor-pointer flex items-center"
+        <div
+          className="text-xl md:text-3xl font-extrabold tracking-tight flex-shrink-0 cursor-pointer flex items-center"
           onClick={() => setActiveTab(NavItem.HOME)}
         >
           <span className="text-blue-700 dark:text-blue-500 mr-2">AIO</span> Video Downloader
@@ -75,17 +75,16 @@ const Header: React.FC<HeaderProps> = ({
               // @ts-ignore
               const label = t.nav[itemKey] || itemKey;
               const isActive = activeTab === itemKey || (activeTab === NavItem.HOME && itemKey === NavItem.VIDEO);
-              
+
               return (
                 <li key={itemKey}>
-                  <a 
-                    href={`#${itemKey.toLowerCase()}`} 
+                  <a
+                    href={`#${itemKey.toLowerCase()}`}
                     onClick={(e) => handleNavClick(itemKey, e)}
-                    className={`hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-200 whitespace-nowrap px-6 py-3 rounded-full text-lg font-bold ${
-                      isActive 
-                        ? 'bg-blue-100 dark:bg-gray-800 text-blue-700 dark:text-blue-400 shadow-sm transform scale-105' 
+                    className={`hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-200 whitespace-nowrap px-6 py-3 rounded-full text-lg font-bold ${isActive
+                        ? 'bg-blue-100 dark:bg-gray-800 text-blue-700 dark:text-blue-400 shadow-sm transform scale-105'
                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    }`}
+                      }`}
                   >
                     {label}
                   </a>
@@ -97,11 +96,11 @@ const Header: React.FC<HeaderProps> = ({
 
         {/* Right Controls: Theme & Language */}
         <div className="flex items-center gap-6 flex-shrink-0">
-          
+
           {/* Theme Toggle */}
           <div className="flex items-center gap-2">
             <Sun size={20} className={`${theme === 'light' ? 'text-orange-500' : 'text-gray-400'}`} />
-            <button 
+            <button
               onClick={toggleTheme}
               className={`w-14 h-7 rounded-full p-1 transition-colors duration-300 focus:outline-none ${theme === 'dark' ? 'bg-blue-600' : 'bg-gray-300'}`}
               aria-label="Toggle Theme"
@@ -113,7 +112,7 @@ const Header: React.FC<HeaderProps> = ({
 
           {/* Language Selector */}
           <div className="relative" ref={dropdownRef}>
-            <button 
+            <button
               onClick={() => setIsLangOpen(!isLangOpen)}
               className="flex items-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none text-gray-700 dark:text-gray-200 font-semibold text-base"
             >
