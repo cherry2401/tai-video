@@ -11,14 +11,57 @@ interface ResultListProps {
 const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
   if (results.length === 0) return null;
 
-  const handleDownloadClick = (result: DownloadResult) => {
+  const handleDownloadClick = async (result: DownloadResult) => {
     if (!result.downloadUrl) {
       alert('Link download chưa sẵn sàng. Vui lòng đợi...');
       return;
     }
 
-    // Mở link download trong tab mới
-    window.open(result.downloadUrl, '_blank');
+    try {
+      // 1. Hiển thị loading (tùy chọn, ở đây ta dùng alert hoặc toast nếu có)
+      const btn = document.getElementById(`btn-dl-${result.id}`);
+      if (btn) btn.innerHTML = '⏳ Đang tải...';
+
+      // 2. Fetch video dưới dạng Blob
+      const response = await fetch(result.downloadUrl);
+      if (!response.ok) throw new Error('Network response was not ok');
+
+      const blob = await response.blob();
+
+      // 3. Tạo object URL
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+
+      // 4. Đặt tên file (ưu tiên tên từ result hoặc mặc định)
+      // Clean title để làm tên file an toàn
+      const safeTitle = (result.title || 'video')
+        .replace(/[^a-z0-9]/gi, '_')
+        .toLowerCase();
+
+      a.download = `${safeTitle}.mp4`;
+
+      // 5. Trigger click và cleanup
+      document.body.appendChild(a);
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      if (btn) btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Tải xuống`;
+
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: Nếu fetch blob thất bại (do CORS strict quá), mở tab mới như cũ
+      window.open(result.downloadUrl, '_blank');
+
+      const btn = document.getElementById(`btn-dl-${result.id}`);
+      if (btn) btn.innerHTML = '❌ Lỗi';
+      setTimeout(() => {
+        if (btn) btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Tải xuống`;
+      }, 2000);
+    }
   };
 
   return (
@@ -35,7 +78,7 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
           {/* Thumbnail Section */}
           <div className="w-full md:w-48 h-32 bg-gray-200 dark:bg-gray-700 relative shrink-0">
             {result.thumbnail ? (
-               <img src={result.thumbnail} alt={result.title} className="w-full h-full object-cover" />
+              <img src={result.thumbnail} alt={result.title} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">
                 No Preview
@@ -91,6 +134,7 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
               {/* Download Button */}
               {result.status === 'success' && result.downloadUrl ? (
                 <button
+                  id={`btn-dl-${result.id}`}
                   className="flex items-center gap-1 text-xs text-white bg-green-600 px-3 py-1.5 rounded hover:bg-green-700 transition-colors shadow-md"
                   onClick={() => handleDownloadClick(result)}
                 >
