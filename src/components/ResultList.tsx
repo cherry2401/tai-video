@@ -11,74 +11,28 @@ interface ResultListProps {
 const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
   if (results.length === 0) return null;
 
-  const handleDownloadClick = async (result: DownloadResult) => {
+  const handleDownloadClick = (result: DownloadResult) => {
     if (!result.downloadUrl) {
       alert('Link download chưa sẵn sàng. Vui lòng đợi...');
       return;
     }
 
-    try {
-      // 1. Hiển thị loading (tùy chọn, ở đây ta dùng alert hoặc toast nếu có)
-      const btn = document.getElementById(`btn-dl-${result.id}`);
-      if (btn) btn.innerHTML = '⏳ Đang tải...';
+    const btn = document.getElementById(`btn-dl-${result.id}`);
+    if (btn) btn.innerHTML = '⏳ Đang tải...';
 
-      // 2. Fetch video dưới dạng Blob
-      const response = await fetch(result.downloadUrl);
-      if (!response.ok) throw new Error('Network response was not ok');
+    // Construct Proxy URL to force download
+    // Sử dụng Proxy giúp bypass CORS và ép trình duyệt tải file về thay vì phát video
+    const safeTitle = (result.title || 'video').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(result.downloadUrl)}&filename=${safeTitle}.mp4`;
 
-      const blob = await response.blob();
+    // Open in new tab - Synchronous call bypasses mobile popup blockers
+    // Proxy returns Content-Disposition: attachment, so it will prompt save/download
+    window.open(proxyUrl, '_blank');
 
-      // 3. Tạo object URL
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-
-      // 4. Đặt tên file (ưu tiên tên từ result hoặc mặc định)
-      // Clean title để làm tên file an toàn
-      const safeTitle = (result.title || 'video')
-        .replace(/[^a-z0-9]/gi, '_')
-        .toLowerCase();
-
-      a.download = `${safeTitle}.mp4`;
-
-      // 5. Trigger click và cleanup
-      document.body.appendChild(a);
-      a.click();
-
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
+    // Reset button after delay
+    setTimeout(() => {
       if (btn) btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Tải xuống`;
-
-    } catch (error) {
-      console.error('Download failed:', error);
-
-      const btn = document.getElementById(`btn-dl-${result.id}`);
-      if (btn) btn.innerHTML = '⚠️ Đang tải...'; // Changed to 'Downloading...'
-
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-      setTimeout(() => {
-        if (isMobile) {
-          // Mobile: Tránh popup blocker bằng cách chuyển hướng trực tiếp
-          window.location.href = result.downloadUrl!;
-        } else {
-          // PC: Sử dụng Proxy để Force Download (Bypass CORS)
-          // Clean filename
-          const safeTitle = (result.title || 'video').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-          const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(result.downloadUrl!)}&filename=${safeTitle}.mp4`;
-
-          // Trigger download bằng cách gán location (vì có Content-Disposition attachment nên sẽ không reload trang)
-          window.location.href = proxyUrl;
-        }
-      }, 500);
-
-      // Reset nút sau 3s
-      setTimeout(() => {
-        if (btn) btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Tải xuống`;
-      }, 3000);
-    }
+    }, 5000);
   };
 
   return (
