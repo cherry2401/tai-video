@@ -2,7 +2,8 @@ import { DownloadResult } from "../types";
 
 // Configuration - Sẽ được load từ .env
 const N8N_CONFIG = {
-  WEBHOOK_URL: import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://your-domain.com/webhook/shopee-download',
+  // Use relative path to call Cloudflare Function
+  WEBHOOK_URL: '/api/video-download',
   TIMEOUT: 30000, // 30 seconds
 };
 
