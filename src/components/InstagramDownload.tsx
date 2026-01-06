@@ -159,11 +159,9 @@ const InstagramDownload: React.FC = () => {
                                         ) : (
                                             <div className="relative w-full h-full">
                                                 <img
-                                                    src={item.url}
+                                                    src={`https://wsrv.nl/?url=${encodeURIComponent(item.url)}`}
                                                     alt={`API Result ${index}`}
                                                     className="w-full h-full object-contain"
-                                                    referrerPolicy="no-referrer"
-                                                    crossOrigin="anonymous"
                                                 />
                                                 <div className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full pointer-events-none">
                                                     <ImageIcon size={16} />
