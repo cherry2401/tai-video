@@ -67,9 +67,9 @@ const Header: React.FC<HeaderProps> = ({
           <span className="text-green-700 dark:text-green-500 mr-2">AIO</span> Video Downloader
         </div>
 
-        {/* Navigation - Added scrollbar hiding classes */}
-        <nav className="flex-1 overflow-x-auto w-full md:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-          <ul className="flex justify-center items-center gap-4 md:gap-8 min-w-max">
+        {/* Navigation - Optimized for Mobile (Fits screen, no scroll) */}
+        <nav className="flex-1 w-full md:w-auto">
+          <ul className="flex justify-center items-center gap-1 md:gap-8 w-full">
             {navItems.map((itemKey) => {
               // Map the enum value to the translation key
               // @ts-ignore
@@ -77,11 +77,11 @@ const Header: React.FC<HeaderProps> = ({
               const isActive = activeTab === itemKey || (activeTab === NavItem.HOME && itemKey === NavItem.VIDEO);
 
               return (
-                <li key={itemKey}>
+                <li key={itemKey} className="flex-1 md:flex-none flex justify-center">
                   <a
                     href={`#${itemKey.toLowerCase()}`}
                     onClick={(e) => handleNavClick(itemKey, e)}
-                    className={`hover:text-green-700 dark:hover:text-green-400 transition-all duration-200 whitespace-nowrap px-6 py-3 rounded-full text-lg font-bold ${isActive
+                    className={`hover:text-green-700 dark:hover:text-green-400 transition-all duration-200 whitespace-nowrap px-3 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-lg font-bold w-full md:w-auto text-center ${isActive
                       ? 'bg-green-100 dark:bg-gray-800 text-green-700 dark:text-green-400 shadow-sm transform scale-105'
                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                       }`}
