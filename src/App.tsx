@@ -13,6 +13,7 @@ import TermsOfService from './components/TermsOfService';
 import ContactForm from './components/ContactForm';
 import AboutUs from './components/AboutUs';
 import ShopeeAffiliate from './components/ShopeeAffiliate';
+import InstagramDownload from './components/InstagramDownload';
 import { analyzeLinks } from './services/geminiService';
 import { enrichResultWithDownload } from './services/n8nService';
 import { isShopeeUrl } from './services/affiliateService';
@@ -148,14 +149,7 @@ const App: React.FC = () => {
     }
 
     if (activeTab === NavItem.TOOL) {
-      return (
-        <div className="flex flex-col items-center justify-center py-20 animate-fadeIn space-y-6">
-          <Construction size={64} className="text-gray-400 dark:text-gray-600" />
-          <h2 className="text-xl md:text-2xl font-semibold text-center text-gray-700 dark:text-gray-300 max-w-2xl px-4 leading-relaxed">
-            {t.underConstruction}
-          </h2>
-        </div>
-      );
+      return <InstagramDownload />;
     }
 
     // Default view (Video/Home/Flashsale - sharing the same UI for now)
