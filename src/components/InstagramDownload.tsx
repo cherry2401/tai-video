@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader2, Download, Instagram, Search, AlertCircle, PlayCircle, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Download, Instagram, Search, AlertCircle, PlayCircle, Image as ImageIcon, Copy, Check } from 'lucide-react';
 
 interface MediaItem {
     type: 'Photo' | 'Video';
@@ -20,6 +20,15 @@ const InstagramDownload: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<InstagramResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [captionCopied, setCaptionCopied] = useState(false);
+
+    const handleCopyCaption = () => {
+        if (result?.message) {
+            navigator.clipboard.writeText(result.message);
+            setCaptionCopied(true);
+            setTimeout(() => setCaptionCopied(false), 2000);
+        }
+    };
 
     const handleDownload = async () => {
         if (!url.trim()) return;
@@ -110,6 +119,25 @@ const InstagramDownload: React.FC = () => {
                             Kết quả tìm thấy ({result.attachments?.length || 0})
                         </h3>
 
+                        {/* Caption Section */}
+                        {result.message && (
+                            <div className="mb-8 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                                <div className="flex justify-between items-start mb-2">
+                                    <h4 className="font-medium text-gray-700 dark:text-gray-300">Caption</h4>
+                                    <button
+                                        onClick={handleCopyCaption}
+                                        className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-medium bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded"
+                                    >
+                                        {captionCopied ? <Check size={14} /> : <Copy size={14} />}
+                                        {captionCopied ? 'Đã sao chép' : 'Sao chép'}
+                                    </button>
+                                </div>
+                                <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                                    {result.message}
+                                </p>
+                            </div>
+                        )}
+
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {result.attachments?.map((item, index) => (
                                 <div key={index} className="bg-gray-50 dark:bg-gray-700/30 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-shadow">
@@ -121,6 +149,7 @@ const InstagramDownload: React.FC = () => {
                                                     src={item.url}
                                                     controls
                                                     className="w-full h-full object-contain"
+                                                    referrerPolicy="no-referrer"
                                                 />
                                                 <div className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full pointer-events-none">
                                                     <PlayCircle size={16} />
@@ -132,6 +161,7 @@ const InstagramDownload: React.FC = () => {
                                                     src={item.url}
                                                     alt={`API Result ${index}`}
                                                     className="w-full h-full object-contain"
+                                                    referrerPolicy="no-referrer"
                                                 />
                                                 <div className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full pointer-events-none">
                                                     <ImageIcon size={16} />
