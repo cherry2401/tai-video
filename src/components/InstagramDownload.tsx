@@ -61,6 +61,16 @@ const InstagramDownload: React.FC = () => {
     };
 
     const handleForceDownload = async (mediaUrl: string, type: 'Photo' | 'Video', index: number) => {
+        // Detect Mobile (Simple check)
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        // On Mobile, opening Blob is unreliable or blocked.
+        // Direct link is better (let Browser handle saving).
+        if (isMobile) {
+            window.open(mediaUrl, '_blank');
+            return;
+        }
+
         try {
             // For images, use proxy to bypass CORS/Hotlink protection
             const fetchUrl = type === 'Photo'
