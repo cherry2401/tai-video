@@ -81,7 +81,7 @@ const Header: React.FC<HeaderProps> = ({
                   <a
                     href={`#${itemKey.toLowerCase()}`}
                     onClick={(e) => handleNavClick(itemKey, e)}
-                    className={`hover:text-green-700 dark:hover:text-green-400 transition-all duration-200 whitespace-nowrap px-3 py-1.5 md:px-5 md:py-2 rounded-full text-sm md:text-lg font-bold w-full md:w-auto text-center ${isActive
+                    className={`hover:text-green-700 dark:hover:text-green-400 transition-all duration-200 whitespace-nowrap px-3 py-1 md:px-4 md:py-1.5 rounded-full text-sm md:text-lg font-bold w-full md:w-auto text-center ${isActive
                       ? 'bg-green-100 dark:bg-gray-800 text-green-700 dark:text-green-400 shadow-sm transform scale-105'
                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                       }`}
