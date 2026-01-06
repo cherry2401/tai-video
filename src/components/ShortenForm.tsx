@@ -183,7 +183,7 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
                   QR Code
                 </h3>
 
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500 dark:text-gray-400 flex justify-center md:justify-start">
                   - Quét mã để truy cập nhanh trên điện thoại.
                 </p>
 
