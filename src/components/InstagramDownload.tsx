@@ -173,46 +173,48 @@ const InstagramDownload: React.FC = () => {
                             </div>
                         )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                             {result.attachments?.map((item, index) => (
                                 <div key={index} className="bg-gray-50 dark:bg-gray-700/30 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-shadow">
                                     {/* Media Preview */}
-                                    <div className="aspect-[4/5] md:aspect-square relative flex items-center justify-center bg-black/5 dark:bg-black/20 group">
+                                    <div className="aspect-[4/5] relative flex items-center justify-center bg-black/5 dark:bg-black/20 group">
                                         {item.type === 'Video' ? (
                                             <div className="relative w-full h-full">
                                                 <video
                                                     src={item.url}
-                                                    controls
-                                                    className="w-full h-full object-contain"
+                                                    className="w-full h-full object-cover"
                                                     referrerPolicy="no-referrer"
                                                     crossOrigin="anonymous"
+                                                    playsInline
+                                                    controlsList="nodownload"
                                                 />
-                                                <div className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full pointer-events-none">
-                                                    <PlayCircle size={16} />
+                                                <div className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded-full pointer-events-none">
+                                                    <PlayCircle size={14} />
                                                 </div>
                                             </div>
                                         ) : (
                                             <div className="relative w-full h-full">
                                                 <img
-                                                    src={`https://wsrv.nl/?url=${encodeURIComponent(item.url)}`}
-                                                    alt={`API Result ${index}`}
-                                                    className="w-full h-full object-contain"
+                                                    src={`https://wsrv.nl/?url=${encodeURIComponent(item.url)}&w=400&output=jpg`}
+                                                    alt={`Result ${index}`}
+                                                    className="w-full h-full object-cover"
+                                                    loading="lazy"
                                                 />
-                                                <div className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full pointer-events-none">
-                                                    <ImageIcon size={16} />
+                                                <div className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded-full pointer-events-none">
+                                                    <ImageIcon size={14} />
                                                 </div>
                                             </div>
                                         )}
                                     </div>
 
                                     {/* Download Button */}
-                                    <div className="p-4">
+                                    <div className="p-2 md:p-3">
                                         <button
                                             onClick={() => handleForceDownload(item.url, item.type, index)}
-                                            className="flex items-center justify-center gap-2 w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors shadow-sm"
+                                            className="flex items-center justify-center gap-1.5 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs md:text-sm font-medium transition-colors shadow-sm"
                                         >
-                                            <Download size={18} />
-                                            Download {item.type}
+                                            <Download size={14} />
+                                            {item.type === 'Video' ? 'Video' : 'Ảnh'}
                                         </button>
                                     </div>
                                 </div>
