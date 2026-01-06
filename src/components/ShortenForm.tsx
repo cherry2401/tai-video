@@ -151,7 +151,7 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
                     level={"H"}
                     includeMargin={true}
                     imageSettings={{
-                      src: "/logo.png",
+                      src: "/logo_black.png",
                       x: undefined,
                       y: undefined,
                       height: 48,
@@ -167,7 +167,7 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
                   level={"H"}
                   includeMargin={true}
                   imageSettings={{
-                    src: "/logo.png",
+                    src: "/logo_black.png",
                     x: undefined,
                     y: undefined,
                     height: 36,
@@ -178,14 +178,15 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
               </div>
 
               <div className="flex-1 flex flex-col justify-center gap-4 text-center md:text-left">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center justify-center md:justify-start gap-2">
-                  <QrCode size={20} className="text-blue-500" />
-                  QR Code
-                </h3>
-
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  - Quét mã để truy cập nhanh trên điện thoại.
-                </p>
+                <div className="flex flex-col md:flex-row items-center md:items-end gap-2">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center justify-center md:justify-start gap-2">
+                    <QrCode size={20} className="text-blue-500" />
+                    QR Code
+                  </h3>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 pb-0.5 md:ml-2">
+                    - Quét mã để truy cập nhanh trên điện thoại.
+                  </span>
+                </div>
 
                 <div className="flex flex-wrap justify-center md:justify-start gap-3">
                   <button
