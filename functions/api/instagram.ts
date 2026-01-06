@@ -1,4 +1,4 @@
-export const onRequestPost: PagesFunction<Env> = async (context) => {
+export const onRequestPost = async (context) => {
     const { request, env } = context;
 
     try {
