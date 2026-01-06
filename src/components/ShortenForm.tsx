@@ -12,32 +12,35 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleShorten = () => {
+  const handleShorten = async () => {
     if (!longUrl.trim()) return;
     setLoading(true);
-    
-    // Simulate network delay
-    setTimeout(() => {
-      try {
-        // 1. Generate a random code
-        const code = Math.random().toString(36).substring(2, 8);
-        
-        // 2. Store mapping in LocalStorage (Simulation of Database)
-        // Key: "short_xyz123", Value: "https://shopee.vn/..."
-        localStorage.setItem(`short_${code}`, longUrl);
 
-        // 3. Create the working link pointing to current app with query param
+    try {
+      // Call Cloudflare Proxy -> n8n
+      const response = await fetch('/api/shortener', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: longUrl })
+      });
+
+      const data = await response.json();
+
+      if (data.shortCode) {
+        // Construct final URL
         const currentDomain = window.location.origin + window.location.pathname;
-        const generatedUrl = `${currentDomain}?s=${code}`;
-        
+        const generatedUrl = `${currentDomain}?s=${data.shortCode}`;
         setShortUrl(generatedUrl);
-      } catch (e) {
-        console.error("Storage error", e);
-        alert("Lỗi bộ nhớ trình duyệt");
-      } finally {
-        setLoading(false);
+      } else {
+        alert('Không thể rút gọn link. Vui lòng thử lại.');
       }
-    }, 600);
+
+    } catch (e) {
+      console.error("Shorten error", e);
+      alert("Lỗi kết nối server");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCopy = () => {
@@ -48,14 +51,14 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
 
   return (
     <div className="w-full max-w-4xl mx-auto animate-fadeIn">
-       <div className="text-center mb-8 space-y-2">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 transition-colors">
-            {t.shorten.title}
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base transition-colors">
-            {t.shorten.note} (Dữ liệu lưu trên trình duyệt này)
-          </p>
-        </div>
+      <div className="text-center mb-8 space-y-2">
+        <h1 className="text-3xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 transition-colors">
+          {t.shorten.title}
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base transition-colors">
+          {t.shorten.note} (Dữ liệu lưu trên trình duyệt này)
+        </p>
+      </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8 transition-colors duration-300">
         <div className="flex flex-col md:flex-row gap-4">
@@ -97,11 +100,10 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
               />
               <button
                 onClick={handleCopy}
-                className={`flex items-center gap-2 px-4 py-2 rounded font-medium text-sm transition-all ${
-                  isCopied 
-                    ? 'bg-green-600 text-white' 
+                className={`flex items-center gap-2 px-4 py-2 rounded font-medium text-sm transition-all ${isCopied
+                    ? 'bg-green-600 text-white'
                     : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {isCopied ? <Check size={16} /> : <Copy size={16} />}
                 {isCopied ? t.shorten.copied : t.shorten.copy}

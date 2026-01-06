@@ -58,18 +58,27 @@ const App: React.FC = () => {
 
     if (shortCode) {
       setIsRedirecting(true);
-      // Simulate lookup delay
-      setTimeout(() => {
-        const originalUrl = localStorage.getItem(`short_${shortCode}`);
-        if (originalUrl) {
-          window.location.href = originalUrl;
-        } else {
+
+      const resolveLink = async () => {
+        try {
+          const response = await fetch(`/api/shortener?code=${shortCode}`);
+          const data = await response.json();
+
+          if (data.originalUrl) {
+            window.location.href = data.originalUrl;
+          } else {
+            throw new Error('Link not found');
+          }
+        } catch (error) {
+          console.error('Link resolution failed:', error);
           setIsRedirecting(false);
           alert('Link rút gọn không tồn tại hoặc đã hết hạn.');
-          // Remove query param to show the app cleanly
+          // Remove query param
           window.history.replaceState({}, document.title, window.location.pathname);
         }
-      }, 1500);
+      };
+
+      resolveLink();
     }
   }, []);
 
