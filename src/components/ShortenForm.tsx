@@ -86,7 +86,7 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
           {t.shorten.title}
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base transition-colors">
-          {t.shorten.note} (Dữ liệu lưu trên trình duyệt này)
+          {t.shorten.note}
         </p>
       </div>
 
@@ -147,23 +147,51 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
             <div className="p-6 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 flex flex-col md:flex-row items-center gap-8">
               <div className="bg-white p-2 rounded-lg shadow-sm">
                 <div className="hidden">
-                  <QRCodeCanvas id="qr-code-canvas" value={shortUrl} size={200} level={"H"} includeMargin={true} />
+                  <QRCodeCanvas
+                    id="qr-code-canvas"
+                    value={shortUrl}
+                    size={200}
+                    level={"H"}
+                    includeMargin={true}
+                    imageSettings={{
+                      src: "/logo.png",
+                      x: undefined,
+                      y: undefined,
+                      height: 48,
+                      width: 48,
+                      excavate: true,
+                    }}
+                  />
                 </div>
-                <QRCodeSVG id="qr-code-svg" value={shortUrl} size={160} level={"H"} includeMargin={true} />
+                <QRCodeSVG
+                  id="qr-code-svg"
+                  value={shortUrl}
+                  size={160}
+                  level={"H"}
+                  includeMargin={true}
+                  imageSettings={{
+                    src: "/logo.png",
+                    x: undefined,
+                    y: undefined,
+                    height: 36,
+                    width: 36,
+                    excavate: true,
+                  }}
+                />
               </div>
 
               <div className="flex-1 text-center md:text-left space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center justify-center md:justify-start gap-2">
+                <div className="flex flex-col md:flex-row items-center md:items-end gap-2">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                     <QrCode size={20} className="text-blue-500" />
                     QR Code
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Quét mã để truy cập nhanh link rút gọn trên điện thoại.
-                  </p>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 pb-0.5 md:ml-2">
+                    - Quét mã để truy cập nhanh trên điện thoại.
+                  </span>
                 </div>
 
-                <div className="flex flex-wrap justify-center md:justify-start gap-3">
+                <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">
                   <button
                     onClick={() => downloadQR('png')}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors"
