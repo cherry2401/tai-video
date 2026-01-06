@@ -150,6 +150,7 @@ const InstagramDownload: React.FC = () => {
                                                     controls
                                                     className="w-full h-full object-contain"
                                                     referrerPolicy="no-referrer"
+                                                    crossOrigin="anonymous"
                                                 />
                                                 <div className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full pointer-events-none">
                                                     <PlayCircle size={16} />
@@ -162,6 +163,7 @@ const InstagramDownload: React.FC = () => {
                                                     alt={`API Result ${index}`}
                                                     className="w-full h-full object-contain"
                                                     referrerPolicy="no-referrer"
+                                                    crossOrigin="anonymous"
                                                 />
                                                 <div className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full pointer-events-none">
                                                     <ImageIcon size={16} />
