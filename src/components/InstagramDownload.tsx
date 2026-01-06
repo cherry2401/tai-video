@@ -60,6 +60,31 @@ const InstagramDownload: React.FC = () => {
         }
     };
 
+    const handleForceDownload = async (mediaUrl: string, type: 'Photo' | 'Video', index: number) => {
+        try {
+            // For images, use proxy to bypass CORS/Hotlink protection
+            const fetchUrl = type === 'Photo'
+                ? `https://wsrv.nl/?url=${encodeURIComponent(mediaUrl)}&output=jpg`
+                : mediaUrl;
+
+            const response = await fetch(fetchUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `instagram_${type.toLowerCase()}_${index + 1}.${type === 'Photo' ? 'jpg' : 'mp4'}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Download failed:', error);
+            // Fallback: Open in new window if force download fails
+            window.open(mediaUrl, '_blank');
+        }
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             handleDownload();
@@ -172,16 +197,13 @@ const InstagramDownload: React.FC = () => {
 
                                     {/* Download Button */}
                                     <div className="p-4">
-                                        <a
-                                            href={item.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                        <button
+                                            onClick={() => handleForceDownload(item.url, item.type, index)}
                                             className="flex items-center justify-center gap-2 w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors shadow-sm"
-                                        // Note: 'download' attribute only works for same-origin or explicit headers, but user can Right Click -> Save As
                                         >
                                             <Download size={18} />
                                             Download {item.type}
-                                        </a>
+                                        </button>
                                     </div>
                                 </div>
                             ))}
