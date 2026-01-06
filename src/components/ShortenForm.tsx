@@ -27,9 +27,10 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
       const data = await response.json();
 
       if (data.shortCode) {
-        // Construct final URL
-        const currentDomain = window.location.origin + window.location.pathname;
-        const generatedUrl = `${currentDomain}?s=${data.shortCode}`;
+        // 3. Create the working link pointing to new Fast Redirect function
+        const currentDomain = window.location.origin;
+        // Clean URL: domain.com/code
+        const generatedUrl = `${currentDomain}/${data.shortCode}`;
         setShortUrl(generatedUrl);
       } else {
         alert('Không thể rút gọn link. Vui lòng thử lại.');
@@ -101,8 +102,8 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
               <button
                 onClick={handleCopy}
                 className={`flex items-center gap-2 px-4 py-2 rounded font-medium text-sm transition-all ${isCopied
-                    ? 'bg-green-600 text-white'
-                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50'
                   }`}
               >
                 {isCopied ? <Check size={16} /> : <Copy size={16} />}

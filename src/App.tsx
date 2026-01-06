@@ -51,37 +51,6 @@ const App: React.FC = () => {
     }
   }, [theme]);
 
-  // Handle URL Redirection (Link Shortener Logic)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const shortCode = params.get('s');
-
-    if (shortCode) {
-      setIsRedirecting(true);
-
-      const resolveLink = async () => {
-        try {
-          const response = await fetch(`/api/shortener?code=${shortCode}`);
-          const data = await response.json();
-
-          if (data.originalUrl) {
-            window.location.href = data.originalUrl;
-          } else {
-            throw new Error('Link not found');
-          }
-        } catch (error) {
-          console.error('Link resolution failed:', error);
-          setIsRedirecting(false);
-          alert('Link rút gọn không tồn tại hoặc đã hết hạn.');
-          // Remove query param
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      };
-
-      resolveLink();
-    }
-  }, []);
-
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
