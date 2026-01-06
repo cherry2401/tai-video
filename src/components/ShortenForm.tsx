@@ -110,9 +110,6 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
                 {isCopied ? t.shorten.copied : t.shorten.copy}
               </button>
             </div>
-            <p className="text-xs text-gray-500 mt-2 italic">
-              * Click vào link trên để test thử tính năng chuyển hướng.
-            </p>
           </div>
         )}
       </div>
