@@ -7,6 +7,10 @@ interface ShortenFormProps {
   t: Translation;
 }
 
+interface ShortenResponse {
+  shortCode: string;
+}
+
 const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
   const [longUrl, setLongUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
@@ -25,7 +29,7 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
         body: JSON.stringify({ url: longUrl })
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as ShortenResponse;
 
       if (data.shortCode) {
         // 3. Create the working link pointing to new Fast Redirect function

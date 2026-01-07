@@ -45,7 +45,7 @@ const InstagramDownload: React.FC = () => {
                 body: JSON.stringify({ url: url.trim() }),
             });
 
-            const data = await response.json();
+            const data = (await response.json()) as InstagramResponse;
 
             if (data.success && data.found) {
                 setResult(data);
