@@ -16,6 +16,7 @@ import ShopeeAffiliate from './components/ShopeeAffiliate';
 import InstagramDownload from './components/InstagramDownload';
 import ZingMp3Download from './components/ZingMp3Download';
 import XvideosDownload from './components/XvideosDownload';
+import SoundCloudDownload from './components/SoundCloudDownload';
 import { analyzeLinks } from './services/geminiService';
 import { enrichResultWithDownload } from './services/n8nService';
 import { isShopeeUrl } from './services/affiliateService';
@@ -43,7 +44,7 @@ const App: React.FC = () => {
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Tool Sub-state
-  const [activeTool, setActiveTool] = useState<'instagram' | 'zing' | 'xvideos'>('instagram');
+  const [activeTool, setActiveTool] = useState<'instagram' | 'zing' | 'xvideos' | 'soundcloud'>('instagram');
 
   // Translation Helper
   const t = translations[language];
@@ -178,6 +179,15 @@ const App: React.FC = () => {
               Zing MP3
             </button>
             <button
+              onClick={() => setActiveTool('soundcloud')}
+              className={`px-6 py-2 rounded-full font-bold transition-all ${activeTool === 'soundcloud'
+                ? 'bg-orange-600 text-white shadow-md transform scale-105'
+                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+            >
+              SoundCloud
+            </button>
+            <button
               onClick={() => setActiveTool('xvideos')}
               className={`px-6 py-2 rounded-full font-bold transition-all ${activeTool === 'xvideos'
                 ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-md transform scale-105'
@@ -191,6 +201,7 @@ const App: React.FC = () => {
           {/* Tool Content */}
           {activeTool === 'instagram' && <InstagramDownload />}
           {activeTool === 'zing' && <ZingMp3Download />}
+          {activeTool === 'soundcloud' && <SoundCloudDownload />}
           {activeTool === 'xvideos' && <XvideosDownload />}
         </div>
       );
