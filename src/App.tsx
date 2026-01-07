@@ -14,6 +14,7 @@ import ContactForm from './components/ContactForm';
 import AboutUs from './components/AboutUs';
 import ShopeeAffiliate from './components/ShopeeAffiliate';
 import InstagramDownload from './components/InstagramDownload';
+import ZingMp3Download from './components/ZingMp3Download';
 import { analyzeLinks } from './services/geminiService';
 import { enrichResultWithDownload } from './services/n8nService';
 import { isShopeeUrl } from './services/affiliateService';
@@ -39,6 +40,9 @@ const App: React.FC = () => {
 
   // State for Redirect Logic
   const [isRedirecting, setIsRedirecting] = useState(false);
+
+  // Tool Sub-state
+  const [activeTool, setActiveTool] = useState<'instagram' | 'zing'>('instagram');
 
   // Translation Helper
   const t = translations[language];
@@ -148,8 +152,36 @@ const App: React.FC = () => {
       return <ShortenForm t={t} />;
     }
 
+
     if (activeTab === NavItem.TOOL) {
-      return <InstagramDownload />;
+      return (
+        <div className="w-full max-w-4xl mx-auto">
+          {/* Tool Switcher Tabs */}
+          <div className="flex justify-center gap-2 mb-8 animate-fadeIn">
+            <button
+              onClick={() => setActiveTool('instagram')}
+              className={`px-6 py-2 rounded-full font-bold transition-all ${activeTool === 'instagram'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md transform scale-105'
+                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+            >
+              Instagram
+            </button>
+            <button
+              onClick={() => setActiveTool('zing')}
+              className={`px-6 py-2 rounded-full font-bold transition-all ${activeTool === 'zing'
+                ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-md transform scale-105'
+                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+            >
+              Zing MP3
+            </button>
+          </div>
+
+          {/* Tool Content */}
+          {activeTool === 'instagram' ? <InstagramDownload /> : <ZingMp3Download />}
+        </div>
+      );
     }
 
     // Default view (Video/Home/Flashsale - sharing the same UI for now)
