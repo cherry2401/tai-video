@@ -110,7 +110,7 @@ const XvideosDownload: React.FC = () => {
             {/* Header / Logo */}
             <div className="text-center mb-8 space-y-2">
                 <h1 className="text-3xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 flex flex-col items-center justify-center gap-2">
-                    <img src="/icon/xvideos.png" alt="Xvideos" className="h-20 md:h-24 object-contain" />
+                    <img src="/icon/xvideos.png" alt="Xvideos" className="h-12 md:h-14 object-contain" />
                     <span>Downloader</span>
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
