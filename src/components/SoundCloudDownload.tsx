@@ -89,7 +89,7 @@ const SoundCloudDownload: React.FC = () => {
             {/* Header */}
             <div className="text-center mb-8 space-y-2">
                 <h1 className="text-3xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 flex items-center justify-center gap-2">
-                    <img src="/icon/soundcloud.png" alt="SoundCloud" className="h-14 md:h-16 w-auto object-contain" />
+                    <img src="/icon/soundcloud.png" alt="SoundCloud" className="h-11 md:h-12 w-auto object-contain" />
                     <span>SoundCloud Downloader</span>
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
