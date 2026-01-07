@@ -40,11 +40,16 @@ const SoundCloudDownload: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [data, setData] = useState<SoundCloudResponse | null>(null);
 
+    // Audio Player State
+    const [isPlaying, setIsPlaying] = useState(false);
+    const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
     const handleGetLink = async () => {
         if (!url.trim()) return;
         setLoading(true);
         setError(null);
         setData(null);
+        setIsPlaying(false); // Reset player
 
         try {
             const response = await fetch('/api/soundcloud', {
@@ -75,14 +80,29 @@ const SoundCloudDownload: React.FC = () => {
     // Filter for progressive MP3s or best available
     const getDownloadableLinks = () => {
         if (!data?.download_links) return [];
-        // Prioritize 'progressive' format usually associated with MP3 download
         return data.download_links.filter(l => l.quality === 'High Quality' || l.format.includes('progressive') || l.format === 'mp3');
     };
 
     const filteredLinks = getDownloadableLinks();
-    // Use all links if filter is too aggressive
     const displayLinks = filteredLinks.length > 0 ? filteredLinks : data?.download_links || [];
 
+    // Get playable stream (prefer progressive mp3)
+    const getStreamUrl = () => {
+        if (!displayLinks.length) return null;
+        const progressive = displayLinks.find(l => l.format === 'progressive');
+        return progressive ? progressive.url : displayLinks[0].url;
+    };
+
+    const togglePlay = () => {
+        if (!audioRef.current) return;
+
+        if (isPlaying) {
+            audioRef.current.pause();
+        } else {
+            audioRef.current.play();
+        }
+        setIsPlaying(!isPlaying);
+    };
 
     return (
         <div className="w-full max-w-4xl mx-auto animate-fadeIn pb-20">
@@ -122,18 +142,37 @@ const SoundCloudDownload: React.FC = () => {
                 {data && data.track_info && (
                     <div className="animate-fadeIn mt-8 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-gray-200 dark:border-gray-600">
                         <div className="flex flex-col md:flex-row gap-6">
-                            {/* Artwork */}
-                            <div className="w-full md:w-1/3 aspect-square rounded-lg overflow-hidden shadow-md relative group">
+                            {/* Artwork & Player Trigger */}
+                            <div
+                                className="w-full md:w-1/3 aspect-square rounded-lg overflow-hidden shadow-md relative group cursor-pointer"
+                                onClick={togglePlay}
+                            >
                                 <img
                                     src={data.track_info.artwork_url || data.track_info.artist.avatar_url}
                                     alt={data.track_info.title}
-                                    className="w-full h-full object-cover"
+                                    className={`w-full h-full object-cover transition-transform duration-700 ${isPlaying ? 'scale-110' : 'group-hover:scale-105'}`}
                                 />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                                    <div className="bg-orange-600 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transform scale-50 group-hover:scale-100 transition-all">
-                                        <Headphones size={24} />
+                                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all flex items-center justify-center">
+                                    <div className={`bg-orange-600 text-white p-4 rounded-full transform transition-all duration-300 shadow-lg ${isPlaying ? 'scale-100 opacity-100' : 'scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100'}`}>
+                                        {isPlaying ? (
+                                            <div className="flex gap-1 h-6 items-center justify-center px-1">
+                                                <div className="w-1 h-4 bg-white animate-bounce" style={{ animationDelay: '0s' }}></div>
+                                                <div className="w-1 h-6 bg-white animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                                <div className="w-1 h-3 bg-white animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                            </div>
+                                        ) : (
+                                            <Play size={32} className="ml-1" />
+                                        )}
                                     </div>
                                 </div>
+
+                                {/* Hidden Audio Element */}
+                                <audio
+                                    ref={audioRef}
+                                    src={getStreamUrl() || ''}
+                                    onEnded={() => setIsPlaying(false)}
+                                    onError={() => setIsPlaying(false)}
+                                />
                             </div>
 
                             {/* Info & Download */}
