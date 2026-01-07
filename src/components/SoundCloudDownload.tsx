@@ -89,7 +89,7 @@ const SoundCloudDownload: React.FC = () => {
             {/* Header */}
             <div className="text-center mb-8 space-y-2">
                 <h1 className="text-3xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 flex items-center justify-center gap-2">
-                    <Music className="w-10 h-10 text-orange-600" />
+                    <img src="/icon/soundcloud.png" alt="SoundCloud" className="w-10 h-10 object-contain" />
                     <span>SoundCloud Downloader</span>
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
@@ -165,13 +165,10 @@ const SoundCloudDownload: React.FC = () => {
                                             <button
                                                 key={idx}
                                                 onClick={() => triggerDownload(link.url)}
-                                                className="w-full py-2 px-4 bg-orange-100 hover:bg-orange-200 dark:bg-gray-600 dark:hover:bg-gray-500 text-orange-700 dark:text-white rounded-md font-medium text-sm flex items-center justify-between transition-colors border border-orange-200 dark:border-gray-500"
+                                                className="w-full py-2 px-4 bg-orange-100 hover:bg-orange-200 dark:bg-gray-600 dark:hover:bg-gray-500 text-orange-700 dark:text-white rounded-md font-medium text-sm flex items-center justify-center gap-2 transition-colors border border-orange-200 dark:border-gray-500"
                                             >
-                                                <span className="flex items-center gap-2">
-                                                    <Download size={16} />
-                                                    {link.format === 'progressive' ? 'MP3 (Progressive)' : link.quality || 'Download'}
-                                                </span>
-                                                <span className="text-xs opacity-75">{link.format}</span>
+                                                <Download size={16} />
+                                                {link.format === 'progressive' ? 'Download MP3' : link.quality || 'Download'}
                                             </button>
                                         ))}
                                         {displayLinks.length === 0 && (
