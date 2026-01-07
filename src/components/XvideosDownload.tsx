@@ -109,8 +109,8 @@ const XvideosDownload: React.FC = () => {
         <div className="w-full max-w-4xl mx-auto animate-fadeIn pb-20">
             {/* Header / Logo */}
             <div className="text-center mb-8 space-y-2">
-                <h1 className="text-3xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 flex items-center justify-center gap-2">
-                    <img src="/icon/xvideos.png" alt="Xvideos" className="h-6 md:h-8 object-contain" />
+                <h1 className="text-3xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 flex flex-col items-center justify-center gap-2">
+                    <img src="/icon/xvideos.png" alt="Xvideos" className="h-20 md:h-24 object-contain" />
                     <span>Downloader</span>
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
