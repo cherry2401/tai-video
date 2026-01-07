@@ -109,8 +109,8 @@ const XvideosDownload: React.FC = () => {
         <div className="w-full max-w-4xl mx-auto animate-fadeIn pb-20">
             {/* Header / Logo */}
             <div className="text-center mb-8 space-y-2">
-                <h1 className="text-3xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 flex items-center justify-center gap-3">
-                    <span className="bg-black text-red-600 px-2 rounded-md">X</span>Videos Downloader
+                <h1 className="text-3xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 flex items-center justify-center">
+                    <span className="text-red-600">X</span>VIDEOS <span className="ml-3 font-light">Downloader</span>
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
                     Tìm kiếm & Tải video Full HD miễn phí.
@@ -122,8 +122,8 @@ const XvideosDownload: React.FC = () => {
                 <button
                     onClick={() => setMode('search')}
                     className={`px-6 py-2 rounded-full font-bold transition-all ${mode === 'search'
-                            ? 'bg-red-600 text-white shadow-md transform scale-105'
-                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ? 'bg-red-600 text-white shadow-md transform scale-105'
+                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                         }`}
                 >
                     <Search className="inline-block w-4 h-4 mr-2" />
@@ -132,8 +132,8 @@ const XvideosDownload: React.FC = () => {
                 <button
                     onClick={() => setMode('download')}
                     className={`px-6 py-2 rounded-full font-bold transition-all ${mode === 'download'
-                            ? 'bg-red-600 text-white shadow-md transform scale-105'
-                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ? 'bg-red-600 text-white shadow-md transform scale-105'
+                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                         }`}
                 >
                     <Download className="inline-block w-4 h-4 mr-2" />
