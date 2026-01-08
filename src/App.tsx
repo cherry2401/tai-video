@@ -158,44 +158,46 @@ const App: React.FC = () => {
     if (activeTab === NavItem.TOOL) {
       return (
         <div className="w-full max-w-4xl mx-auto">
-          {/* Tool Switcher Tabs */}
-          <div className="flex justify-center gap-2 mb-8 animate-fadeIn">
-            <button
-              onClick={() => setActiveTool('instagram')}
-              className={`px-6 py-2 rounded-full font-bold transition-all ${activeTool === 'instagram'
-                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md transform scale-105'
-                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-            >
-              Instagram
-            </button>
-            <button
-              onClick={() => setActiveTool('zing')}
-              className={`px-6 py-2 rounded-full font-bold transition-all ${activeTool === 'zing'
-                ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-md transform scale-105'
-                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-            >
-              Zing MP3
-            </button>
-            <button
-              onClick={() => setActiveTool('soundcloud')}
-              className={`px-6 py-2 rounded-full font-bold transition-all ${activeTool === 'soundcloud'
-                ? 'bg-orange-600 text-white shadow-md transform scale-105'
-                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-            >
-              SoundCloud
-            </button>
-            <button
-              onClick={() => setActiveTool('xvideos')}
-              className={`px-6 py-2 rounded-full font-bold transition-all ${activeTool === 'xvideos'
-                ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-md transform scale-105'
-                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-            >
-              Xvideos
-            </button>
+          {/* Tool Switcher Tabs - Horizontal Scroll on Mobile */}
+          <div className="overflow-x-auto pb-4 mb-4 md:mb-8 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="flex md:justify-center gap-3 w-max md:w-auto">
+              <button
+                onClick={() => setActiveTool('instagram')}
+                className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${activeTool === 'instagram'
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md transform scale-105'
+                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                  }`}
+              >
+                Instagram
+              </button>
+              <button
+                onClick={() => setActiveTool('zing')}
+                className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${activeTool === 'zing'
+                  ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-md transform scale-105'
+                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                  }`}
+              >
+                Zing MP3
+              </button>
+              <button
+                onClick={() => setActiveTool('soundcloud')}
+                className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${activeTool === 'soundcloud'
+                  ? 'bg-orange-600 text-white shadow-md transform scale-105'
+                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                  }`}
+              >
+                SoundCloud
+              </button>
+              <button
+                onClick={() => setActiveTool('xvideos')}
+                className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${activeTool === 'xvideos'
+                  ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-md transform scale-105'
+                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                  }`}
+              >
+                Xvideos
+              </button>
+            </div>
           </div>
 
           {/* Tool Content */}
@@ -211,7 +213,7 @@ const App: React.FC = () => {
     return (
       <>
         <div className="text-center mb-10 space-y-2 animate-fadeIn">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 transition-colors">
+          <h1 className="text-2xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 transition-colors">
             {t.title}
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base transition-colors">
