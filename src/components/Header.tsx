@@ -27,9 +27,12 @@ const Header: React.FC<HeaderProps> = ({
   setActiveTool
 }) => {
   const navItems = Object.values(NavItem);
-  const [isLangOpen, setIsLangOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Mobile Menu State
-  const [isToolsOpen, setIsToolsOpen] = useState(false); // Tools Dropdown State (Mobile)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isToolsOpen, setIsToolsOpen] = useState(false);
+  const [isLangMobileOpen, setIsLangMobileOpen] = useState(false);
+  const [isLangDesktopOpen, setIsLangDesktopOpen] = useState(false);
+
+  // Desktop dropdown ref
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const languages: { code: Language; label: string }[] = [
@@ -46,11 +49,11 @@ const Header: React.FC<HeaderProps> = ({
 
   const currentLangLabel = languages.find(l => l.code === language)?.label;
 
-  // Close dropdown when clicking outside
+  // Close desktop dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsLangOpen(false);
+        setIsLangDesktopOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -70,97 +73,37 @@ const Header: React.FC<HeaderProps> = ({
   }
 
   return (
-    <header className="bg-white dark:bg-gray-900 text-gray-800 dark:text-white py-4 px-6 md:py-6 shadow-sm dark:shadow-md transition-colors duration-300 border-b border-gray-200 dark:border-gray-800 relative z-50">
-      <div className="container mx-auto flex justify-between items-center gap-4">
+    <header className="bg-white dark:bg-gray-900 text-gray-800 dark:text-white py-4 px-4 md:px-6 shadow-sm dark:shadow-md transition-colors duration-300 border-b border-gray-200 dark:border-gray-800 relative z-50">
+      <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         <div
-          className="text-2xl md:text-3xl font-extrabold tracking-tight cursor-pointer flex items-center z-50"
+          className="text-xl md:text-3xl font-extrabold tracking-tight cursor-pointer flex items-center"
           onClick={() => setActiveTab(NavItem.HOME)}
         >
-          <span className="text-green-700 dark:text-green-500 mr-2">AIO</span> Video Downloader
+          <span className="text-green-600 dark:text-green-500 mr-1">FSaver</span>
         </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden p-2 text-gray-700 dark:text-gray-200 focus:outline-none z-50"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-
-        >
-          {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
-
-        {/* Navigation & Controls Wrapper */}
-        <div className={`
-          flex-1 fixed inset-0 bg-white dark:bg-gray-900 md:bg-transparent md:static flex flex-col md:flex-row items-center md:gap-6 p-8 md:p-0 transition-transform duration-300 ease-in-out z-40 overflow-y-auto md:overflow-visible
-          ${isMenuOpen ? 'translate-x-0 top-16 pb-24' : 'translate-x-full top-0 md:translate-x-0'}
-        `}>
-          {/* Navigation */}
-          <nav className="w-full md:flex-1 md:flex md:justify-center mt-4 md:mt-0">
-            <ul className="flex flex-col md:flex-row gap-2 md:gap-8 items-start md:items-center w-full md:w-auto">
+        {/* Desktop Navigation (Centered) */}
+        <div className="hidden md:flex flex-1 justify-center">
+          <nav>
+            <ul className="flex gap-8 items-center">
               {navItems.map((itemKey) => {
                 // @ts-ignore
                 const label = t.nav[itemKey] || itemKey;
                 const isActive = activeTab === itemKey || (activeTab === NavItem.HOME && itemKey === NavItem.VIDEO);
 
-                // Special handling for "Tool" tab to be a dropdown on mobile
-                if (itemKey === NavItem.TOOL) {
-                  return (
-                    <li key={itemKey} className="w-full md:w-auto flex flex-col">
-                      {/* Desktop View: Standard Link */}
-                      <div className="hidden md:block">
-                        <a
-                          href={`#${itemKey.toLowerCase()}`}
-                          onClick={(e) => handleNavClick(itemKey, e)}
-                          className={`
-                                                block text-center px-4 py-1.5 rounded-full text-lg font-bold transition-all duration-200 whitespace-nowrap
-                                                ${isActive
-                              ? 'bg-green-100 dark:bg-gray-800 text-green-700 dark:text-green-400 shadow-sm transform scale-105'
-                              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                            }
-                                              `}
-                        >
-                          {label}
-                        </a>
-                      </div>
-
-                      {/* Mobile View: Accordion */}
-                      <div className="md:hidden w-full">
-                        <button
-                          onClick={() => setIsToolsOpen(!isToolsOpen)}
-                          className={`
-                                                  flex items-center justify-between w-full text-left px-4 py-3 rounded-lg text-lg font-bold transition-all duration-200
-                                                  ${isActive || isToolsOpen ? 'text-green-700 dark:text-green-500 bg-green-50 dark:bg-gray-800/50' : 'text-gray-700 dark:text-gray-200'}
-                                                `}
-                        >
-                          <span>{label}</span>
-                          {isToolsOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                        </button>
-
-                        {isToolsOpen && (
-                          <div className="pl-8 pr-4 space-y-2 mt-2 animate-fadeIn">
-                            <button onClick={() => handleToolClick('instagram')} className={`block w-full text-left py-2 px-3 rounded-md text-base ${activeTool === 'instagram' ? 'text-pink-600 font-bold bg-pink-50 dark:bg-pink-900/20' : 'text-gray-600 dark:text-gray-300'}`}>Instagram</button>
-                            <button onClick={() => handleToolClick('zing')} className={`block w-full text-left py-2 px-3 rounded-md text-base ${activeTool === 'zing' ? 'text-purple-600 font-bold bg-purple-50 dark:bg-purple-900/20' : 'text-gray-600 dark:text-gray-300'}`}>Zing MP3</button>
-                            <button onClick={() => handleToolClick('soundcloud')} className={`block w-full text-left py-2 px-3 rounded-md text-base ${activeTool === 'soundcloud' ? 'text-orange-600 font-bold bg-orange-50 dark:bg-orange-900/20' : 'text-gray-600 dark:text-gray-300'}`}>SoundCloud</button>
-                            <button onClick={() => handleToolClick('xvideos')} className={`block w-full text-left py-2 px-3 rounded-md text-base ${activeTool === 'xvideos' ? 'text-red-600 font-bold bg-red-50 dark:bg-red-900/20' : 'text-gray-600 dark:text-gray-300'}`}>Xvideos</button>
-                          </div>
-                        )}
-                      </div>
-                    </li>
-                  )
-                }
-
                 return (
-                  <li key={itemKey} className="w-full md:w-auto">
+                  <li key={itemKey}>
                     <a
                       href={`#${itemKey.toLowerCase()}`}
                       onClick={(e) => handleNavClick(itemKey, e)}
                       className={`
-                                                block w-full md:w-auto text-left md:text-center px-4 py-3 md:py-1.5 rounded-lg md:rounded-full text-lg md:text-lg font-bold transition-all duration-200
+                                                block px-4 py-1.5 rounded-full text-lg font-bold transition-all duration-200
                                                 ${isActive
-                          ? 'md:bg-green-100 md:dark:bg-gray-800 text-green-700 dark:text-green-500 md:dark:text-green-400 md:shadow-sm md:transform md:scale-105 ps-4 md:ps-4 border-l-4 md:border-l-0 border-green-600 md:border-transparent bg-gray-50 dark:bg-gray-800/50'
-                          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                          ? 'bg-green-100 dark:bg-gray-800 text-green-700 dark:text-green-400 shadow-sm transform scale-105'
+                          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                         }
-                                              `}
+                                            `}
                     >
                       {label}
                     </a>
@@ -169,63 +112,165 @@ const Header: React.FC<HeaderProps> = ({
               })}
             </ul>
           </nav>
+        </div>
 
-          {/* Right Controls: Theme & Language (Mobile Bottom / Desktop Right) */}
-          <div className="flex flex-col md:flex-row items-center gap-6 mt-8 md:mt-0 w-full md:w-auto border-t border-gray-100 dark:border-gray-800 md:border-none pt-6 md:pt-0">
+        {/* Desktop Right Controls (Theme & Lang) */}
+        <div className="hidden md:flex items-center gap-4">
+          {/* Theme Toggle */}
+          <div className="flex items-center gap-2">
+            <Sun size={20} className={`${theme === 'light' ? 'text-orange-500' : 'text-gray-400'}`} />
+            <button
+              onClick={toggleTheme}
+              className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 focus:outline-none ${theme === 'dark' ? 'bg-blue-600' : 'bg-gray-300'}`}
+            >
+              <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0'}`} />
+            </button>
+            <Moon size={20} className={`${theme === 'dark' ? 'text-blue-400' : 'text-gray-400'}`} />
+          </div>
 
-            {/* Theme Toggle */}
-            <div className="flex items-center gap-4 md:gap-2 justify-between md:justify-center w-full md:w-auto px-4 md:px-0">
-              <span className="md:hidden font-medium text-gray-700 dark:text-gray-300">Giao diện</span>
-              <div className="flex items-center gap-2">
-                <Sun size={24} className={`md:w-5 md:h-5 ${theme === 'light' ? 'text-orange-500' : 'text-gray-400'}`} />
-                <button
-                  onClick={toggleTheme}
-                  className={`w-14 h-7 rounded-full p-1 transition-colors duration-300 focus:outline-none ${theme === 'dark' ? 'bg-blue-600' : 'bg-gray-300'}`}
-                  aria-label="Toggle Theme"
-                >
-                  <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ${theme === 'dark' ? 'translate-x-7' : 'translate-x-0'}`} />
-                </button>
-                <Moon size={24} className={`md:w-5 md:h-5 ${theme === 'dark' ? 'text-blue-400' : 'text-gray-400'}`} />
+          {/* Language Selector */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsLangDesktopOpen(!isLangDesktopOpen)}
+              className="flex items-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none font-semibold"
+            >
+              <Globe size={20} />
+              <span>{currentLangLabel}</span>
+            </button>
+            {isLangDesktopOpen && (
+              <div className="absolute top-full right-0 mt-2 w-40 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-2 z-50 animate-fadeIn overflow-hidden">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      setLanguage(lang.code);
+                      setIsLangDesktopOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${language === lang.code ? 'font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700/50' : ''}`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
               </div>
-            </div>
-
-            {/* Language Selector */}
-            <div className="relative w-full md:w-auto flex justify-between md:justify-center px-4 md:px-0" ref={dropdownRef}>
-              <span className="md:hidden font-medium text-gray-700 dark:text-gray-300 self-center">Ngôn ngữ</span>
-              <button
-                onClick={() => setIsLangOpen(!isLangOpen)}
-                className="flex items-center justify-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none text-gray-700 dark:text-gray-200 font-semibold text-lg md:text-base px-4 py-2 border md:border-none rounded-lg border-gray-200 dark:border-gray-700 w-auto"
-              >
-                <Globe size={24} className="md:w-5 md:h-5" />
-                <span>{currentLangLabel}</span>
-              </button>
-
-              {isLangOpen && (
-                <div className={`
-                  absolute md:top-full md:right-0 bottom-full md:bottom-auto mb-2 md:mb-0 md:mt-3 
-                  w-48 right-4 md:auto bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 
-                  rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-2 z-50 animate-fadeIn overflow-hidden
-                `}>
-                  <div className="max-h-60 overflow-y-auto">
-                    {languages.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => {
-                          setLanguage(lang.code);
-                          setIsLangOpen(false);
-                        }}
-                        className={`w-full text-center md:text-left px-5 py-3 text-base md:text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${language === lang.code ? 'font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700/50' : ''}`}
-                      >
-                        {lang.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
+
+        {/* Mobile Menu Button - Right Aligned */}
+        <button
+          className="md:hidden p-2 text-gray-700 dark:text-gray-200 focus:outline-none"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          {isMenuOpen ? <X size={28} className="text-green-600" /> : <Menu size={28} className="text-green-600" />}
+        </button>
       </div>
+
+      {/* Mobile Menu Dropdown (Absolute) */}
+      {isMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-2xl z-40 animate-slideDown origin-top">
+          <ul className="flex flex-col py-2">
+            {navItems.map((itemKey) => {
+              // @ts-ignore
+              const label = t.nav[itemKey] || itemKey;
+              const isActive = activeTab === itemKey || (activeTab === NavItem.HOME && itemKey === NavItem.VIDEO);
+
+              // Mobile Tool Dropdown
+              if (itemKey === NavItem.TOOL) {
+                return (
+                  <li key={itemKey} className="border-b border-gray-50 dark:border-gray-800 last:border-none">
+                    <button
+                      onClick={() => setIsToolsOpen(!isToolsOpen)}
+                      className={`flex items-center justify-between w-full px-5 py-3.5 text-left text-[16px] font-medium transition-colors
+                                                 ${isActive ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-gray-300'}`}
+                    >
+                      <span>{label}</span>
+                      {isToolsOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </button>
+
+                    {isToolsOpen && (
+                      <div className="bg-gray-50 dark:bg-gray-800/50 px-5 py-2 space-y-1">
+                        <button onClick={() => handleToolClick('instagram')} className={`block w-full text-left py-2.5 px-2 rounded text-[15px] ${activeTool === 'instagram' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>Tải Instagram</button>
+                        <button onClick={() => handleToolClick('zing')} className={`block w-full text-left py-2.5 px-2 rounded text-[15px] ${activeTool === 'zing' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>Tải Zing MP3</button>
+                        <button onClick={() => handleToolClick('soundcloud')} className={`block w-full text-left py-2.5 px-2 rounded text-[15px] ${activeTool === 'soundcloud' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>Tải SoundCloud</button>
+                        <button onClick={() => handleToolClick('xvideos')} className={`block w-full text-left py-2.5 px-2 rounded text-[15px] ${activeTool === 'xvideos' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>Tải XVideos</button>
+                      </div>
+                    )}
+                  </li>
+                )
+              }
+
+              return (
+                <li key={itemKey} className="border-b border-gray-50 dark:border-gray-800 last:border-none">
+                  <a
+                    href={`#${itemKey.toLowerCase()}`}
+                    onClick={(e) => handleNavClick(itemKey, e)}
+                    className={`
+                                                block px-5 py-3.5 text-[16px] font-medium transition-colors
+                                                ${isActive ? 'text-green-600 dark:text-green-400 bg-green-50/50 dark:bg-green-900/10' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}
+                                            `}
+                  >
+                    {label}
+                  </a>
+                </li>
+              );
+            })}
+
+            {/* Language Accordion */}
+            <li className="border-b border-gray-50 dark:border-gray-800">
+              <button
+                onClick={() => setIsLangMobileOpen(!isLangMobileOpen)}
+                className="flex items-center justify-between w-full px-5 py-3.5 text-left text-[16px] font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                <div className="flex items-center gap-2">
+                  <Globe size={18} className="text-gray-500" />
+                  <span>{currentLangLabel}</span>
+                </div>
+                {isLangMobileOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </button>
+              {isLangMobileOpen && (
+                <div className="bg-gray-50 dark:bg-gray-800/50 px-5 py-2 grid grid-cols-2 gap-2">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        setLanguage(lang.code);
+                        setIsMenuOpen(false); // Optional: close menu on lang change? No, usually keep open.
+                      }}
+                      className={`text-left py-2 px-2 rounded text-[14px] ${language === lang.code ? 'text-green-600 font-bold bg-green-100/50' : 'text-gray-600 dark:text-gray-400'}`}
+                    >
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </li>
+
+            {/* Theme Item */}
+            <li className="px-5 py-3.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[16px] font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <Sun size={18} className="text-gray-500" />
+                  Giao diện
+                </span>
+                <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
+                  <button
+                    onClick={() => theme === 'dark' && toggleTheme()}
+                    className={`p-1.5 rounded-full ${theme === 'light' ? 'bg-white shadow-sm text-orange-500' : 'text-gray-400'}`}
+                  >
+                    <Sun size={16} />
+                  </button>
+                  <button
+                    onClick={() => theme === 'light' && toggleTheme()}
+                    className={`p-1.5 rounded-full ${theme === 'dark' ? 'bg-gray-700 shadow-sm text-blue-400' : 'text-gray-400'}`}
+                  >
+                    <Moon size={16} />
+                  </button>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      )}
     </header>
   );
 };
