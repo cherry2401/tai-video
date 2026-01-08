@@ -80,12 +80,12 @@ const Header: React.FC<HeaderProps> = ({
 
         {/* Navigation & Controls Wrapper */}
         <div className={`
-          flex-1 fixed inset-0 bg-white dark:bg-gray-900 md:bg-transparent md:static flex flex-col md:flex-row items-center justify-between md:gap-6 p-8 md:p-0 transition-transform duration-300 ease-in-out z-40
+          flex-1 fixed inset-0 bg-white dark:bg-gray-900 md:bg-transparent md:static flex flex-col md:flex-row items-center md:gap-6 p-8 md:p-0 transition-transform duration-300 ease-in-out z-40
           ${isMenuOpen ? 'translate-x-0 top-0' : 'translate-x-full top-0 md:translate-x-0'}
         `}>
           {/* Navigation */}
-          <nav className="w-full md:w-auto mt-16 md:mt-0">
-            <ul className="flex flex-col md:flex-row gap-4 md:gap-8 items-center w-full">
+          <nav className="w-full md:flex-1 md:flex md:justify-center mt-16 md:mt-0">
+            <ul className="flex flex-col md:flex-row gap-4 md:gap-8 items-center w-full md:w-auto">
               {navItems.map((itemKey) => {
                 // @ts-ignore
                 const label = t.nav[itemKey] || itemKey;
