@@ -80,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({
           className="text-xl md:text-3xl font-extrabold tracking-tight cursor-pointer flex items-center"
           onClick={() => setActiveTab(NavItem.HOME)}
         >
-          <span className="text-green-600 dark:text-green-500 mr-1">FSaver</span>
+          <span className="text-green-700 dark:text-green-500 mr-2">AIO</span> Video Downloader
         </div>
 
         {/* Desktop Navigation (Centered) */}
