@@ -158,8 +158,8 @@ const App: React.FC = () => {
     if (activeTab === NavItem.TOOL) {
       return (
         <div className="w-full max-w-4xl mx-auto">
-          {/* Tool Switcher Tabs - Horizontal Scroll on Mobile */}
-          <div className="overflow-x-auto pb-4 mb-4 md:mb-8 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+          {/* Tool Switcher Tabs - Hidden on Mobile, Visible on Desktop */}
+          <div className="hidden md:block overflow-x-auto pb-4 mb-4 md:mb-8 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
             <div className="flex md:justify-center gap-3 w-max md:w-auto">
               <button
                 onClick={() => setActiveTool('instagram')}

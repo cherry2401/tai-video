@@ -81,8 +81,8 @@ const ZingMp3Download: React.FC = () => {
         <div className="w-full max-w-4xl mx-auto animate-fadeIn pb-20">
             {/* Header */}
             <div className="text-center mb-10 space-y-2">
-                <h1 className="text-3xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 transition-colors flex items-center justify-center gap-3">
-                    <Headphones className="text-purple-600" size={40} />
+                <h1 className="text-2xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 transition-colors flex items-center justify-center gap-3">
+                    <Headphones className="text-purple-600" size={32} />
                     Zing MP3 Downloader
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">
