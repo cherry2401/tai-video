@@ -108,8 +108,8 @@ const SoundCloudDownload: React.FC = () => {
         <div className="w-full max-w-4xl mx-auto animate-fadeIn pb-20">
             {/* Header */}
             <div className="text-center mb-8 space-y-2">
-                <h1 className="text-2xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 flex items-center justify-center gap-2">
-                    <img src="/icon/soundcloud.png" alt="SoundCloud" className="h-7 md:h-9 w-auto object-contain" />
+                <h1 className="text-xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 flex items-center justify-center gap-2 whitespace-nowrap">
+                    <img src="/icon/soundcloud.png" alt="SoundCloud" className="h-6 md:h-9 w-auto object-contain" />
                     <span>SoundCloud Downloader</span>
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
