@@ -283,6 +283,8 @@ const App: React.FC = () => {
           setActiveTab(tab);
           setCurrentView('home');
         }}
+        activeTool={activeTool}
+        setActiveTool={setActiveTool}
       />
 
       <main className="flex-1 w-full container mx-auto px-4 py-10 flex flex-col items-center">
