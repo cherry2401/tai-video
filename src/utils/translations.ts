@@ -2,10 +2,10 @@
 export const translations = {
   vi: {
     nav: {
-      Home: 'Home',
-      Tool: 'Tool',
-      Video: 'Video',
-      'Rút gọn': 'Rút gọn',
+      HOME: 'Home',
+      TOOL: 'Tool',
+      VIDEO: 'Video',
+      RUT_GON: 'Rút gọn',
       AI_WRITER: 'AI Writer'
     },
     aiWriter: {
@@ -102,10 +102,10 @@ export const translations = {
   },
   en: {
     nav: {
-      Home: 'Home',
-      Tool: 'Tool',
-      Video: 'Video',
-      'Rút gọn': 'Shorten',
+      HOME: 'Home',
+      TOOL: 'Tool',
+      VIDEO: 'Video',
+      RUT_GON: 'Shorten',
       AI_WRITER: 'AI Writer'
     },
     aiWriter: {
@@ -202,10 +202,10 @@ export const translations = {
   },
   zh: {
     nav: {
-      Home: '首页',
-      Tool: '工具',
-      Video: '视频',
-      'Rút gọn': '缩短',
+      HOME: '首页',
+      TOOL: '工具',
+      VIDEO: '视频',
+      RUT_GON: '缩短',
       AI_WRITER: 'AI 写作'
     },
     aiWriter: {
@@ -302,10 +302,10 @@ export const translations = {
   },
   ko: {
     nav: {
-      Home: '홈',
-      Tool: '도구',
-      Video: '비디오',
-      'Rút gọn': '단축',
+      HOME: '홈',
+      TOOL: '도구',
+      VIDEO: '비디오',
+      RUT_GON: '단축',
       AI_WRITER: 'AI 작가'
     },
     aiWriter: {
@@ -402,10 +402,10 @@ export const translations = {
   },
   ja: {
     nav: {
-      Home: 'ホーム',
-      Tool: 'ツール',
-      Video: 'ビデオ',
-      'Rút gọn': '短縮',
+      HOME: 'ホーム',
+      TOOL: 'ツール',
+      VIDEO: 'ビデオ',
+      RUT_GON: '短縮',
       AI_WRITER: 'AIライター'
     },
     aiWriter: {
@@ -502,10 +502,10 @@ export const translations = {
   },
   id: {
     nav: {
-      Home: 'Beranda',
-      Tool: 'Alat',
-      Video: 'Video',
-      'Rút gọn': 'Perpendek',
+      HOME: 'Beranda',
+      TOOL: 'Alat',
+      VIDEO: 'Video',
+      RUT_GON: 'Perpendek',
       AI_WRITER: 'Penulis AI'
     },
     aiWriter: {
@@ -602,10 +602,10 @@ export const translations = {
   },
   th: {
     nav: {
-      Home: 'หน้าแรก',
-      Tool: 'เครื่องมือ',
-      Video: 'วิดีโอ',
-      'Rút gọn': 'ย่อลิงก์'
+      HOME: 'หน้าแรก',
+      TOOL: 'เครื่องมือ',
+      VIDEO: 'วิดีโอ',
+      RUT_GON: 'ย่อลิงก์',
     },
     title: "โปรแกรมดาวน์โหลดวิดีโอหลายแพลตฟอร์ม",
     subtitle: "รองรับการดาวน์โหลดวิดีโอ Shopee, TikTok, Facebook, Douyin โดยไม่มีลายน้ำ ฟรี",
@@ -688,10 +688,11 @@ export const translations = {
   },
   es: {
     nav: {
-      Home: 'Inicio',
-      Tool: 'Herramienta',
-      Video: 'Video',
-      'Rút gọn': 'Acortar'
+      HOME: 'Inicio',
+      TOOL: 'Herramienta',
+      VIDEO: 'Video',
+      RUT_GON: 'Acortar',
+      AI_WRITER: 'Escritor IA'
     },
     title: "Descargador de Video Multiplataforma",
     subtitle: "Soporte para descargar videos de Shopee, TikTok, Facebook, Douyin sin marca de agua gratis",
@@ -774,11 +775,11 @@ export const translations = {
   },
   fr: {
     nav: {
-      Home: 'Accueil',
-      Tool: 'Outil',
-      Video: 'Vidéo',
+      HOME: 'Accueil',
+      TOOL: 'Outil',
+      VIDEO: 'Vidéo',
       AI_WRITER: 'Rédacteur IA',
-      'Rút gọn': 'Raccourcir'
+      RUT_GON: 'Raccourcir'
     },
     aiWriter: {
       title: "Rédacteur IA Gratuit",
