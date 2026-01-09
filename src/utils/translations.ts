@@ -19,7 +19,41 @@ export const translations = {
       copy: "Sao chép",
       copied: "Đã chép",
       error: "Lỗi khi tạo nội dung. Vui lòng thử lại sau hoặc kiểm tra giới hạn sử dụng.",
-      adminBypassNotice: "Đã kích hoạt chế độ Admin: Bỏ qua giới hạn"
+      adminBypassNotice: "Đã kích hoạt chế độ Admin: Bỏ qua giới hạn",
+      uploadLabel: "Tải ảnh/video lên để AI phân tích (Tùy chọn)",
+      options: {
+        genre: {
+          label: "Thể loại",
+          sales: "Bán hàng",
+          story: "Kể chuyện",
+          blog: "Blog/Bài viết",
+          news: "Tin tức",
+          review: "Review/Đánh giá"
+        },
+        style: {
+          label: "Phong cách",
+          professional: "Chuyên nghiệp",
+          humorous: "Hài hước",
+          emotional: "Cảm xúc",
+          witty: "Hóm hỉnh",
+          formal: "Trang trọng"
+        },
+        length: {
+          label: "Độ dài",
+          short: "Ngắn",
+          medium: "Trung bình",
+          long: "Dài"
+        },
+        platform: {
+          label: "Nền tảng",
+          facebook: "Facebook",
+          instagram: "Instagram",
+          threads: "Threads",
+          tiktok: "TikTok",
+          shopee: "Shopee",
+          website: "Website"
+        }
+      }
     },
     title: "Tải Video Đa Nền Tảng",
     subtitle: "Hỗ trợ tải video Shopee, TikTok, Facebook, Douyin,..không có Watermark miễn phí",
@@ -119,7 +153,41 @@ export const translations = {
       copy: "Copy",
       copied: "Copied",
       error: "Error generating content. Please try again later or check your quota.",
-      adminBypassNotice: "Admin Mode Activated: Limit Bypassed"
+      adminBypassNotice: "Admin Mode Activated: Limit Bypassed",
+      uploadLabel: "Upload image/video for AI analysis (Optional)",
+      options: {
+        genre: {
+          label: "Genre",
+          sales: "Sales",
+          story: "Storytelling",
+          blog: "Blog/Article",
+          news: "News",
+          review: "Review"
+        },
+        style: {
+          label: "Style",
+          professional: "Professional",
+          humorous: "Humorous",
+          emotional: "Emotional",
+          witty: "Witty",
+          formal: "Formal"
+        },
+        length: {
+          label: "Length",
+          short: "Short",
+          medium: "Medium",
+          long: "Long"
+        },
+        platform: {
+          label: "Platform",
+          facebook: "Facebook",
+          instagram: "Instagram",
+          threads: "Threads",
+          tiktok: "TikTok",
+          shopee: "Shopee",
+          website: "Website"
+        }
+      }
     },
     title: "Multi-Platform Video Downloader",
     subtitle: "Support downloading Shopee, TikTok, Facebook, Douyin videos without Watermark for free",

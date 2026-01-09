@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader2, Sparkles, Copy, Check, AlertCircle, Unlock, Lock } from 'lucide-react';
+import { Loader2, Sparkles, Copy, Check, AlertCircle, Unlock, Lock, UploadCloud, X } from 'lucide-react';
 import { Translation } from '../utils/translations';
 import Markdown from 'react-markdown';
 
@@ -19,6 +19,13 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
     const [prompt, setPrompt] = useState('');
     const [adminKey, setAdminKey] = useState('');
     const [isAdminOpen, setIsAdminOpen] = useState(false);
+
+    // New Options State
+    const [file, setFile] = useState<string | null>(null);
+    const [genre, setGenre] = useState('sales');
+    const [style, setStyle] = useState('professional');
+    const [length, setLength] = useState('medium');
+    const [platform, setPlatform] = useState('facebook');
 
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<string | null>(null);
@@ -42,7 +49,12 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
                 body: JSON.stringify({
                     prompt: prompt.trim(),
                     admin_key: adminKey.trim(),
-                    lang: language // Pass current UI language preference to AI context
+                    lang: language,
+                    file,
+                    genre,
+                    style,
+                    length,
+                    platform
                 }),
             });
 
@@ -88,17 +100,134 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
             </div>
 
             {/* Main Input Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 md:p-8 transition-colors">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 md:p-8 transition-colors text-left">
 
                 {/* Prompt Input */}
-                <div className="mb-6">
+                <div className="mb-4">
                     <textarea
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
                         placeholder={t.aiWriter.promptPlaceholder}
-                        className="w-full h-32 md:h-40 p-4 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none transition-colors dark:text-white resize-none text-base md:text-lg"
+                        className="w-full h-32 p-4 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none transition-colors dark:text-white resize-none text-base"
                     />
                 </div>
+
+                {/* Image Upload */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {t.aiWriter.uploadLabel}
+                    </label>
+                    <div className="flex items-center gap-4">
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 transition-colors">
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                <UploadCloud className="w-8 h-8 mb-3 text-gray-400" />
+                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="font-semibold">Click to upload</span> or drag and drop
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    SVG, PNG, JPG or GIF (MAX. 800x400px)
+                                </p>
+                            </div>
+                            <input
+                                type="file"
+                                className="hidden"
+                                accept="image/*,video/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            setFile(reader.result as string);
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                }}
+                            />
+                        </label>
+                    </div>
+                    {file && (
+                        <div className="mt-2 relative inline-block">
+                            {file.startsWith('data:video') ? (
+                                <video src={file} className="h-20 rounded shadow" controls />
+                            ) : (
+                                <img src={file} alt="Preview" className="h-20 rounded shadow" />
+                            )}
+                            <button
+                                onClick={() => setFile(null)}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
+                            >
+                                <X size={12} />
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Options Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    {/* Genre */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.aiWriter.options.genre.label}</label>
+                        <select
+                            value={genre}
+                            onChange={(e) => setGenre(e.target.value)}
+                            className="w-full p-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 dark:text-white"
+                        >
+                            <option value="sales">{t.aiWriter.options.genre.sales}</option>
+                            <option value="story">{t.aiWriter.options.genre.story}</option>
+                            <option value="blog">{t.aiWriter.options.genre.blog}</option>
+                            <option value="news">{t.aiWriter.options.genre.news}</option>
+                            <option value="review">{t.aiWriter.options.genre.review}</option>
+                        </select>
+                    </div>
+
+                    {/* Style */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.aiWriter.options.style.label}</label>
+                        <select
+                            value={style}
+                            onChange={(e) => setStyle(e.target.value)}
+                            className="w-full p-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 dark:text-white"
+                        >
+                            <option value="professional">{t.aiWriter.options.style.professional}</option>
+                            <option value="humorous">{t.aiWriter.options.style.humorous}</option>
+                            <option value="emotional">{t.aiWriter.options.style.emotional}</option>
+                            <option value="witty">{t.aiWriter.options.style.witty}</option>
+                            <option value="formal">{t.aiWriter.options.style.formal}</option>
+                        </select>
+                    </div>
+
+                    {/* Length */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.aiWriter.options.length.label}</label>
+                        <select
+                            value={length}
+                            onChange={(e) => setLength(e.target.value)}
+                            className="w-full p-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 dark:text-white"
+                        >
+                            <option value="short">{t.aiWriter.options.length.short}</option>
+                            <option value="medium">{t.aiWriter.options.length.medium}</option>
+                            <option value="long">{t.aiWriter.options.length.long}</option>
+                        </select>
+                    </div>
+
+                    {/* Platform */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.aiWriter.options.platform.label}</label>
+                        <select
+                            value={platform}
+                            onChange={(e) => setPlatform(e.target.value)}
+                            className="w-full p-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 dark:text-white"
+                        >
+                            <option value="facebook">{t.aiWriter.options.platform.facebook}</option>
+                            <option value="instagram">{t.aiWriter.options.platform.instagram}</option>
+                            <option value="threads">{t.aiWriter.options.platform.threads}</option>
+                            <option value="tiktok">{t.aiWriter.options.platform.tiktok}</option>
+                            <option value="shopee">{t.aiWriter.options.platform.shopee}</option>
+                            <option value="website">{t.aiWriter.options.platform.website}</option>
+                        </select>
+                    </div>
+                </div>
+
 
                 {/* Admin Key Toggle */}
                 <div className="mb-6">
