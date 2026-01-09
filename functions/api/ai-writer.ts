@@ -23,7 +23,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
         // Default Webhook URL (Replace with your actual n8n webhook if env not set)
         // NOTE: In production, use env variables or secure storage.
-        const webhookUrl = "https://n8n.taivideo.io.vn/webhook/ai-writer-v1";
+        const webhookUrl = env.N8N_WEBHOOK_URL_AI || "https://n8n.taivideo.io.vn/webhook/ai-writer-v1";
 
         // Forward to n8n
         const n8nResponse = await fetch(webhookUrl, {
