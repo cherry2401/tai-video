@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Loader2, Sparkles, Copy, Check, AlertCircle, Unlock, Lock } from 'lucide-react';
 import { Translation } from '../utils/translations';
-import ReactMarkdown from 'react-markdown';
+import Markdown from 'react-markdown';
 
 interface AiWriterProps {
     t: Translation;
@@ -168,7 +168,7 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
 
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 md:p-8 min-h-[200px]">
                         <div className="prose dark:prose-invert max-w-none">
-                            <ReactMarkdown>{result}</ReactMarkdown>
+                            <Markdown>{result}</Markdown>
                         </div>
                     </div>
                 </div>
