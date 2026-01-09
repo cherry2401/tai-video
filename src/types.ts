@@ -11,8 +11,9 @@ export interface DownloadResult {
 }
 
 export enum NavItem {
-  HOME = 'Home',
-  TOOL = 'Tool',
-  VIDEO = 'Video',
-  RUT_GON = 'Rút gọn'
+  HOME = 'HOME',
+  TOOL = 'TOOL',
+  VIDEO = 'VIDEO',
+  AI_WRITER = 'AI_WRITER',
+  RUT_GON = 'RUT_GON'
 }

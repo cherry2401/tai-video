@@ -5,7 +5,21 @@ export const translations = {
       Home: 'Home',
       Tool: 'Tool',
       Video: 'Video',
-      'Rút gọn': 'Rút gọn'
+      'Rút gọn': 'Rút gọn',
+      AI_WRITER: 'AI Writer'
+    },
+    aiWriter: {
+      title: "AI Writer Miễn Phí",
+      subtitle: "Tạo nội dung chất lượng cao tức thì với AI. Miễn phí 20-50 request/ngày.",
+      promptPlaceholder: "Bạn muốn viết về chủ đề gì? (ví dụ: Viết caption Facebook cho shop giày...)",
+      adminKeyPlaceholder: "Mã Admin (Tùy chọn - Để bỏ qua giới hạn)",
+      generateButton: "Tạo Nội Dung",
+      generating: "AI đang suy nghĩ...",
+      resultTitle: "Nội Dung Được Tạo",
+      copy: "Sao chép",
+      copied: "Đã chép",
+      error: "Lỗi khi tạo nội dung. Vui lòng thử lại sau hoặc kiểm tra giới hạn sử dụng.",
+      adminBypassNotice: "Đã kích hoạt chế độ Admin: Bỏ qua giới hạn"
     },
     title: "Tải Video Đa Nền Tảng",
     subtitle: "Hỗ trợ tải video Shopee, TikTok, Facebook, Douyin,..không có Watermark miễn phí",
@@ -91,7 +105,21 @@ export const translations = {
       Home: 'Home',
       Tool: 'Tool',
       Video: 'Video',
-      'Rút gọn': 'Shorten'
+      'Rút gọn': 'Shorten',
+      AI_WRITER: 'AI Writer'
+    },
+    aiWriter: {
+      title: "Free AI Writer",
+      subtitle: "Generate high-quality content instantly with AI. Free 20-50 requests/day.",
+      promptPlaceholder: "What do you want to write about? (e.g., Write a Facebook caption for a shoe shop...)",
+      adminKeyPlaceholder: "Admin Key (Optional - To bypass limit)",
+      generateButton: "Generate Content",
+      generating: "AI is thinking...",
+      resultTitle: "Generated Content",
+      copy: "Copy",
+      copied: "Copied",
+      error: "Error generating content. Please try again later or check your quota.",
+      adminBypassNotice: "Admin Mode Activated: Limit Bypassed"
     },
     title: "Multi-Platform Video Downloader",
     subtitle: "Support downloading Shopee, TikTok, Facebook, Douyin videos without Watermark for free",
@@ -177,7 +205,21 @@ export const translations = {
       Home: '首页',
       Tool: '工具',
       Video: '视频',
-      'Rút gọn': '缩短'
+      'Rút gọn': '缩短',
+      AI_WRITER: 'AI 写作'
+    },
+    aiWriter: {
+      title: "免费 AI 写作助手",
+      subtitle: "使用 AI 即时生成高质量内容。每天免费 20-50 次请求。",
+      promptPlaceholder: "您想写什么？(例如：为鞋店写一个 Facebook 标题...)",
+      adminKeyPlaceholder: "管理员密钥 (可选 - 用于绕过限制)",
+      generateButton: "生成内容",
+      generating: "AI 正在思考...",
+      resultTitle: "生成的内容",
+      copy: "复制",
+      copied: "已复制",
+      error: "生成内容时出错。请稍后再试或检查您的配额。",
+      adminBypassNotice: "管理员模式已激活：限制已绕过"
     },
     title: "多平台视频下载器",
     subtitle: "免费支持下载 Shopee, TikTok, Facebook, Douyin 无水印视频",
@@ -263,7 +305,21 @@ export const translations = {
       Home: '홈',
       Tool: '도구',
       Video: '비디오',
-      'Rút gọn': '단축'
+      'Rút gọn': '단축',
+      AI_WRITER: 'AI 작가'
+    },
+    aiWriter: {
+      title: "무료 AI 작가",
+      subtitle: "AI로 즉시 고품질 콘텐츠를 생성하세요. 하루 20-50회 무료 요청.",
+      promptPlaceholder: "무엇을 쓰고 싶으신가요? (예: 신발 가게를 위한 Facebook 캡션 작성...)",
+      adminKeyPlaceholder: "관리자 키 (선택 사항 - 제한 우회용)",
+      generateButton: "콘텐츠 생성",
+      generating: "AI가 생각 중입니다...",
+      resultTitle: "생성된 콘텐츠",
+      copy: "복사",
+      copied: "복사됨",
+      error: "콘텐츠 생성 오류. 나중에 다시 시도하거나 할당량을 확인하세요.",
+      adminBypassNotice: "관리자 모드 활성화: 제한 우회됨"
     },
     title: "멀티 플랫폼 비디오 다운로더",
     subtitle: "Shopee, TikTok, Facebook, Douyin 워터마크 없는 비디오 무료 다운로드 지원",
@@ -349,7 +405,21 @@ export const translations = {
       Home: 'ホーム',
       Tool: 'ツール',
       Video: 'ビデオ',
-      'Rút gọn': '短縮'
+      'Rút gọn': '短縮',
+      AI_WRITER: 'AIライター'
+    },
+    aiWriter: {
+      title: "無料 AI ライター",
+      subtitle: "AI で高品質なコンテンツを即座に生成します。1日20〜50回のリクエストが無料。",
+      promptPlaceholder: "何について書きたいですか？ (例: 靴屋のFacebookキャプションを書いて...)",
+      adminKeyPlaceholder: "管理者キー (オプション - 制限を回避するため)",
+      generateButton: "コンテンツを生成",
+      generating: "AI が思考中...",
+      resultTitle: "生成されたコンテンツ",
+      copy: "コピー",
+      copied: "コピー完了",
+      error: "コンテンツ生成エラー。後でもう一度試すか、クォータを確認してください。",
+      adminBypassNotice: "管理者モード有効: 制限が回避されました"
     },
     title: "マルチプラットフォーム動画ダウンローダー",
     subtitle: "Shopee、TikTok、Facebook、Douyinの動画を透かしなしで無料でダウンロード",
@@ -435,7 +505,21 @@ export const translations = {
       Home: 'Beranda',
       Tool: 'Alat',
       Video: 'Video',
-      'Rút gọn': 'Perpendek'
+      'Rút gọn': 'Perpendek',
+      AI_WRITER: 'Penulis AI'
+    },
+    aiWriter: {
+      title: "Penulis AI Gratis",
+      subtitle: "Hasilkan konten berkualitas tinggi secara instan dengan AI. Gratis 20-50 permintaan/hari.",
+      promptPlaceholder: "Apa yang ingin Anda tulis? (contoh: Tulis caption Facebook untuk toko sepatu...)",
+      adminKeyPlaceholder: "Kunci Admin (Opsional - Untuk melewati batas)",
+      generateButton: "Hasilkan Konten",
+      generating: "AI sedang berpikir...",
+      resultTitle: "Konten yang Dihasilkan",
+      copy: "Salin",
+      copied: "Disalin",
+      error: "Kesalahan membuat konten. Silakan coba lagi nanti atau periksa kuota Anda.",
+      adminBypassNotice: "Mode Admin Diaktifkan: Batas Dilewati"
     },
     title: "Pengunduh Video Multi-Platform",
     subtitle: "Dukung unduhan video Shopee, TikTok, Facebook, Douyin tanpa Watermark gratis",
@@ -693,7 +777,21 @@ export const translations = {
       Home: 'Accueil',
       Tool: 'Outil',
       Video: 'Vidéo',
+      AI_WRITER: 'Rédacteur IA',
       'Rút gọn': 'Raccourcir'
+    },
+    aiWriter: {
+      title: "Rédacteur IA Gratuit",
+      subtitle: "Créez du contenu de haute qualité instantanément avec l'IA. 20-50 requêtes gratuites/jour.",
+      promptPlaceholder: "De quoi voulez-vous parler ? (ex: Écrivez une légende Facebook pour une boutique de chaussures...)",
+      adminKeyPlaceholder: "Clé Admin (Optionnel - Pour contourner la limite)",
+      generateButton: "Générer du Contenu",
+      generating: "L'IA réfléchit...",
+      resultTitle: "Contenu Généré",
+      copy: "Copier",
+      copied: "Copié",
+      error: "Erreur lors de la génération. Veuillez réessayer plus tard ou vérifier votre quota.",
+      adminBypassNotice: "Mode Admin Activé: Limite contournée"
     },
     title: "Téléchargeur Vidéo Multiplateforme",
     subtitle: "Téléchargez des vidéos Shopee, TikTok, Facebook, Douyin sans filigrane gratuitement",

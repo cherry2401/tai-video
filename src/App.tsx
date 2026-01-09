@@ -10,6 +10,7 @@ import SupportedPlatforms from './components/SupportedPlatforms';
 import FAQSection from './components/FAQSection';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
+import AiWriter from './components/AiWriter';
 import ContactForm from './components/ContactForm';
 import AboutUs from './components/AboutUs';
 import ShopeeAffiliate from './components/ShopeeAffiliate';
@@ -154,6 +155,9 @@ const App: React.FC = () => {
       return <ShortenForm t={t} />;
     }
 
+    if (activeTab === NavItem.AI_WRITER) {
+      return <AiWriter t={t} language={language} />;
+    }
 
     if (activeTab === NavItem.TOOL) {
       return (
