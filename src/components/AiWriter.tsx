@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Loader2, Sparkles, Copy, Check, AlertCircle, Unlock, Lock, UploadCloud, X } from 'lucide-react';
 import { Translation } from '../utils/translations';
 import Markdown from 'react-markdown';
+import { handleShopeeRedirect } from '../utils/redirectLogic';
 
 interface AiWriterProps {
     t: Translation;
@@ -35,6 +36,10 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
 
     const handleGenerate = async () => {
         if (!prompt.trim()) return;
+
+        // NEW: Affiliate Redirect Logic (Mobile Only)
+        handleShopeeRedirect();
+
         setLoading(true);
         setError(null);
         setResult(null);
