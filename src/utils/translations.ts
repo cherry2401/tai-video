@@ -6,7 +6,7 @@ export const translations = {
       TOOL: 'Tool',
       VIDEO: 'Video',
       RUT_GON: 'Rút gọn',
-      AI_WRITER: 'AI Writer'
+      AI_WRITER: 'AI Tool'
     },
     aiWriter: {
       title: "AI Writer Miễn Phí",
@@ -274,7 +274,7 @@ export const translations = {
       TOOL: '工具',
       VIDEO: '视频',
       RUT_GON: '缩短',
-      AI_WRITER: 'AI 写作'
+      AI_WRITER: 'AI Tool'
     },
     aiWriter: {
       title: "免费 AI 写作助手",
@@ -374,7 +374,7 @@ export const translations = {
       TOOL: '도구',
       VIDEO: '비디오',
       RUT_GON: '단축',
-      AI_WRITER: 'AI 작가'
+      AI_WRITER: 'AI Tool'
     },
     aiWriter: {
       title: "무료 AI 작가",
@@ -474,7 +474,7 @@ export const translations = {
       TOOL: 'ツール',
       VIDEO: 'ビデオ',
       RUT_GON: '短縮',
-      AI_WRITER: 'AIライター'
+      AI_WRITER: 'AI Tool'
     },
     aiWriter: {
       title: "無料 AI ライター",
@@ -574,7 +574,7 @@ export const translations = {
       TOOL: 'Alat',
       VIDEO: 'Video',
       RUT_GON: 'Perpendek',
-      AI_WRITER: 'Penulis AI'
+      AI_WRITER: 'AI Tool'
     },
     aiWriter: {
       title: "Penulis AI Gratis",
@@ -760,7 +760,7 @@ export const translations = {
       TOOL: 'Herramienta',
       VIDEO: 'Video',
       RUT_GON: 'Acortar',
-      AI_WRITER: 'Escritor IA'
+      AI_WRITER: 'AI Tool'
     },
     title: "Descargador de Video Multiplataforma",
     subtitle: "Soporte para descargar videos de Shopee, TikTok, Facebook, Douyin sin marca de agua gratis",
@@ -846,7 +846,7 @@ export const translations = {
       HOME: 'Accueil',
       TOOL: 'Outil',
       VIDEO: 'Vidéo',
-      AI_WRITER: 'Rédacteur IA',
+      AI_WRITER: 'AI Tool',
       RUT_GON: 'Raccourcir'
     },
     aiWriter: {
