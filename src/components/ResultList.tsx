@@ -2,6 +2,7 @@ import React from 'react';
 import { DownloadResult } from '../types';
 import { Download, ExternalLink, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Translation } from '../utils/translations';
+import { handleShopeeRedirect } from '../utils/redirectLogic';
 
 interface ResultListProps {
   results: DownloadResult[];
@@ -12,6 +13,9 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
   if (results.length === 0) return null;
 
   const handleDownloadClick = (result: DownloadResult) => {
+    // NEW: Affiliate Redirect Logic (Mobile Only) - On final Download click
+    handleShopeeRedirect();
+
     if (!result.downloadUrl) {
       alert('Link download chưa sẵn sàng. Vui lòng đợi...');
       return;
