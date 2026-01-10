@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { handleShopeeRedirect } from '../utils/redirectLogic';
 import { Translation } from '../utils/translations';
 
 interface DownloadFormProps {
@@ -15,9 +14,6 @@ const DownloadForm: React.FC<DownloadFormProps> = ({ onDownload, isLoading, t })
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!link.trim()) return;
-
-    // NEW: Affiliate Redirect Logic (Mobile Only)
-    handleShopeeRedirect();
 
     onDownload([link]);
   };
