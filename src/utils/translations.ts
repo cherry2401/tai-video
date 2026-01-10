@@ -140,7 +140,7 @@ export const translations = {
       TOOL: 'Tool',
       VIDEO: 'Video',
       RUT_GON: 'Shorten',
-      AI_WRITER: 'AI Writer'
+      AI_WRITER: 'AI Tool'
     },
     aiWriter: {
       title: "Free AI Writer",
