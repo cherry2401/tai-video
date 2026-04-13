@@ -49,6 +49,11 @@ const QualitySelector: React.FC<{
     return acc;
   }, []);
 
+  const getProxyUrl = (rawUrl: string, title: string) => {
+    const safeTitle = (title || 'video').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    return `/api/download-proxy?url=${encodeURIComponent(rawUrl)}&filename=${safeTitle}.mp4`;
+  };
+
   const handleSelectAndDownload = async (format: VideoFormat) => {
     setSelectedFormat(format);
     setIsDownloading(true);
@@ -62,8 +67,35 @@ const QualitySelector: React.FC<{
       );
 
       if (data.downloadUrl) {
-        setDownloadUrl(data.downloadUrl);
-        onDownloadStart({ ...result, downloadUrl: data.downloadUrl, quality: format.height + 'p' });
+        const rawUrl = data.downloadUrl;
+        setDownloadUrl(rawUrl);
+        onDownloadStart({ ...result, downloadUrl: rawUrl, quality: format.height + 'p' });
+
+        // Auto-trigger download via proxy
+        const proxyUrl = getProxyUrl(rawUrl, result.title || data.title || 'video');
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        if (isMobile) {
+          window.open(proxyUrl, '_blank');
+        } else {
+          // Desktop: try blob download, fallback to proxy
+          try {
+            const resp = await fetch(rawUrl);
+            if (!resp.ok) throw new Error('fetch failed');
+            const blob = await resp.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = blobUrl;
+            a.download = `${(result.title || 'video').replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${format.height}p.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(blobUrl);
+            document.body.removeChild(a);
+          } catch {
+            window.location.href = proxyUrl;
+          }
+        }
       } else {
         setError('Không nhận được link tải');
       }
@@ -130,7 +162,7 @@ const QualitySelector: React.FC<{
 
       {downloadUrl && (
         <a
-          href={downloadUrl}
+          href={getProxyUrl(downloadUrl, result.title || 'video')}
           target="_blank"
           rel="noreferrer"
           className="mt-2 inline-flex items-center gap-1 text-xs text-white bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700 transition-colors shadow-md"
