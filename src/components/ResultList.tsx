@@ -198,7 +198,7 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
   };
 
   const hasYouTubeFormats = (result: DownloadResult) =>
-    result.platform === 'youtube' && result.formats && result.formats.length > 0;
+    result.platform?.toLowerCase() === 'youtube' && result.formats && result.formats.length > 0;
 
   return (
     <div className="w-full max-w-4xl mx-auto mt-8 space-y-4">

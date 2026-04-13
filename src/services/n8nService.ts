@@ -157,7 +157,7 @@ export const enrichResultWithDownload = async (
 ): Promise<DownloadResult> => {
   try {
     // YouTube: use 2-phase flow
-    if (result.platform === 'youtube') {
+    if (result.platform.toLowerCase() === 'youtube') {
       const extractData = await fetchFormats(result.originalUrl);
       return {
         ...result,
