@@ -34,9 +34,8 @@ function getInstantThumbnail(url: string, platform: string): string {
   } catch (e) {
     // Invalid URL
   }
-  // Other platforms: thumbnail comes from API (Satoru V2) response,
-  // will be set when enrichResultWithDownload completes
-  return '';
+  // Other platforms: show placeholder while waiting for API thumbnail
+  return `https://picsum.photos/seed/${encodeURIComponent(url.slice(-10))}/300/200`;
 }
 
 function generateTitle(url: string, platform: string): string {
