@@ -14,7 +14,7 @@ function detectPlatform(url: string): string {
   return 'Unknown';
 }
 
-// Extract thumbnail URL from video URL immediately (no API call needed)
+// Extract thumbnail directly from URL where possible (no API call)
 function getInstantThumbnail(url: string, platform: string): string {
   try {
     const urlObj = new URL(url);
@@ -34,39 +34,23 @@ function getInstantThumbnail(url: string, platform: string): string {
   } catch (e) {
     // Invalid URL
   }
-  return '';
-}
-
-// Async: try to fetch thumbnail via oEmbed for platforms that support it
-async function fetchOEmbedThumbnail(url: string, platform: string): Promise<string> {
-  try {
-    if (platform === 'TikTok') {
-      const resp = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`);
-      if (resp.ok) {
-        const data = await resp.json() as { thumbnail_url?: string };
-        return data.thumbnail_url || '';
-      }
-    }
-  } catch (e) {
-    // oEmbed failed, no big deal
-  }
+  // Other platforms: thumbnail comes from API (Satoru V2) response,
+  // will be set when enrichResultWithDownload completes
   return '';
 }
 
 function generateTitle(url: string, platform: string): string {
   try {
     const urlObj = new URL(url);
-    const pathname = urlObj.pathname;
-    const parts = pathname.split('/').filter(p => p.length > 0);
+    const parts = urlObj.pathname.split('/').filter(p => p.length > 0);
     const lastPart = parts[parts.length - 1];
 
     if (lastPart && lastPart.length > 5) {
       return `${platform} Video - ${lastPart.substring(0, 30)}`;
     }
   } catch (e) {
-    // Invalid URL, ignore
+    // Invalid URL
   }
-
   return `${platform} Video`;
 }
 
@@ -76,8 +60,7 @@ export const analyzeLinks = async (urls: string[]): Promise<DownloadResult[]> =>
   const validUrls = urls.filter(u => u.trim().length > 0);
   if (validUrls.length === 0) return [];
 
-  // Create results with instant thumbnails first
-  const results = validUrls.map((url, index) => {
+  return validUrls.map((url, index) => {
     const platform = detectPlatform(url);
     const title = generateTitle(url, platform);
     const thumbnail = getInstantThumbnail(url, platform);
@@ -87,21 +70,8 @@ export const analyzeLinks = async (urls: string[]): Promise<DownloadResult[]> =>
       originalUrl: url,
       platform: platform,
       title: title,
-      status: 'success' as const,
+      status: 'success',
       thumbnail: thumbnail
     };
   });
-
-  // Fire oEmbed thumbnail fetches in the background (non-blocking)
-  // These will update the results array before enrichResultWithDownload runs
-  await Promise.all(results.map(async (result) => {
-    if (!result.thumbnail) {
-      const oembedThumb = await fetchOEmbedThumbnail(result.originalUrl, result.platform);
-      if (oembedThumb) {
-        result.thumbnail = oembedThumb;
-      }
-    }
-  }));
-
-  return results;
 };
