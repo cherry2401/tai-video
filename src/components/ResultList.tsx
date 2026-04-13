@@ -161,14 +161,16 @@ const QualitySelector: React.FC<{
       )}
 
       {downloadUrl && (
-        <a
-          href={getProxyUrl(downloadUrl, result.title || 'video')}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-2 inline-flex items-center gap-1 text-xs text-white bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700 transition-colors shadow-md"
-        >
-          <Download size={14} /> Tải lại
-        </a>
+        <div className="mt-3 flex justify-center">
+          <a
+            href={downloadUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-white bg-green-600 px-6 py-2.5 rounded-lg hover:bg-green-700 transition-colors shadow-md"
+          >
+            <Download size={14} /> Tải xuống
+          </a>
+        </div>
       )}
     </div>
   );
