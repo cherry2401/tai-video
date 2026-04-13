@@ -3,7 +3,9 @@ export const ALLOWED_ORIGINS = [
     'http://localhost:4173',
     'https://tai-video.pages.dev',
     'https://taivideo.io.vn',
-    'https://www.taivideo.io.vn'
+    'https://www.taivideo.io.vn',
+    'https://taivideo.huphet.vn',
+    'https://www.taivideo.huphet.vn'
 ];
 
 export const corsHeaders = (origin: string | null) => {
