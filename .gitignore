@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Environment
+.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +25,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Non-frontend files accidentally added
+Web Video Download API V3.json
+functions/api/_middleware.ts
+functions/cors.ts
+public/_redirects
+.claude/
