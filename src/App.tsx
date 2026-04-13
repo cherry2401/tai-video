@@ -111,20 +111,23 @@ const App: React.FC = () => {
     await enrichResultsWithDownloadLinks(results);
   };
 
-  // NEW: Enrich results với download links từ n8n
+  // NEW: Enrich results với download links từ n8n (streaming - từng result cập nhật ngay khi API respond)
   const enrichResultsWithDownloadLinks = async (resultsToEnrich: DownloadResult[]) => {
     setIsProcessingDownload(true);
 
     try {
       console.log('📥 Step 4: Fetching download links from n8n...');
 
-      // Gọi n8n webhook cho từng result
-      const enrichedResults = await Promise.all(
-        resultsToEnrich.map(result => enrichResultWithDownload(result))
-      );
+      // Gọi n8n webhook cho từng result - cập nhật UI ngay khi mỗi result resolve
+      const promises = resultsToEnrich.map(async (result, index) => {
+        const enriched = await enrichResultWithDownload(result);
+        // Cập nhật UI ngay lập tức khi result này resolve (không đợi tất cả)
+        setResults(prev => prev.map((r, i) => i === index ? enriched : r));
+        return enriched;
+      });
 
-      console.log('✅ Download links fetched:', enrichedResults);
-      setResults(enrichedResults);
+      await Promise.all(promises);
+      console.log('✅ All download links fetched');
 
     } catch (error) {
       console.error('Error enriching results:', error);
