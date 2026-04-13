@@ -1,10 +1,11 @@
-import { DownloadResult } from "../types";
+import { DownloadResult, VideoFormat } from "../types";
 
 // Configuration - Sẽ được load từ .env
 const N8N_CONFIG = {
   // Use relative path to call Cloudflare Function
   WEBHOOK_URL: '/api/video-download',
   TIMEOUT: 30000, // 30 seconds
+  DOWNLOAD_TIMEOUT: 60000, // 60 seconds for download phase (muxing takes time)
 };
 
 export interface N8nDownloadResponse {
@@ -15,10 +16,12 @@ export interface N8nDownloadResponse {
   thumbnail?: string;
   platform?: string;
   message?: string;
+  phase?: string;
+  formats?: VideoFormat[];
 }
 
 /**
- * Gọi n8n webhook để lấy download link
+ * Gọi n8n webhook để lấy download link (backward compat - auto mode)
  */
 export const fetchDownloadLink = async (
   videoUrl: string,
@@ -69,12 +72,104 @@ export const fetchDownloadLink = async (
 };
 
 /**
+ * Phase 1: Extract formats list (cho YouTube quality selector)
+ */
+export const fetchFormats = async (
+  videoUrl: string
+): Promise<N8nDownloadResponse> => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), N8N_CONFIG.TIMEOUT);
+
+    const response = await fetch(N8N_CONFIG.WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: videoUrl,
+        platform: 'youtube',
+        phase: 'extract'
+      }),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data: N8nDownloadResponse = await response.json();
+    if (data.error) throw new Error(data.message || 'Không thể trích xuất video');
+
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') throw new Error('⏱️ Timeout: Server không phản hồi');
+      throw error;
+    }
+    throw new Error('❌ Không thể kết nối đến server');
+  }
+};
+
+/**
+ * Phase 2: Download with selected format (cho YouTube quality selector)
+ */
+export const fetchDownloadWithFormat = async (
+  videoUrl: string,
+  videoFormatId: string,
+  audioFormatId?: string
+): Promise<N8nDownloadResponse> => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), N8N_CONFIG.DOWNLOAD_TIMEOUT);
+
+    const response = await fetch(N8N_CONFIG.WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: videoUrl,
+        platform: 'youtube',
+        phase: 'download',
+        video_format_id: videoFormatId,
+        audio_format_id: audioFormatId || ''
+      }),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data: N8nDownloadResponse = await response.json();
+    if (data.error) throw new Error(data.message || 'Không thể tải video');
+
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') throw new Error('⏱️ Timeout: Muxing video quá lâu');
+      throw error;
+    }
+    throw new Error('❌ Không thể kết nối đến server');
+  }
+};
+
+/**
  * Convert DownloadResult sang format có download link từ n8n
  */
 export const enrichResultWithDownload = async (
   result: DownloadResult
 ): Promise<DownloadResult> => {
   try {
+    // YouTube: use 2-phase flow
+    if (result.platform === 'youtube') {
+      const extractData = await fetchFormats(result.originalUrl);
+      return {
+        ...result,
+        status: 'success',
+        title: extractData.title || result.title,
+        thumbnail: extractData.thumbnail || result.thumbnail,
+        formats: extractData.formats || [],
+        quality: 'Chọn chất lượng'
+      };
+    }
+
+    // Other platforms: direct download
     const n8nData = await fetchDownloadLink(result.originalUrl, result.platform);
 
     return {
