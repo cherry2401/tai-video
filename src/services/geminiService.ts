@@ -14,25 +14,43 @@ function detectPlatform(url: string): string {
   return 'Unknown';
 }
 
-// Extract YouTube video ID from URL to generate thumbnail immediately
-function getYouTubeThumbnail(url: string): string | null {
+// Extract thumbnail URL from video URL immediately (no API call needed)
+function getInstantThumbnail(url: string, platform: string): string {
   try {
     const urlObj = new URL(url);
-    let videoId: string | null = null;
 
-    if (urlObj.hostname.includes('youtu.be')) {
-      videoId = urlObj.pathname.slice(1);
-    } else if (urlObj.hostname.includes('youtube.com')) {
-      videoId = urlObj.searchParams.get('v');
-    }
-
-    if (videoId) {
-      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    // YouTube: extract video ID → img.youtube.com
+    if (platform === 'YouTube') {
+      let videoId: string | null = null;
+      if (urlObj.hostname.includes('youtu.be')) {
+        videoId = urlObj.pathname.slice(1).split('?')[0];
+      } else if (urlObj.hostname.includes('youtube.com')) {
+        videoId = urlObj.searchParams.get('v');
+      }
+      if (videoId) {
+        return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+      }
     }
   } catch (e) {
     // Invalid URL
   }
-  return null;
+  return '';
+}
+
+// Async: try to fetch thumbnail via oEmbed for platforms that support it
+async function fetchOEmbedThumbnail(url: string, platform: string): Promise<string> {
+  try {
+    if (platform === 'TikTok') {
+      const resp = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`);
+      if (resp.ok) {
+        const data = await resp.json() as { thumbnail_url?: string };
+        return data.thumbnail_url || '';
+      }
+    }
+  } catch (e) {
+    // oEmbed failed, no big deal
+  }
+  return '';
 }
 
 function generateTitle(url: string, platform: string): string {
@@ -58,20 +76,32 @@ export const analyzeLinks = async (urls: string[]): Promise<DownloadResult[]> =>
   const validUrls = urls.filter(u => u.trim().length > 0);
   if (validUrls.length === 0) return [];
 
-  return validUrls.map((url, index) => {
+  // Create results with instant thumbnails first
+  const results = validUrls.map((url, index) => {
     const platform = detectPlatform(url);
     const title = generateTitle(url, platform);
-
-    // Use real thumbnail for YouTube, placeholder for others
-    const thumbnail = getYouTubeThumbnail(url) || `https://picsum.photos/300/200?random=${index}`;
+    const thumbnail = getInstantThumbnail(url, platform);
 
     return {
       id: `res-${Date.now()}-${index}`,
       originalUrl: url,
       platform: platform,
       title: title,
-      status: 'success',
+      status: 'success' as const,
       thumbnail: thumbnail
     };
   });
+
+  // Fire oEmbed thumbnail fetches in the background (non-blocking)
+  // These will update the results array before enrichResultWithDownload runs
+  await Promise.all(results.map(async (result) => {
+    if (!result.thumbnail) {
+      const oembedThumb = await fetchOEmbedThumbnail(result.originalUrl, result.platform);
+      if (oembedThumb) {
+        result.thumbnail = oembedThumb;
+      }
+    }
+  }));
+
+  return results;
 };
