@@ -5,7 +5,7 @@ const N8N_CONFIG = {
   // Use relative path to call Cloudflare Function
   WEBHOOK_URL: '/api/video-download',
   TIMEOUT: 30000, // 30 seconds
-  DOWNLOAD_TIMEOUT: 60000, // 60 seconds for download phase (muxing takes time)
+  DOWNLOAD_TIMEOUT: 150000, // 150 seconds for download phase (muxing takes up to 120s)
 };
 
 export interface N8nDownloadResponse {
