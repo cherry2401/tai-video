@@ -13,6 +13,8 @@ interface HeaderProps {
   setActiveTab: (tab: NavItem) => void;
   activeTool: string;
   setActiveTool: (tool: 'instagram' | 'zing' | 'soundcloud' | 'xvideos' | 'xnxx') => void;
+  activeUtility: 'tempmail' | 'twofa';
+  setActiveUtility: (utility: 'tempmail' | 'twofa') => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -25,10 +27,13 @@ const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   activeTool,
   setActiveTool,
+  activeUtility,
+  setActiveUtility,
 }) => {
   const navItems = Object.values(NavItem);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
+  const [isUtilitiesOpen, setIsUtilitiesOpen] = useState(false);
   const [isLangMobileOpen, setIsLangMobileOpen] = useState(false);
   const [isLangDesktopOpen, setIsLangDesktopOpen] = useState(false);
 
@@ -67,6 +72,12 @@ const Header: React.FC<HeaderProps> = ({
   const handleToolClick = (tool: 'instagram' | 'zing' | 'soundcloud' | 'xvideos' | 'xnxx') => {
     setActiveTool(tool);
     setActiveTab(NavItem.TOOL);
+    setIsMenuOpen(false);
+  };
+
+  const handleUtilityClick = (utility: 'tempmail' | 'twofa') => {
+    setActiveUtility(utility);
+    setActiveTab(NavItem.VIDEO);
     setIsMenuOpen(false);
   };
 
@@ -225,6 +236,43 @@ const Header: React.FC<HeaderProps> = ({
                           }`}
                         >
                           Tải XNXX
+                        </button>
+                      </div>
+                    )}
+                  </li>
+                );
+              }
+
+              if (itemKey === NavItem.VIDEO) {
+                return (
+                  <li key={itemKey} className="border-b border-gray-50 dark:border-gray-800 last:border-none">
+                    <button
+                      onClick={() => setIsUtilitiesOpen(!isUtilitiesOpen)}
+                      className={`flex items-center justify-between w-full px-5 py-3.5 text-left text-[16px] font-medium transition-colors ${
+                        isActive ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      <span>{label}</span>
+                      {isUtilitiesOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </button>
+
+                    {isUtilitiesOpen && (
+                      <div className="bg-gray-50 dark:bg-gray-800/50 px-5 py-2 space-y-1">
+                        <button
+                          onClick={() => handleUtilityClick('tempmail')}
+                          className={`block w-full text-left py-2.5 px-2 rounded text-[15px] ${
+                            activeUtility === 'tempmail' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          Tempmail
+                        </button>
+                        <button
+                          onClick={() => handleUtilityClick('twofa')}
+                          className={`block w-full text-left py-2.5 px-2 rounded text-[15px] ${
+                            activeUtility === 'twofa' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          2FA
                         </button>
                       </div>
                     )}

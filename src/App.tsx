@@ -233,7 +233,7 @@ const App: React.FC = () => {
     if (activeTab === NavItem.VIDEO) {
       return (
         <div className="w-full max-w-4xl mx-auto">
-          <div className="overflow-x-auto pb-4 mb-4 md:mb-8 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+          <div className="hidden md:block overflow-x-auto pb-4 mb-4 md:mb-8 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
             <div className="flex md:justify-center gap-3 w-max md:w-auto">
               <button
                 onClick={() => setActiveUtility('tempmail')}
@@ -340,6 +340,8 @@ const App: React.FC = () => {
         }}
         activeTool={activeTool}
         setActiveTool={setActiveTool}
+        activeUtility={activeUtility}
+        setActiveUtility={setActiveUtility}
       />
 
       <main className="flex-1 w-full container mx-auto px-4 py-10 flex flex-col items-center">
