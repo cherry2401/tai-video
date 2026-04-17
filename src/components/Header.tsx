@@ -13,8 +13,8 @@ interface HeaderProps {
   setActiveTab: (tab: NavItem) => void;
   activeTool: string;
   setActiveTool: (tool: 'instagram' | 'zing' | 'soundcloud' | 'xvideos' | 'xnxx') => void;
-  activeUtility: 'tempmail' | 'twofa' | 'outlook';
-  setActiveUtility: (utility: 'tempmail' | 'twofa' | 'outlook') => void;
+  activeUtility: 'tempmail' | 'twofa' | 'outlook' | 'cdk';
+  setActiveUtility: (utility: 'tempmail' | 'twofa' | 'outlook' | 'cdk') => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -75,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({
     setIsMenuOpen(false);
   };
 
-  const handleUtilityClick = (utility: 'tempmail' | 'twofa' | 'outlook') => {
+  const handleUtilityClick = (utility: 'tempmail' | 'twofa' | 'outlook' | 'cdk') => {
     setActiveUtility(utility);
     setActiveTab(NavItem.VIDEO);
     setIsMenuOpen(false);
@@ -85,10 +85,17 @@ const Header: React.FC<HeaderProps> = ({
     <header className="bg-white dark:bg-gray-900 text-gray-800 dark:text-white py-4 px-4 md:px-6 shadow-sm dark:shadow-md transition-colors duration-300 border-b border-gray-200 dark:border-gray-800 relative z-50">
       <div className="container mx-auto flex justify-between items-center">
         <div
-          className="text-xl md:text-3xl font-extrabold tracking-tight cursor-pointer flex items-center"
+          className="cursor-pointer inline-flex items-center h-10 gap-2 md:gap-2.5 leading-none"
           onClick={() => setActiveTab(NavItem.HOME)}
         >
-          <span className="text-green-700 dark:text-green-500 mr-2">AIO</span> Video Downloader
+          <img
+            src="/logo_taivideo.svg"
+            alt="TaiVideo logo"
+            className="w-10 h-10 md:w-9 md:h-9 md:translate-y-[0.5px] object-contain shrink-0"
+          />
+          <span className="hidden md:inline-flex items-center translate-y-[3px] font-codec-pro-bold text-[1.85rem] lg:text-[2rem] leading-none tracking-[-0.01em] text-gray-900 dark:text-gray-100">
+            tai<span className="text-green-700 dark:text-green-400">video</span>
+          </span>
         </div>
 
         <div className="hidden md:flex flex-1 justify-center">
@@ -281,6 +288,14 @@ const Header: React.FC<HeaderProps> = ({
                           }`}
                         >
                           Outlook Mail
+                        </button>
+                        <button
+                          onClick={() => handleUtilityClick('cdk')}
+                          className={`block w-full text-left py-2.5 px-2 rounded text-[15px] ${
+                            activeUtility === 'cdk' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          ChatGPT CDK
                         </button>
                       </div>
                     )}

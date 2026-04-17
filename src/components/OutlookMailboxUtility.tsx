@@ -251,7 +251,10 @@ const OutlookMailboxUtility: React.FC = () => {
   return (
     <div className="w-full max-w-4xl mx-auto animate-fadeIn pb-20">
       <div className="text-center mb-7 space-y-2">
-        <h1 className="text-3xl md:text-4xl font-black tracking-wide text-gray-900 dark:text-gray-100">Outlook / Hotmail</h1>
+        <h1 className="text-3xl md:text-4xl font-black tracking-wide text-gray-900 dark:text-gray-100 flex items-center justify-center gap-2">
+          <img src="/outlook.svg" alt="Outlook logo" className="w-7 h-7 md:w-8 md:h-8 object-contain" />
+          <span>Outlook / Hotmail</span>
+        </h1>
         <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">Đọc inbox bằng token theo chuẩn DongVanFB API.</p>
       </div>
 
