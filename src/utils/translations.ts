@@ -1,10 +1,10 @@
-
+﻿
 export const translations = {
   vi: {
     nav: {
-      HOME: 'Home',
-      TOOL: 'Giải trí',
-      VIDEO: 'Tiện ích',
+      HOME: 'Trang ch\u1ee7',
+      TOOL: 'Gi\u1ea3i tr\u00ed',
+      VIDEO: 'Ti\u1ec7n \u00edch',
       RUT_GON: 'Rút gọn',
       AI_WRITER: 'AI Tool'
     },
@@ -137,8 +137,8 @@ export const translations = {
   en: {
     nav: {
       HOME: 'Home',
-      TOOL: 'Tool',
-      VIDEO: 'Video',
+      TOOL: 'Entertainment',
+      VIDEO: 'Utilities',
       RUT_GON: 'Shorten',
       AI_WRITER: 'AI Tool'
     },
@@ -270,9 +270,9 @@ export const translations = {
   },
   zh: {
     nav: {
-      HOME: '首页',
-      TOOL: '工具',
-      VIDEO: '视频',
+      HOME: 'Home',
+      TOOL: 'Entertainment',
+      VIDEO: 'Utilities',
       RUT_GON: '缩短',
       AI_WRITER: 'AI Tool'
     },
@@ -370,9 +370,9 @@ export const translations = {
   },
   ko: {
     nav: {
-      HOME: '홈',
-      TOOL: '도구',
-      VIDEO: '비디오',
+      HOME: 'Home',
+      TOOL: 'Entertainment',
+      VIDEO: 'Utilities',
       RUT_GON: '단축',
       AI_WRITER: 'AI Tool'
     },
@@ -470,9 +470,9 @@ export const translations = {
   },
   ja: {
     nav: {
-      HOME: 'ホーム',
-      TOOL: 'ツール',
-      VIDEO: 'ビデオ',
+      HOME: 'Home',
+      TOOL: 'Entertainment',
+      VIDEO: 'Utilities',
       RUT_GON: '短縮',
       AI_WRITER: 'AI Tool'
     },
@@ -571,8 +571,8 @@ export const translations = {
   id: {
     nav: {
       HOME: 'Beranda',
-      TOOL: 'Alat',
-      VIDEO: 'Video',
+      TOOL: 'Hiburan',
+      VIDEO: 'Utilitas',
       RUT_GON: 'Perpendek',
       AI_WRITER: 'AI Tool'
     },
@@ -670,9 +670,9 @@ export const translations = {
   },
   th: {
     nav: {
-      HOME: 'หน้าแรก',
-      TOOL: 'เครื่องมือ',
-      VIDEO: 'วิดีโอ',
+      HOME: 'Home',
+      TOOL: 'Entertainment',
+      VIDEO: 'Utilities',
       RUT_GON: 'ย่อลิงก์',
     },
     title: "โปรแกรมดาวน์โหลดวิดีโอหลายแพลตฟอร์ม",
@@ -757,8 +757,8 @@ export const translations = {
   es: {
     nav: {
       HOME: 'Inicio',
-      TOOL: 'Herramienta',
-      VIDEO: 'Video',
+      TOOL: 'Entretenimiento',
+      VIDEO: 'Utilidades',
       RUT_GON: 'Acortar',
       AI_WRITER: 'AI Tool'
     },
@@ -844,8 +844,8 @@ export const translations = {
   fr: {
     nav: {
       HOME: 'Accueil',
-      TOOL: 'Outil',
-      VIDEO: 'Vidéo',
+      TOOL: 'Divertissement',
+      VIDEO: 'Utilitaires',
       AI_WRITER: 'AI Tool',
       RUT_GON: 'Raccourcir'
     },
@@ -945,3 +945,5 @@ export const translations = {
 
 export type Language = keyof typeof translations;
 export type Translation = typeof translations['vi'];
+
+
