@@ -6,12 +6,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-type TempMailAction = 'create' | 'inbox' | 'message';
+type TempMailAction = 'create' | 'inbox' | 'message' | 'restore';
 
 interface TempMailRequestBody {
   action?: TempMailAction;
   token?: string;
   messageId?: string;
+  email?: string;
+  password?: string;
 }
 
 export const onRequestOptions: PagesFunction = async () => {
@@ -23,8 +25,8 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
     const body = (await request.json()) as TempMailRequestBody;
     const action = body.action;
 
-    if (!action || (action !== 'create' && action !== 'inbox' && action !== 'message')) {
-      return new Response(JSON.stringify({ message: 'Invalid action. Use "create", "inbox" or "message".' }), {
+    if (!action || (action !== 'create' && action !== 'inbox' && action !== 'message' && action !== 'restore')) {
+      return new Response(JSON.stringify({ message: 'Invalid action. Use "create", "inbox", "message" or "restore".' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
@@ -49,7 +51,7 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
         method: 'GET',
         headers: { Accept: 'application/json' },
       });
-    } else {
+    } else if (action === 'message') {
       const token = body.token?.trim();
       const messageId = body.messageId?.trim();
       if (!token || !messageId) {
@@ -66,6 +68,27 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
           Accept: 'application/json',
           Authorization: `Bearer ${token}`,
         },
+      });
+    } else {
+      const email = body.email?.trim();
+      const password = body.password?.trim();
+      if (!email || !password) {
+        return new Response(JSON.stringify({ message: 'Missing email or password for restore action.' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
+      upstream = await fetch('https://api.mail.tm/token', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address: email,
+          password,
+        }),
       });
     }
 

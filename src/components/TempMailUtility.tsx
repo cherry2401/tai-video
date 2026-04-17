@@ -28,6 +28,7 @@ interface TempMailApiResponse {
   answer?: TempMailMessage[];
   messages?: TempMailMessage[];
   message?: string;
+  id?: string;
 }
 
 interface TempMailMessageDetailResponse {
@@ -123,10 +124,13 @@ const TempMailUtility: React.FC = () => {
   const [messages, setMessages] = useState<TempMailMessage[]>([]);
   const [expandedMailKey, setExpandedMailKey] = useState<string | null>(null);
   const [loadingCreate, setLoadingCreate] = useState(false);
+  const [loadingRestore, setLoadingRestore] = useState(false);
   const [loadingInbox, setLoadingInbox] = useState(false);
   const [loadingMessageKey, setLoadingMessageKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [restoreEmail, setRestoreEmail] = useState('');
+  const [restorePassword, setRestorePassword] = useState('');
 
   const getMailKey = (mail: TempMailMessage, index: number): string => mail.id || `${index}-${mail.subject || 'mail'}`;
 
@@ -162,15 +166,64 @@ const TempMailUtility: React.FC = () => {
     }
   };
 
-  const refreshInbox = async () => {
-    if (!account?.token) return;
+  const restoreMailbox = async () => {
+    const email = restoreEmail.trim();
+    if (!email) {
+      setError('Vui lòng nhập email cũ để khôi phục.');
+      return;
+    }
+
+    const fallbackPassword = email.includes('@') ? email.split('@')[0] : '';
+    const password = restorePassword.trim() || fallbackPassword;
+    if (!password) {
+      setError('Thiếu mật khẩu để khôi phục mailbox.');
+      return;
+    }
+
+    setLoadingRestore(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/tempmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'restore',
+          email,
+          password,
+        }),
+      });
+
+      const data = (await response.json()) as TempMailApiResponse;
+      const token = data.token;
+      if (!response.ok || !token) {
+        throw new Error(data.message || 'Không thể khôi phục mailbox. Kiểm tra lại email/mật khẩu.');
+      }
+
+      setAccount({
+        email,
+        token,
+        password,
+        id: data.id,
+      });
+      setMessages([]);
+      setExpandedMailKey(null);
+      await refreshInboxWithToken(token);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Lỗi khôi phục mailbox.');
+    } finally {
+      setLoadingRestore(false);
+    }
+  };
+
+  const refreshInboxWithToken = async (token: string) => {
     setLoadingInbox(true);
     setError(null);
     try {
       const response = await fetch('/api/tempmail', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'inbox', token: account.token }),
+        body: JSON.stringify({ action: 'inbox', token }),
       });
 
       const data = (await response.json()) as TempMailApiResponse;
@@ -201,6 +254,11 @@ const TempMailUtility: React.FC = () => {
     } finally {
       setLoadingInbox(false);
     }
+  };
+
+  const refreshInbox = async () => {
+    if (!account?.token) return;
+    await refreshInboxWithToken(account.token);
   };
 
   const copyEmail = async () => {
@@ -343,6 +401,32 @@ const TempMailUtility: React.FC = () => {
               <Trash2 size={14} />
               Xóa
             </button>
+          </div>
+
+          <div className="mt-3 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+            <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 font-medium">Khôi phục mailbox cũ</p>
+            <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr_auto] gap-2">
+              <input
+                value={restoreEmail}
+                onChange={(e) => setRestoreEmail(e.target.value)}
+                placeholder="Nhập email cũ (ví dụ: abc@domain.com)"
+                className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-800 dark:text-gray-100"
+              />
+              <input
+                value={restorePassword}
+                onChange={(e) => setRestorePassword(e.target.value)}
+                placeholder="Mật khẩu (để trống sẽ thử auto)"
+                className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-800 dark:text-gray-100"
+              />
+              <button
+                onClick={restoreMailbox}
+                disabled={loadingRestore}
+                className="px-3 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                {loadingRestore ? <Loader2 size={14} className="animate-spin" /> : null}
+                Khôi phục
+              </button>
+            </div>
           </div>
         </div>
 
