@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AlertCircle, Copy, Inbox, Loader2, MailPlus, RefreshCw, Shuffle, Trash2 } from 'lucide-react';
 
 interface TempMailAccount {
@@ -28,7 +28,6 @@ interface TempMailApiResponse {
   answer?: TempMailMessage[];
   messages?: TempMailMessage[];
   message?: string;
-  id?: string;
 }
 
 interface TempMailMessageDetailResponse {
@@ -44,12 +43,17 @@ interface TempMailMessageDetailResponse {
   message?: string;
 }
 
+const AUTO_REFRESH_SECONDS = 10;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const normalizeAddressField = (value: unknown): string => {
   if (!value) return 'N/A';
   if (typeof value === 'string') return value;
 
   if (Array.isArray(value)) {
-    const parts = value.map((item) => normalizeAddressField(item)).filter((item) => item && item !== 'N/A');
+    const parts = value
+      .map((item) => normalizeAddressField(item))
+      .filter((item) => item && item !== 'N/A');
     return parts.length ? parts.join(', ') : 'N/A';
   }
 
@@ -121,18 +125,119 @@ const renderTextWithLinks = (text: string) => {
 
 const TempMailUtility: React.FC = () => {
   const [account, setAccount] = useState<TempMailAccount | null>(null);
+  const [mailboxInput, setMailboxInput] = useState('');
   const [messages, setMessages] = useState<TempMailMessage[]>([]);
   const [expandedMailKey, setExpandedMailKey] = useState<string | null>(null);
+
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [loadingRestore, setLoadingRestore] = useState(false);
   const [loadingInbox, setLoadingInbox] = useState(false);
   const [loadingMessageKey, setLoadingMessageKey] = useState<string | null>(null);
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
+
   const [error, setError] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const [restoreEmail, setRestoreEmail] = useState('');
-  const [restorePassword, setRestorePassword] = useState('');
 
   const getMailKey = (mail: TempMailMessage, index: number): string => mail.id || `${index}-${mail.subject || 'mail'}`;
+
+  const refreshInboxWithToken = async (token: string, silent = false) => {
+    if (!silent) {
+      setLoadingInbox(true);
+      setError(null);
+    }
+
+    try {
+      const response = await fetch('/api/tempmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'inbox', token }),
+      });
+
+      const data = (await response.json()) as TempMailApiResponse;
+      if (!response.ok) {
+        throw new Error(data.message || 'Không thể đọc hộp thư.');
+      }
+
+      const inboxItems = Array.isArray(data.answer)
+        ? data.answer
+        : Array.isArray(data.messages)
+          ? data.messages
+          : [];
+
+      const normalizedMessages = inboxItems.map((mail) => ({
+        ...mail,
+        subject: typeof mail.subject === 'string' && mail.subject.trim() ? mail.subject : '(Không có tiêu đề)',
+        intro: typeof mail.intro === 'string' ? mail.intro : '',
+        text: typeof mail.text === 'string' ? mail.text : '',
+        createdAt: typeof mail.createdAt === 'string' ? mail.createdAt : '',
+        date: typeof mail.date === 'string' ? mail.date : '',
+        from: normalizeAddressField(mail.from),
+        to: normalizeAddressField(mail.to),
+      }));
+
+      setMessages(normalizedMessages);
+      setExpandedMailKey((prev) => {
+        if (!prev) return null;
+        return normalizedMessages.some((mail, index) => getMailKey(mail, index) === prev) ? prev : null;
+      });
+    } catch (err) {
+      if (!silent) setError(err instanceof Error ? err.message : 'Lỗi đọc hộp thư.');
+    } finally {
+      if (!silent) setLoadingInbox(false);
+    }
+  };
+
+  const refreshInbox = async () => {
+    if (!account?.token) return;
+    await refreshInboxWithToken(account.token);
+  };
+
+  const restoreMailboxByEmail = async (emailRaw: string) => {
+    const email = emailRaw.trim();
+    if (!emailRegex.test(email)) return;
+
+    const fallbackPassword = email.includes('@') ? email.split('@')[0] : '';
+    if (!fallbackPassword) {
+      setError('Không thể suy ra mật khẩu mặc định từ email này.');
+      return;
+    }
+
+    setLoadingRestore(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/tempmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'restore',
+          email,
+          password: fallbackPassword,
+        }),
+      });
+
+      const data = (await response.json()) as TempMailApiResponse;
+      if (!response.ok || !data.token) {
+        throw new Error(data.message || 'Không thể khôi phục mailbox. Có thể email không thuộc hệ tempmail này.');
+      }
+
+      const restoredAccount: TempMailAccount = {
+        email,
+        token: data.token,
+        password: fallbackPassword,
+        id: data.id,
+      };
+
+      setAccount(restoredAccount);
+      setMailboxInput(email);
+      setMessages([]);
+      setExpandedMailKey(null);
+      await refreshInboxWithToken(data.token);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Lỗi khôi phục mailbox.');
+    } finally {
+      setLoadingRestore(false);
+    }
+  };
 
   const createMailbox = async () => {
     setLoadingCreate(true);
@@ -155,110 +260,17 @@ const TempMailUtility: React.FC = () => {
         password: data.password,
         id: data.id,
       });
+      setMailboxInput(data.email);
       setMessages([]);
       setExpandedMailKey(null);
     } catch (err) {
       setAccount(null);
       setMessages([]);
+      setMailboxInput('');
       setError(err instanceof Error ? err.message : 'Lỗi tạo mailbox.');
     } finally {
       setLoadingCreate(false);
     }
-  };
-
-  const restoreMailbox = async () => {
-    const email = restoreEmail.trim();
-    if (!email) {
-      setError('Vui lòng nhập email cũ để khôi phục.');
-      return;
-    }
-
-    const fallbackPassword = email.includes('@') ? email.split('@')[0] : '';
-    const password = restorePassword.trim() || fallbackPassword;
-    if (!password) {
-      setError('Thiếu mật khẩu để khôi phục mailbox.');
-      return;
-    }
-
-    setLoadingRestore(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/tempmail', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'restore',
-          email,
-          password,
-        }),
-      });
-
-      const data = (await response.json()) as TempMailApiResponse;
-      const token = data.token;
-      if (!response.ok || !token) {
-        throw new Error(data.message || 'Không thể khôi phục mailbox. Kiểm tra lại email/mật khẩu.');
-      }
-
-      setAccount({
-        email,
-        token,
-        password,
-        id: data.id,
-      });
-      setMessages([]);
-      setExpandedMailKey(null);
-      await refreshInboxWithToken(token);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Lỗi khôi phục mailbox.');
-    } finally {
-      setLoadingRestore(false);
-    }
-  };
-
-  const refreshInboxWithToken = async (token: string) => {
-    setLoadingInbox(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/tempmail', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'inbox', token }),
-      });
-
-      const data = (await response.json()) as TempMailApiResponse;
-      if (!response.ok) {
-        throw new Error(data.message || 'Không thể đọc hộp thư.');
-      }
-
-      const inboxItems = Array.isArray(data.answer) ? data.answer : Array.isArray(data.messages) ? data.messages : [];
-
-      const normalizedMessages = inboxItems.map((mail) => ({
-        ...mail,
-        subject: typeof mail.subject === 'string' && mail.subject.trim() ? mail.subject : '(Không có tiêu đề)',
-        intro: typeof mail.intro === 'string' ? mail.intro : '',
-        text: typeof mail.text === 'string' ? mail.text : '',
-        createdAt: typeof mail.createdAt === 'string' ? mail.createdAt : '',
-        date: typeof mail.date === 'string' ? mail.date : '',
-        from: normalizeAddressField(mail.from),
-        to: normalizeAddressField(mail.to),
-      }));
-
-      setMessages(normalizedMessages);
-      setExpandedMailKey((prev) => {
-        if (!prev) return null;
-        return normalizedMessages.some((mail, index) => getMailKey(mail, index) === prev) ? prev : null;
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Lỗi đọc hộp thư.');
-    } finally {
-      setLoadingInbox(false);
-    }
-  };
-
-  const refreshInbox = async () => {
-    if (!account?.token) return;
-    await refreshInboxWithToken(account.token);
   };
 
   const copyEmail = async () => {
@@ -270,6 +282,7 @@ const TempMailUtility: React.FC = () => {
 
   const clearMailbox = () => {
     setAccount(null);
+    setMailboxInput('');
     setMessages([]);
     setExpandedMailKey(null);
     setLoadingMessageKey(null);
@@ -335,6 +348,14 @@ const TempMailUtility: React.FC = () => {
     return 'Không có nội dung thư.';
   };
 
+  useEffect(() => {
+    if (!autoRefreshEnabled || !account?.token) return;
+    const timer = setInterval(() => {
+      void refreshInboxWithToken(account.token, true);
+    }, AUTO_REFRESH_SECONDS * 1000);
+    return () => clearInterval(timer);
+  }, [account?.token, autoRefreshEnabled]);
+
   return (
     <div className="w-full max-w-4xl mx-auto animate-fadeIn pb-20">
       <div className="text-center mb-7 space-y-2">
@@ -347,16 +368,32 @@ const TempMailUtility: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 md:p-6">
         <div className="max-w-xl mx-auto">
           <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 px-3.5 py-2 flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p
-                className={`truncate ${
-                  account?.email
-                    ? 'text-[15px] md:text-base font-normal text-gray-700 dark:text-gray-300'
-                    : 'text-[14px] md:text-[15px] font-normal text-gray-500 dark:text-gray-400'
-                }`}
-              >
-                {account?.email || 'Bấm "Tạo" để tạo email tạm và bắt đầu nhận thư.'}
-              </p>
+            <div className="min-w-0 flex-1">
+              <input
+                value={mailboxInput}
+                onChange={(e) => setMailboxInput(e.target.value)}
+                onBlur={() => {
+                  if (mailboxInput.trim() && mailboxInput.trim() !== account?.email) {
+                    void restoreMailboxByEmail(mailboxInput);
+                  }
+                }}
+                onPaste={(e) => {
+                  const pasted = e.clipboardData.getData('text').trim();
+                  if (pasted) {
+                    e.preventDefault();
+                    setMailboxInput(pasted);
+                    void restoreMailboxByEmail(pasted);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    void restoreMailboxByEmail(mailboxInput);
+                  }
+                }}
+                placeholder='Bấm "Tạo" hoặc dán email cũ để mở lại mailbox'
+                className="w-full bg-transparent text-[15px] md:text-base font-normal text-gray-700 dark:text-gray-300 outline-none"
+              />
             </div>
             <button
               onClick={copyEmail}
@@ -401,32 +438,12 @@ const TempMailUtility: React.FC = () => {
               <Trash2 size={14} />
               Xóa
             </button>
-          </div>
-
-          <div className="mt-3 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
-            <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 font-medium">Khôi phục mailbox cũ</p>
-            <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr_auto] gap-2">
-              <input
-                value={restoreEmail}
-                onChange={(e) => setRestoreEmail(e.target.value)}
-                placeholder="Nhập email cũ (ví dụ: abc@domain.com)"
-                className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-800 dark:text-gray-100"
-              />
-              <input
-                value={restorePassword}
-                onChange={(e) => setRestorePassword(e.target.value)}
-                placeholder="Mật khẩu (để trống sẽ thử auto)"
-                className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-800 dark:text-gray-100"
-              />
-              <button
-                onClick={restoreMailbox}
-                disabled={loadingRestore}
-                className="px-3 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2 whitespace-nowrap"
-              >
-                {loadingRestore ? <Loader2 size={14} className="animate-spin" /> : null}
-                Khôi phục
-              </button>
-            </div>
+            {loadingRestore && (
+              <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                <Loader2 size={12} className="animate-spin" />
+                Đang mở mailbox cũ...
+              </span>
+            )}
           </div>
         </div>
 
@@ -437,12 +454,13 @@ const TempMailUtility: React.FC = () => {
               Thư đến
             </div>
             <button
-              onClick={refreshInbox}
-              disabled={loadingInbox || !account?.token}
+              onClick={() => setAutoRefreshEnabled((prev) => !prev)}
+              disabled={!account?.token}
               className="text-sm px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-60 flex items-center gap-2"
+              title={`Tự động làm mới mỗi ${AUTO_REFRESH_SECONDS}s`}
             >
-              <RefreshCw size={14} className={loadingInbox ? 'animate-spin' : ''} />
-              Làm mới
+              <RefreshCw size={14} className={autoRefreshEnabled && account?.token ? 'animate-spin' : ''} />
+              {autoRefreshEnabled ? `Làm mới tự động (${AUTO_REFRESH_SECONDS}s)` : 'Bật làm mới tự động'}
             </button>
           </div>
 
@@ -451,7 +469,7 @@ const TempMailUtility: React.FC = () => {
               <div className="h-full min-h-[300px] flex items-center justify-center text-center px-6">
                 <div>
                   <p className="text-gray-700 dark:text-gray-200 font-semibold">Chưa có hộp thư tạm</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Bấm Tạo để tạo email tạm và bắt đầu nhận thư.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Bấm Tạo hoặc dán email cũ để bắt đầu nhận thư.</p>
                 </div>
               </div>
             )}
@@ -470,7 +488,7 @@ const TempMailUtility: React.FC = () => {
                 <div>
                   <Inbox className="mx-auto text-gray-400" size={30} />
                   <p className="text-gray-700 dark:text-gray-200 font-semibold mt-4">Chưa có thư</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Đang chờ thư đến. Bấm Làm mới để kiểm tra lại.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Hệ thống sẽ tự động làm mới. Anh cũng có thể bấm Refresh thủ công.</p>
                 </div>
               </div>
             )}
@@ -489,8 +507,7 @@ const TempMailUtility: React.FC = () => {
                       >
                         <p className="font-semibold text-gray-900 dark:text-gray-100">{mail.subject || '(Không có tiêu đề)'}</p>
                         <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                          Từ: {typeof mail.from === 'string' ? mail.from : 'N/A'}{' '}
-                          {mail.date || mail.createdAt ? `• ${mail.date || mail.createdAt}` : ''}
+                          Từ: {typeof mail.from === 'string' ? mail.from : 'N/A'} {mail.date || mail.createdAt ? `• ${mail.date || mail.createdAt}` : ''}
                         </p>
                         <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 break-words">{mail.intro || 'Không có nội dung preview.'}</p>
                       </button>
