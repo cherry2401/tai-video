@@ -3,8 +3,8 @@ export const translations = {
   vi: {
     nav: {
       HOME: 'Home',
-      TOOL: 'Tool',
-      VIDEO: 'Video',
+      TOOL: 'Giải trí',
+      VIDEO: 'Tiện ích',
       RUT_GON: 'Rút gọn',
       AI_WRITER: 'AI Tool'
     },

@@ -86,7 +86,7 @@ const Header: React.FC<HeaderProps> = ({
               {navItems.map((itemKey) => {
                 // @ts-ignore
                 const label = t.nav[itemKey] || itemKey;
-                const isActive = activeTab === itemKey || (activeTab === NavItem.HOME && itemKey === NavItem.VIDEO);
+                const isActive = activeTab === itemKey;
 
                 return (
                   <li key={itemKey}>
@@ -169,7 +169,7 @@ const Header: React.FC<HeaderProps> = ({
             {navItems.map((itemKey) => {
               // @ts-ignore
               const label = t.nav[itemKey] || itemKey;
-              const isActive = activeTab === itemKey || (activeTab === NavItem.HOME && itemKey === NavItem.VIDEO);
+              const isActive = activeTab === itemKey;
 
               if (itemKey === NavItem.TOOL) {
                 return (
@@ -309,4 +309,3 @@ const Header: React.FC<HeaderProps> = ({
 };
 
 export default Header;
-
