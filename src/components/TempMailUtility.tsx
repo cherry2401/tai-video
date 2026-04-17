@@ -10,8 +10,8 @@ interface TempMailAccount {
 
 interface TempMailMessage {
   id?: string;
-  from?: string;
-  to?: string;
+  from?: unknown;
+  to?: unknown;
   subject?: string;
   intro?: string;
   text?: string;
@@ -26,8 +26,33 @@ interface TempMailApiResponse {
   token?: string;
   id?: string;
   answer?: TempMailMessage[];
+  messages?: TempMailMessage[];
   message?: string;
 }
+
+const normalizeAddressField = (value: unknown): string => {
+  if (!value) return 'N/A';
+  if (typeof value === 'string') return value;
+
+  if (Array.isArray(value)) {
+    const parts = value
+      .map((item) => normalizeAddressField(item))
+      .filter((item) => item && item !== 'N/A');
+    return parts.length ? parts.join(', ') : 'N/A';
+  }
+
+  if (typeof value === 'object') {
+    const addressObj = value as { address?: unknown; name?: unknown };
+    const address = typeof addressObj.address === 'string' ? addressObj.address.trim() : '';
+    const name = typeof addressObj.name === 'string' ? addressObj.name.trim() : '';
+
+    if (name && address) return `${name} <${address}>`;
+    if (address) return address;
+    if (name) return name;
+  }
+
+  return 'N/A';
+};
 
 const TempMailUtility: React.FC = () => {
   const [account, setAccount] = useState<TempMailAccount | null>(null);
@@ -46,10 +71,12 @@ const TempMailUtility: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'create' }),
       });
+
       const data = (await response.json()) as TempMailApiResponse;
       if (!response.ok || !data.email || !data.token || !data.password) {
         throw new Error(data.message || 'Không thể tạo email tạm.');
       }
+
       setAccount({
         email: data.email,
         token: data.token,
@@ -76,11 +103,30 @@ const TempMailUtility: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'inbox', token: account.token }),
       });
+
       const data = (await response.json()) as TempMailApiResponse;
       if (!response.ok) {
         throw new Error(data.message || 'Không thể đọc hộp thư.');
       }
-      setMessages(Array.isArray(data.answer) ? data.answer : []);
+
+      const inboxItems = Array.isArray(data.answer)
+        ? data.answer
+        : Array.isArray(data.messages)
+          ? data.messages
+          : [];
+
+      const normalizedMessages = inboxItems.map((mail) => ({
+        ...mail,
+        subject: typeof mail.subject === 'string' && mail.subject.trim() ? mail.subject : '(Không có tiêu đề)',
+        intro: typeof mail.intro === 'string' ? mail.intro : '',
+        text: typeof mail.text === 'string' ? mail.text : '',
+        createdAt: typeof mail.createdAt === 'string' ? mail.createdAt : '',
+        date: typeof mail.date === 'string' ? mail.date : '',
+        from: normalizeAddressField(mail.from),
+        to: normalizeAddressField(mail.to),
+      }));
+
+      setMessages(normalizedMessages);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi đọc hộp thư.');
     } finally {
@@ -222,7 +268,7 @@ const TempMailUtility: React.FC = () => {
                   <div key={mail.id || `${index}-${mail.subject || 'mail'}`} className="px-4 md:px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
                     <p className="font-semibold text-gray-900 dark:text-gray-100">{mail.subject || '(Không có tiêu đề)'}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                      Từ: {mail.from || 'N/A'} {mail.date || mail.createdAt ? `• ${mail.date || mail.createdAt}` : ''}
+                      Từ: {typeof mail.from === 'string' ? mail.from : 'N/A'} {mail.date || mail.createdAt ? `• ${mail.date || mail.createdAt}` : ''}
                     </p>
                     <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 break-words">{mail.intro || mail.text || 'Không có nội dung preview.'}</p>
                   </div>
