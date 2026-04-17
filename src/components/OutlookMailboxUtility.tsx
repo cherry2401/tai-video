@@ -22,8 +22,50 @@ interface OutlookMessage {
 }
 
 const urlRegex = /(https?:\/\/[^\s<>"')\]]+)/gi;
+const htmlTagRegex = /<\/?[a-z][\s\S]*>/i;
 
-const stripHtml = (value: string): string => value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+const decodeHtmlEntities = (value: string): string => {
+  if (typeof document === 'undefined') return value;
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = value;
+  return textarea.value;
+};
+
+const normalizeDisplayText = (value: string): string =>
+  value
+    .replace(/\r\n/g, '\n')
+    .replace(/\u00A0/g, ' ')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+const stripHtml = (value: string): string => {
+  const normalized = value
+    .replace(/<\s*br\s*\/?>/gi, '\n')
+    .replace(/<\/\s*(p|div|li|h1|h2|h3|h4|h5|h6)\s*>/gi, '\n')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ');
+
+  return normalizeDisplayText(decodeHtmlEntities(normalized.replace(/<[^>]*>/g, ' ')));
+};
+
+const sanitizeBodyValue = (value?: string): string => {
+  if (!value?.trim()) return '';
+  const raw = value.trim();
+  const decoded = decodeHtmlEntities(raw);
+
+  if (htmlTagRegex.test(decoded)) {
+    if (typeof DOMParser !== 'undefined') {
+      const doc = new DOMParser().parseFromString(decoded, 'text/html');
+      const text = doc.body?.textContent || '';
+      const parsed = normalizeDisplayText(text);
+      if (parsed) return parsed;
+    }
+    return stripHtml(decoded);
+  }
+
+  return normalizeDisplayText(decoded);
+};
 
 const normalizeMessage = (msg: Record<string, unknown>): OutlookMessage => {
   const fromObj = msg.from as { address?: string; name?: string } | undefined;
@@ -34,19 +76,15 @@ const normalizeMessage = (msg: Record<string, unknown>): OutlookMessage => {
         ? `${fromObj.name} <${fromObj.address}>`
         : fromObj?.address || fromObj?.name || undefined;
 
-  const html = typeof msg.html === 'string' ? msg.html : undefined;
-  const text = typeof msg.text === 'string' ? msg.text : undefined;
-  const body = typeof msg.body === 'string' ? msg.body : typeof msg.message === 'string' ? msg.message : undefined;
-
   return {
     id: typeof msg.id === 'string' ? msg.id : undefined,
     subject: typeof msg.subject === 'string' ? msg.subject : '(Không có tiêu đề)',
     from,
     date: (msg.date as string) || (msg.createdAt as string) || (msg.time as string) || undefined,
     intro: typeof msg.intro === 'string' ? msg.intro : undefined,
-    text,
-    html,
-    body,
+    text: typeof msg.text === 'string' ? msg.text : undefined,
+    html: typeof msg.html === 'string' ? msg.html : undefined,
+    body: typeof msg.body === 'string' ? msg.body : undefined,
     message: typeof msg.message === 'string' ? msg.message : undefined,
   };
 };
@@ -63,6 +101,11 @@ const extractMessages = (payload: unknown): Record<string, unknown>[] => {
     }
   }
   return [];
+};
+
+const shortenUrlText = (url: string): string => {
+  if (url.length <= 100) return url;
+  return `${url.slice(0, 56)}…${url.slice(-28)}`;
 };
 
 const renderTextWithLinks = (text: string) => {
@@ -90,9 +133,10 @@ const renderTextWithLinks = (text: string) => {
               href={cleanUrl}
               target="_blank"
               rel="noopener noreferrer"
+              title={cleanUrl}
               className="text-blue-600 dark:text-blue-400 underline break-all"
             >
-              {cleanUrl}
+              {shortenUrlText(cleanUrl)}
             </a>
           );
 
@@ -196,11 +240,11 @@ const OutlookMailboxUtility: React.FC = () => {
   };
 
   const getMessageBody = (message: OutlookMessage): string => {
-    if (message.text?.trim()) return message.text.trim();
-    if (message.html?.trim()) return stripHtml(message.html);
-    if (message.body?.trim()) return message.body.trim();
-    if (message.message?.trim()) return message.message.trim();
-    if (message.intro?.trim()) return message.intro.trim();
+    const candidates = [message.html, message.body, message.message, message.text, message.intro];
+    for (const candidate of candidates) {
+      const clean = sanitizeBodyValue(candidate);
+      if (clean) return clean;
+    }
     return 'Không có nội dung thư.';
   };
 
@@ -208,9 +252,7 @@ const OutlookMailboxUtility: React.FC = () => {
     <div className="w-full max-w-4xl mx-auto animate-fadeIn pb-20">
       <div className="text-center mb-7 space-y-2">
         <h1 className="text-3xl md:text-4xl font-black tracking-wide text-gray-900 dark:text-gray-100">Outlook / Hotmail</h1>
-        <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">
-          Đọc inbox bằng token theo chuẩn DongVanFB API.
-        </p>
+        <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">Đọc inbox bằng token theo chuẩn DongVanFB API.</p>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 md:p-6">
@@ -238,10 +280,7 @@ const OutlookMailboxUtility: React.FC = () => {
           className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-sm resize-y"
         />
 
-        <div className="mt-3 flex items-center justify-between gap-2">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Mỗi lần đọc dùng dòng đầu tiên. Không lưu token trên trình duyệt.
-          </p>
+        <div className="mt-3 flex items-center justify-end gap-2">
           <button
             onClick={readMailbox}
             disabled={loading}
