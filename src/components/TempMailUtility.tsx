@@ -30,6 +30,19 @@ interface TempMailApiResponse {
   message?: string;
 }
 
+interface TempMailMessageDetailResponse {
+  id?: string;
+  text?: string;
+  html?: string | string[];
+  intro?: string;
+  subject?: string;
+  from?: unknown;
+  to?: unknown;
+  date?: string;
+  createdAt?: string;
+  message?: string;
+}
+
 const normalizeAddressField = (value: unknown): string => {
   if (!value) return 'N/A';
   if (typeof value === 'string') return value;
@@ -62,6 +75,7 @@ const TempMailUtility: React.FC = () => {
   const [selectedMail, setSelectedMail] = useState<TempMailMessage | null>(null);
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [loadingInbox, setLoadingInbox] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
 
@@ -156,6 +170,51 @@ const TempMailUtility: React.FC = () => {
     setSelectedMail(null);
     setError(null);
     setCopiedEmail(false);
+  };
+
+  const openMessage = async (mail: TempMailMessage) => {
+    setSelectedMail(mail);
+    if (!account?.token || !mail.id) return;
+
+    setLoadingMessage(true);
+    try {
+      const response = await fetch('/api/tempmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'message',
+          token: account.token,
+          messageId: mail.id,
+        }),
+      });
+
+      const data = (await response.json()) as TempMailMessageDetailResponse;
+      if (!response.ok) {
+        throw new Error(data.message || 'Không thể đọc nội dung thư chi tiết.');
+      }
+
+      const normalizedHtml = Array.isArray(data.html) ? data.html.join('\n') : data.html;
+      const detailedMessage: TempMailMessage = {
+        ...mail,
+        subject: typeof data.subject === 'string' && data.subject.trim() ? data.subject : mail.subject,
+        intro: typeof data.intro === 'string' ? data.intro : mail.intro,
+        text: typeof data.text === 'string' ? data.text : mail.text,
+        html: typeof normalizedHtml === 'string' ? normalizedHtml : mail.html,
+        date: typeof data.date === 'string' ? data.date : mail.date,
+        createdAt: typeof data.createdAt === 'string' ? data.createdAt : mail.createdAt,
+        from: data.from ? normalizeAddressField(data.from) : mail.from,
+        to: data.to ? normalizeAddressField(data.to) : mail.to,
+      };
+
+      setSelectedMail(detailedMessage);
+      setMessages((prev) =>
+        prev.map((item) => (item.id && mail.id && item.id === mail.id ? detailedMessage : item))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Lỗi đọc nội dung thư.');
+    } finally {
+      setLoadingMessage(false);
+    }
   };
 
   const getMailBody = (mail: TempMailMessage): string => {
@@ -285,7 +344,7 @@ const TempMailUtility: React.FC = () => {
                   <button
                     type="button"
                     key={mail.id || `${index}-${mail.subject || 'mail'}`}
-                    onClick={() => setSelectedMail(mail)}
+                    onClick={() => openMessage(mail)}
                     className={`w-full text-left px-4 md:px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors ${
                       selectedMail?.id && mail.id && selectedMail.id === mail.id
                         ? 'bg-blue-50/70 dark:bg-blue-900/20'
@@ -322,9 +381,16 @@ const TempMailUtility: React.FC = () => {
               )}
             </div>
             <div className="px-4 md:px-6 py-4">
-              <p className="text-sm leading-6 whitespace-pre-wrap break-words text-gray-800 dark:text-gray-200">
-                {getMailBody(selectedMail)}
-              </p>
+              {loadingMessage ? (
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                  <Loader2 size={16} className="animate-spin" />
+                  Đang tải nội dung thư...
+                </div>
+              ) : (
+                <p className="text-sm leading-6 whitespace-pre-wrap break-words text-gray-800 dark:text-gray-200">
+                  {getMailBody(selectedMail)}
+                </p>
+              )}
             </div>
           </div>
         )}
