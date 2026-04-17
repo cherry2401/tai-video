@@ -48,9 +48,7 @@ const normalizeAddressField = (value: unknown): string => {
   if (typeof value === 'string') return value;
 
   if (Array.isArray(value)) {
-    const parts = value
-      .map((item) => normalizeAddressField(item))
-      .filter((item) => item && item !== 'N/A');
+    const parts = value.map((item) => normalizeAddressField(item)).filter((item) => item && item !== 'N/A');
     return parts.length ? parts.join(', ') : 'N/A';
   }
 
@@ -69,15 +67,68 @@ const normalizeAddressField = (value: unknown): string => {
 
 const stripHtml = (value: string): string => value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
+const urlRegex = /(https?:\/\/[^\s<>"')\]]+)/gi;
+
+const renderTextWithLinks = (text: string) => {
+  const lines = text.split('\n');
+  return (
+    <>
+      {lines.map((line, lineIdx) => {
+        const matches = [...line.matchAll(urlRegex)];
+        const chunks: React.ReactNode[] = [];
+        let lastIndex = 0;
+
+        matches.forEach((match, idx) => {
+          const rawUrl = match[0];
+          const start = match.index ?? 0;
+          const end = start + rawUrl.length;
+
+          if (start > lastIndex) chunks.push(line.slice(lastIndex, start));
+
+          const cleanUrl = rawUrl.replace(/[.,;:!?]+$/g, '');
+          const trailing = rawUrl.slice(cleanUrl.length);
+
+          chunks.push(
+            <a
+              key={`url-${lineIdx}-${idx}-${cleanUrl}`}
+              href={cleanUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 underline break-all"
+              onClick={(event) => event.stopPropagation()}
+            >
+              {cleanUrl}
+            </a>
+          );
+
+          if (trailing) chunks.push(trailing);
+          lastIndex = end;
+        });
+
+        if (lastIndex < line.length) chunks.push(line.slice(lastIndex));
+
+        return (
+          <React.Fragment key={`line-${lineIdx}`}>
+            {chunks}
+            {lineIdx < lines.length - 1 && <br />}
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
+};
+
 const TempMailUtility: React.FC = () => {
   const [account, setAccount] = useState<TempMailAccount | null>(null);
   const [messages, setMessages] = useState<TempMailMessage[]>([]);
-  const [selectedMail, setSelectedMail] = useState<TempMailMessage | null>(null);
+  const [expandedMailKey, setExpandedMailKey] = useState<string | null>(null);
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [loadingInbox, setLoadingInbox] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState(false);
+  const [loadingMessageKey, setLoadingMessageKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
+
+  const getMailKey = (mail: TempMailMessage, index: number): string => mail.id || `${index}-${mail.subject || 'mail'}`;
 
   const createMailbox = async () => {
     setLoadingCreate(true);
@@ -101,7 +152,7 @@ const TempMailUtility: React.FC = () => {
         id: data.id,
       });
       setMessages([]);
-      setSelectedMail(null);
+      setExpandedMailKey(null);
     } catch (err) {
       setAccount(null);
       setMessages([]);
@@ -127,11 +178,7 @@ const TempMailUtility: React.FC = () => {
         throw new Error(data.message || 'Không thể đọc hộp thư.');
       }
 
-      const inboxItems = Array.isArray(data.answer)
-        ? data.answer
-        : Array.isArray(data.messages)
-          ? data.messages
-          : [];
+      const inboxItems = Array.isArray(data.answer) ? data.answer : Array.isArray(data.messages) ? data.messages : [];
 
       const normalizedMessages = inboxItems.map((mail) => ({
         ...mail,
@@ -145,10 +192,9 @@ const TempMailUtility: React.FC = () => {
       }));
 
       setMessages(normalizedMessages);
-      setSelectedMail((prev) => {
+      setExpandedMailKey((prev) => {
         if (!prev) return null;
-        const matched = normalizedMessages.find((mail) => mail.id && prev.id && mail.id === prev.id);
-        return matched || null;
+        return normalizedMessages.some((mail, index) => getMailKey(mail, index) === prev) ? prev : null;
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi đọc hộp thư.');
@@ -167,16 +213,26 @@ const TempMailUtility: React.FC = () => {
   const clearMailbox = () => {
     setAccount(null);
     setMessages([]);
-    setSelectedMail(null);
+    setExpandedMailKey(null);
+    setLoadingMessageKey(null);
     setError(null);
     setCopiedEmail(false);
   };
 
-  const openMessage = async (mail: TempMailMessage) => {
-    setSelectedMail(mail);
+  const openMessage = async (mail: TempMailMessage, mailKey: string) => {
+    if (expandedMailKey === mailKey) {
+      setExpandedMailKey(null);
+      return;
+    }
+
+    setExpandedMailKey(mailKey);
     if (!account?.token || !mail.id) return;
 
-    setLoadingMessage(true);
+    const hasDetailedBody = Boolean((mail.text && mail.text.trim()) || (mail.html && mail.html.trim()));
+    if (hasDetailedBody) return;
+
+    setLoadingMessageKey(mailKey);
+    setError(null);
     try {
       const response = await fetch('/api/tempmail', {
         method: 'POST',
@@ -206,14 +262,11 @@ const TempMailUtility: React.FC = () => {
         to: data.to ? normalizeAddressField(data.to) : mail.to,
       };
 
-      setSelectedMail(detailedMessage);
-      setMessages((prev) =>
-        prev.map((item) => (item.id && mail.id && item.id === mail.id ? detailedMessage : item))
-      );
+      setMessages((prev) => prev.map((item, index) => (getMailKey(item, index) === mailKey ? detailedMessage : item)));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi đọc nội dung thư.');
     } finally {
-      setLoadingMessage(false);
+      setLoadingMessageKey(null);
     }
   };
 
@@ -309,7 +362,7 @@ const TempMailUtility: React.FC = () => {
             </button>
           </div>
 
-          <div className="min-h-[300px] max-h-[500px] overflow-y-auto">
+          <div className="min-h-[300px] max-h-[700px] overflow-y-auto">
             {!account && (
               <div className="h-full min-h-[300px] flex items-center justify-center text-center px-6">
                 <div>
@@ -340,60 +393,45 @@ const TempMailUtility: React.FC = () => {
 
             {account && !loadingInbox && messages.length > 0 && (
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                {messages.map((mail, index) => (
-                  <button
-                    type="button"
-                    key={mail.id || `${index}-${mail.subject || 'mail'}`}
-                    onClick={() => openMessage(mail)}
-                    className={`w-full text-left px-4 md:px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors ${
-                      selectedMail?.id && mail.id && selectedMail.id === mail.id
-                        ? 'bg-blue-50/70 dark:bg-blue-900/20'
-                        : ''
-                    }`}
-                  >
-                    <p className="font-semibold text-gray-900 dark:text-gray-100">{mail.subject || '(Không có tiêu đề)'}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                      Từ: {typeof mail.from === 'string' ? mail.from : 'N/A'} {mail.date || mail.createdAt ? `• ${mail.date || mail.createdAt}` : ''}
-                    </p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 break-words">{mail.intro || mail.text || 'Không có nội dung preview.'}</p>
-                  </button>
-                ))}
+                {messages.map((mail, index) => {
+                  const mailKey = getMailKey(mail, index);
+                  const isExpanded = expandedMailKey === mailKey;
+                  return (
+                    <div key={mailKey} className={isExpanded ? 'bg-blue-50/70 dark:bg-blue-900/20' : ''}>
+                      <button
+                        type="button"
+                        onClick={() => openMessage(mail, mailKey)}
+                        className="w-full text-left px-4 md:px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors"
+                      >
+                        <p className="font-semibold text-gray-900 dark:text-gray-100">{mail.subject || '(Không có tiêu đề)'}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                          Từ: {typeof mail.from === 'string' ? mail.from : 'N/A'}{' '}
+                          {mail.date || mail.createdAt ? `• ${mail.date || mail.createdAt}` : ''}
+                        </p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 break-words">{mail.intro || 'Không có nội dung preview.'}</p>
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-4 md:px-6 pb-4 pt-0 border-t border-gray-200/80 dark:border-gray-700/80">
+                          {loadingMessageKey === mailKey ? (
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 py-3">
+                              <Loader2 size={16} className="animate-spin" />
+                              Đang tải nội dung thư...
+                            </div>
+                          ) : (
+                            <p className="text-sm leading-6 whitespace-pre-wrap break-words text-gray-800 dark:text-gray-200 py-3">
+                              {renderTextWithLinks(getMailBody(mail))}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
-
-        {account && selectedMail && (
-          <div className="mt-4 border border-gray-200 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-900/20">
-            <div className="px-4 md:px-6 py-3.5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-                  {selectedMail.subject || '(Không có tiêu đề)'}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 truncate mt-1">
-                  Từ: {typeof selectedMail.from === 'string' ? selectedMail.from : 'N/A'}
-                </p>
-              </div>
-              {(selectedMail.date || selectedMail.createdAt) && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 shrink-0">
-                  {selectedMail.date || selectedMail.createdAt}
-                </p>
-              )}
-            </div>
-            <div className="px-4 md:px-6 py-4">
-              {loadingMessage ? (
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                  <Loader2 size={16} className="animate-spin" />
-                  Đang tải nội dung thư...
-                </div>
-              ) : (
-                <p className="text-sm leading-6 whitespace-pre-wrap break-words text-gray-800 dark:text-gray-200">
-                  {getMailBody(selectedMail)}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {error && (
