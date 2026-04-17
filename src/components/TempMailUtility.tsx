@@ -134,6 +134,7 @@ const TempMailUtility: React.FC = () => {
   const [loadingInbox, setLoadingInbox] = useState(false);
   const [loadingMessageKey, setLoadingMessageKey] = useState<string | null>(null);
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
+  const [autoRefreshCountdown, setAutoRefreshCountdown] = useState(AUTO_REFRESH_SECONDS);
 
   const [error, setError] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -189,6 +190,7 @@ const TempMailUtility: React.FC = () => {
 
   const refreshInbox = async () => {
     if (!account?.token) return;
+    setAutoRefreshCountdown(AUTO_REFRESH_SECONDS);
     await refreshInboxWithToken(account.token);
   };
 
@@ -231,6 +233,7 @@ const TempMailUtility: React.FC = () => {
       setMailboxInput(email);
       setMessages([]);
       setExpandedMailKey(null);
+      setAutoRefreshCountdown(AUTO_REFRESH_SECONDS);
       await refreshInboxWithToken(data.token);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi khôi phục mailbox.');
@@ -263,6 +266,7 @@ const TempMailUtility: React.FC = () => {
       setMailboxInput(data.email);
       setMessages([]);
       setExpandedMailKey(null);
+      setAutoRefreshCountdown(AUTO_REFRESH_SECONDS);
     } catch (err) {
       setAccount(null);
       setMessages([]);
@@ -288,6 +292,7 @@ const TempMailUtility: React.FC = () => {
     setLoadingMessageKey(null);
     setError(null);
     setCopiedEmail(false);
+    setAutoRefreshCountdown(AUTO_REFRESH_SECONDS);
   };
 
   const openMessage = async (mail: TempMailMessage, mailKey: string) => {
@@ -349,12 +354,25 @@ const TempMailUtility: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!autoRefreshEnabled || !account?.token) return;
+    if (!autoRefreshEnabled || !account?.token) {
+      setAutoRefreshCountdown(AUTO_REFRESH_SECONDS);
+      return;
+    }
+
     const timer = setInterval(() => {
-      void refreshInboxWithToken(account.token, true);
-    }, AUTO_REFRESH_SECONDS * 1000);
+      setAutoRefreshCountdown((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+
     return () => clearInterval(timer);
   }, [account?.token, autoRefreshEnabled]);
+
+  useEffect(() => {
+    if (!autoRefreshEnabled || !account?.token) return;
+    if (autoRefreshCountdown > 0) return;
+
+    setAutoRefreshCountdown(AUTO_REFRESH_SECONDS);
+    void refreshInboxWithToken(account.token, true);
+  }, [account?.token, autoRefreshCountdown, autoRefreshEnabled]);
 
   return (
     <div className="w-full max-w-4xl mx-auto animate-fadeIn pb-20">
@@ -454,13 +472,19 @@ const TempMailUtility: React.FC = () => {
               Thư đến
             </div>
             <button
-              onClick={() => setAutoRefreshEnabled((prev) => !prev)}
+              onClick={() =>
+                setAutoRefreshEnabled((prev) => {
+                  const next = !prev;
+                  if (next) setAutoRefreshCountdown(AUTO_REFRESH_SECONDS);
+                  return next;
+                })
+              }
               disabled={!account?.token}
               className="text-sm px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-60 flex items-center gap-2"
               title={`Tự động làm mới mỗi ${AUTO_REFRESH_SECONDS}s`}
             >
               <RefreshCw size={14} className={autoRefreshEnabled && account?.token ? 'animate-spin' : ''} />
-              {autoRefreshEnabled ? `Làm mới tự động (${AUTO_REFRESH_SECONDS}s)` : 'Bật làm mới tự động'}
+              {autoRefreshEnabled ? `Làm mới tự động (${autoRefreshCountdown}s)` : 'Bật làm mới tự động'}
             </button>
           </div>
 
