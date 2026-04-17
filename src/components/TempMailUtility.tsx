@@ -54,9 +54,12 @@ const normalizeAddressField = (value: unknown): string => {
   return 'N/A';
 };
 
+const stripHtml = (value: string): string => value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
 const TempMailUtility: React.FC = () => {
   const [account, setAccount] = useState<TempMailAccount | null>(null);
   const [messages, setMessages] = useState<TempMailMessage[]>([]);
+  const [selectedMail, setSelectedMail] = useState<TempMailMessage | null>(null);
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [loadingInbox, setLoadingInbox] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +87,7 @@ const TempMailUtility: React.FC = () => {
         id: data.id,
       });
       setMessages([]);
+      setSelectedMail(null);
     } catch (err) {
       setAccount(null);
       setMessages([]);
@@ -127,6 +131,11 @@ const TempMailUtility: React.FC = () => {
       }));
 
       setMessages(normalizedMessages);
+      setSelectedMail((prev) => {
+        if (!prev) return null;
+        const matched = normalizedMessages.find((mail) => mail.id && prev.id && mail.id === prev.id);
+        return matched || null;
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi đọc hộp thư.');
     } finally {
@@ -144,8 +153,16 @@ const TempMailUtility: React.FC = () => {
   const clearMailbox = () => {
     setAccount(null);
     setMessages([]);
+    setSelectedMail(null);
     setError(null);
     setCopiedEmail(false);
+  };
+
+  const getMailBody = (mail: TempMailMessage): string => {
+    if (typeof mail.text === 'string' && mail.text.trim()) return mail.text.trim();
+    if (typeof mail.html === 'string' && mail.html.trim()) return stripHtml(mail.html);
+    if (typeof mail.intro === 'string' && mail.intro.trim()) return mail.intro.trim();
+    return 'Không có nội dung thư.';
   };
 
   return (
@@ -265,18 +282,52 @@ const TempMailUtility: React.FC = () => {
             {account && !loadingInbox && messages.length > 0 && (
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
                 {messages.map((mail, index) => (
-                  <div key={mail.id || `${index}-${mail.subject || 'mail'}`} className="px-4 md:px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
+                  <button
+                    type="button"
+                    key={mail.id || `${index}-${mail.subject || 'mail'}`}
+                    onClick={() => setSelectedMail(mail)}
+                    className={`w-full text-left px-4 md:px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors ${
+                      selectedMail?.id && mail.id && selectedMail.id === mail.id
+                        ? 'bg-blue-50/70 dark:bg-blue-900/20'
+                        : ''
+                    }`}
+                  >
                     <p className="font-semibold text-gray-900 dark:text-gray-100">{mail.subject || '(Không có tiêu đề)'}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                       Từ: {typeof mail.from === 'string' ? mail.from : 'N/A'} {mail.date || mail.createdAt ? `• ${mail.date || mail.createdAt}` : ''}
                     </p>
                     <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 break-words">{mail.intro || mail.text || 'Không có nội dung preview.'}</p>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
           </div>
         </div>
+
+        {account && selectedMail && (
+          <div className="mt-4 border border-gray-200 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-900/20">
+            <div className="px-4 md:px-6 py-3.5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                  {selectedMail.subject || '(Không có tiêu đề)'}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 truncate mt-1">
+                  Từ: {typeof selectedMail.from === 'string' ? selectedMail.from : 'N/A'}
+                </p>
+              </div>
+              {(selectedMail.date || selectedMail.createdAt) && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 shrink-0">
+                  {selectedMail.date || selectedMail.createdAt}
+                </p>
+              )}
+            </div>
+            <div className="px-4 md:px-6 py-4">
+              <p className="text-sm leading-6 whitespace-pre-wrap break-words text-gray-800 dark:text-gray-200">
+                {getMailBody(selectedMail)}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {error && (
