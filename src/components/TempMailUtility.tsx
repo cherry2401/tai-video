@@ -113,28 +113,34 @@ const TempMailUtility: React.FC = () => {
 
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 md:p-6">
         <div className="max-w-xl mx-auto">
-          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 px-4 py-2.5 flex items-center justify-between gap-2.5">
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 px-3.5 py-2.5 flex items-center justify-between gap-2">
             <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Email tam</p>
-              <p className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
-                {account?.email || 'Chua co email. Bam Tao de bat dau.'}
+              <p
+                className={`truncate ${
+                  account?.email
+                    ? 'text-[15px] md:text-base font-normal text-gray-700 dark:text-gray-300'
+                    : 'text-[14px] md:text-[15px] font-normal text-gray-500 dark:text-gray-400'
+                }`}
+              >
+                {account?.email || 'Bam "Tao" de tao email tam va bat dau nhan thu.'}
               </p>
             </div>
             <button
               onClick={copyEmail}
               disabled={!account?.email}
-              className="shrink-0 px-2.5 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 flex items-center gap-1.5"
+              className="shrink-0 px-2 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 text-sm font-normal text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 flex items-center gap-1.5"
             >
               <Copy size={13} />
               {copiedEmail ? 'copied' : 'copy'}
             </button>
           </div>
 
-          <div className="mt-3.5 flex flex-wrap justify-center gap-2">
+          <div className="mt-3.5 flex items-center justify-center gap-1.5 flex-nowrap">
             <button
               onClick={createMailbox}
               disabled={loadingCreate}
-              className="px-3.5 py-1.5 rounded-full bg-gray-900 hover:bg-black text-white text-sm font-semibold flex items-center gap-1.5 disabled:opacity-60"
+              className="px-2.5 sm:px-3.5 py-1.5 rounded-full bg-gray-900 hover:bg-black text-white text-xs sm:text-sm font-semibold flex items-center gap-1 disabled:opacity-60 whitespace-nowrap"
             >
               {loadingCreate ? <Loader2 className="animate-spin" size={14} /> : <MailPlus size={14} />}
               Tao
@@ -142,7 +148,7 @@ const TempMailUtility: React.FC = () => {
             <button
               onClick={createMailbox}
               disabled={loadingCreate}
-              className="px-3.5 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-1.5 disabled:opacity-60"
+              className="px-2.5 sm:px-3.5 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-1 disabled:opacity-60 whitespace-nowrap"
             >
               <Shuffle size={14} />
               Random
@@ -150,7 +156,7 @@ const TempMailUtility: React.FC = () => {
             <button
               onClick={refreshInbox}
               disabled={loadingInbox || !account?.token}
-              className="px-3.5 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold flex items-center gap-1.5 disabled:opacity-60"
+              className="px-2.5 sm:px-3.5 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold flex items-center gap-1 disabled:opacity-60 whitespace-nowrap"
             >
               {loadingInbox ? <Loader2 className="animate-spin" size={14} /> : <RefreshCw size={14} />}
               Refresh
@@ -158,7 +164,7 @@ const TempMailUtility: React.FC = () => {
             <button
               onClick={clearMailbox}
               disabled={!account}
-              className="px-3.5 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-1.5 disabled:opacity-60"
+              className="px-2.5 sm:px-3.5 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-1 disabled:opacity-60 whitespace-nowrap"
             >
               <Trash2 size={14} />
               Xoa
