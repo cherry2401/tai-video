@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_N8N_WEBHOOK_URL: string
   readonly VITE_SHOPEE_SITE_ID: string
   readonly VITE_SHOPEE_PARTNER_ID: string
+  readonly VITE_API_BASE_URL?: string
 }
 
 interface ImportMeta {

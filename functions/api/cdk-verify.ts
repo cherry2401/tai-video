@@ -75,7 +75,16 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
     });
 
     const payload = (await upstream.json().catch(() => null)) as
-      | { code?: string; used?: boolean; app_name?: string; app_product_name?: string }
+      | {
+          code?: string;
+          used?: boolean;
+          user?: string;
+          email?: string;
+          message?: string;
+          error?: string;
+          app_name?: string;
+          app_product_name?: string;
+        }
       | null;
 
     if (!upstream.ok || !payload) {
@@ -86,11 +95,15 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
       return json({ message: 'CDK not found.' }, 404);
     }
 
+    const usedBy = payload.user?.trim() || payload.email?.trim() || null;
+
     return json({
       cdk: payload.code,
       used: Boolean(payload.used),
+      usedBy,
       appName: payload.app_name || 'ChatGPT',
       packageName: payload.app_product_name || 'Unknown package',
+      message: payload.message || payload.error || null,
       valid: true,
     });
   } catch {

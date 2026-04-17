@@ -6,6 +6,8 @@ type CdkStage = 'verify' | 'token' | 'activate' | 'success';
 interface VerifyResponse {
   cdk: string;
   used: boolean;
+  usedBy?: string | null;
+  message?: string | null;
   appName: string;
   packageName: string;
   valid: boolean;
@@ -43,22 +45,70 @@ const parseDurationFromPackage = (packageName: string): string => {
   return '1m';
 };
 
-const fetchJson = async <T,>(url: string, body: Record<string, string>): Promise<T> => {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+const getApiCandidates = (path: string): string[] => {
+  const base = (import.meta.env.VITE_API_BASE_URL || '').trim().replace(/\/+$/, '');
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const candidates: string[] = [];
 
-  const payload = (await response.json().catch(() => null)) as (T & { message?: string }) | null;
-
-  if (!response.ok || !payload) {
-    throw new Error(payload?.message || 'Yêu cầu thất bại. Vui lòng thử lại.');
+  if (base) {
+    candidates.push(`${base}${normalizedPath}`);
+    if (normalizedPath.startsWith('/api/')) {
+      candidates.push(`${base}/functions${normalizedPath}`);
+    }
   }
 
-  return payload;
+  candidates.push(normalizedPath);
+  if (normalizedPath.startsWith('/api/')) {
+    candidates.push(`/functions${normalizedPath}`);
+  }
+
+  return [...new Set(candidates)];
+};
+
+const fetchJson = async <T,>(url: string, body: Record<string, string>): Promise<T> => {
+  const candidates = getApiCandidates(url);
+  let lastError = 'Yêu cầu thất bại. Vui lòng thử lại.';
+
+  for (let i = 0; i < candidates.length; i += 1) {
+    const target = candidates[i];
+    const response = await fetch(target, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    const rawText = await response.text();
+    let payload: (T & { message?: string; error?: string }) | null = null;
+
+    if (rawText) {
+      try {
+        payload = JSON.parse(rawText) as T & { message?: string; error?: string };
+      } catch {
+        payload = null;
+      }
+    }
+
+    if (response.ok && payload) {
+      return payload;
+    }
+
+    const detail = payload?.message || payload?.error || rawText?.trim();
+    lastError = detail || `Yêu cầu thất bại (HTTP ${response.status}). Vui lòng thử lại.`;
+
+    const isLastCandidate = i === candidates.length - 1;
+    if (response.status !== 404 || isLastCandidate) {
+      break;
+    }
+  }
+
+  const isLocalhost = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  if (isLocalhost && lastError.includes('HTTP 404')) {
+    throw new Error('Local dev chưa có route backend CDK. Hãy chạy backend functions hoặc cấu hình VITE_API_BASE_URL.');
+  }
+
+  throw new Error(lastError);
 };
 
 const normalizePlanLabel = (value: string): string => {
@@ -144,9 +194,10 @@ const ChatGptCdkUtility: React.FC = () => {
     setStatusMessage(null);
 
     try {
-      const payload = await fetchJson<VerifyResponse>('/functions/api/cdk-verify', { cdk: normalized });
+      const payload = await fetchJson<VerifyResponse>('/api/cdk-verify', { cdk: normalized });
       if (payload.used) {
-        setErrorMessage('CDK này đã được sử dụng. Vui lòng thử mã khác.');
+        const usedBy = payload.usedBy?.trim();
+        setErrorMessage(usedBy ? `CDK này đã được sử dụng bởi: ${usedBy}` : 'CDK này đã được sử dụng. Vui lòng thử mã khác.');
         return;
       }
 
@@ -181,7 +232,7 @@ const ChatGptCdkUtility: React.FC = () => {
         parsedEmail = parseEmailFromTokenPayload(raw);
       }
 
-      const payload = await fetchJson<ParseResponse>('/functions/api/cdk-parse', {
+      const payload = await fetchJson<ParseResponse>('/api/cdk-parse', {
         cdk: verifiedCdk || normalizeCdkInput(cdkKey),
         sessionJson: raw,
       });
@@ -218,7 +269,7 @@ const ChatGptCdkUtility: React.FC = () => {
     setStatusMessage('Yêu cầu kích hoạt đã được chấp nhận. Đang chờ kết quả cuối cùng...');
 
     try {
-      const payload = await fetchJson<ActivateResponse>('/functions/api/cdk-activate', {
+      const payload = await fetchJson<ActivateResponse>('/api/cdk-activate', {
         cdk: verifiedCdk || normalizeCdkInput(cdkKey),
         sessionJson: raw,
       });
@@ -480,6 +531,13 @@ const ChatGptCdkUtility: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {errorMessage && (
+                <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-red-600 dark:text-red-400 flex items-center gap-2 text-xs md:text-sm">
+                  <AlertCircle size={16} className="shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -519,13 +577,6 @@ const ChatGptCdkUtility: React.FC = () => {
           </div>
         )}
       </div>
-
-      {errorMessage && (
-        <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-red-600 dark:text-red-400 flex items-center justify-center gap-2">
-          <AlertCircle size={16} />
-          <span>{errorMessage}</span>
-        </div>
-      )}
     </div>
   );
 };
