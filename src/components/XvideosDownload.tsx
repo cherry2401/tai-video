@@ -12,7 +12,15 @@ interface XVideoSearchResult {
 
 interface XVideoDownloadData {
     title: string;
-    thumbnail: string;
+    thumbnail:
+        | string
+        | {
+              default?: string;
+              widescreen?: string;
+              slide?: string;
+              slideBig?: string;
+              ldJson?: string;
+          };
     videoUrls: {
         low: string;
         high: string;
@@ -35,6 +43,12 @@ const XvideosDownload: React.FC = () => {
 
     const [searchResults, setSearchResults] = useState<XVideoSearchResult[]>([]);
     const [downloadData, setDownloadData] = useState<XVideoDownloadData | null>(null);
+
+    const getThumbnailUrl = (thumbnail: XVideoDownloadData['thumbnail']): string => {
+        if (!thumbnail) return '';
+        if (typeof thumbnail === 'string') return thumbnail;
+        return thumbnail.default || thumbnail.widescreen || thumbnail.slideBig || thumbnail.slide || thumbnail.ldJson || '';
+    };
 
     // ACTION: Search
     const handleSearch = async () => {
@@ -87,7 +101,11 @@ const XvideosDownload: React.FC = () => {
             const res = (await response.json()) as XVideoResponse;
 
             if (res.success && res.data) {
-                setDownloadData(res.data);
+                const normalized: XVideoDownloadData = {
+                    ...res.data,
+                    thumbnail: getThumbnailUrl(res.data.thumbnail),
+                };
+                setDownloadData(normalized);
             } else {
                 setError('Không thể lấy link tải. Video có thể đã bị xóa hoặc lỗi server.');
             }
