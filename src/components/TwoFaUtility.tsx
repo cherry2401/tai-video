@@ -11,7 +11,7 @@ const normalizeSecret = (value: string): string => {
 const base32ToBytes = (base32: string): Uint8Array => {
   const cleaned = base32.replace(/=+$/g, '');
   if (!cleaned || !/^[A-Z2-7]+$/.test(cleaned)) {
-    throw new Error('Secret khong hop le. Chi cho phep A-Z, 2-7.');
+    throw new Error('Secret không hợp lệ. Chỉ cho phép A-Z, 2-7.');
   }
 
   let bits = 0;
@@ -26,7 +26,7 @@ const base32ToBytes = (base32: string): Uint8Array => {
     if (charCode >= 50 && charCode <= 55) idx = charCode - 24;
 
     if (idx < 0 || idx > 31) {
-      throw new Error('Secret Base32 khong hop le.');
+      throw new Error('Secret Base32 không hợp lệ.');
     }
 
     value = (value << 5) | idx;
@@ -98,7 +98,7 @@ const TwoFaUtility: React.FC = () => {
       } catch (err) {
         if (cancelled) return;
         setOtp('');
-        setError(err instanceof Error ? err.message : 'Secret khong hop le.');
+        setError(err instanceof Error ? err.message : 'Secret không hợp lệ.');
       }
     };
 
@@ -123,12 +123,12 @@ const TwoFaUtility: React.FC = () => {
     <div className="w-full max-w-4xl mx-auto animate-fadeIn pb-20">
       <div className="text-center mb-7 space-y-2">
         <h1 className="text-3xl md:text-4xl font-black tracking-wide text-gray-900 dark:text-gray-100">2FA</h1>
-        <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">Nhap secret va lay ma OTP 6 so tu dong cap nhat moi 30 giay.</p>
+        <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">Nhập secret và lấy mã OTP 6 số tự động cập nhật mỗi 30 giây.</p>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 md:p-6 space-y-5">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Secret Key</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Khóa bí mật</label>
           <input
             type="text"
             value={secretInput}
@@ -141,7 +141,7 @@ const TwoFaUtility: React.FC = () => {
         <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">OTP Code</p>
+              <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Mã OTP</p>
               <p className="mt-1 font-mono text-3xl md:text-4xl tracking-[0.18em] text-gray-900 dark:text-gray-100">{otp || '------'}</p>
             </div>
             <button
@@ -150,7 +150,7 @@ const TwoFaUtility: React.FC = () => {
               className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 flex items-center gap-2"
             >
               <Copy size={14} />
-              {copied ? 'copied' : 'copy'}
+              {copied ? 'Đã copy' : 'Copy'}
             </button>
           </div>
 
