@@ -13,8 +13,8 @@ interface HeaderProps {
   setActiveTab: (tab: NavItem) => void;
   activeTool: string;
   setActiveTool: (tool: 'instagram' | 'zing' | 'soundcloud' | 'xvideos' | 'xnxx') => void;
-  activeUtility: 'tempmail' | 'twofa';
-  setActiveUtility: (utility: 'tempmail' | 'twofa') => void;
+  activeUtility: 'tempmail' | 'twofa' | 'outlook';
+  setActiveUtility: (utility: 'tempmail' | 'twofa' | 'outlook') => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -75,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({
     setIsMenuOpen(false);
   };
 
-  const handleUtilityClick = (utility: 'tempmail' | 'twofa') => {
+  const handleUtilityClick = (utility: 'tempmail' | 'twofa' | 'outlook') => {
     setActiveUtility(utility);
     setActiveTab(NavItem.VIDEO);
     setIsMenuOpen(false);
@@ -273,6 +273,14 @@ const Header: React.FC<HeaderProps> = ({
                           }`}
                         >
                           2FA
+                        </button>
+                        <button
+                          onClick={() => handleUtilityClick('outlook')}
+                          className={`block w-full text-left py-2.5 px-2 rounded text-[15px] ${
+                            activeUtility === 'outlook' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          Outlook Mail
                         </button>
                       </div>
                     )}
