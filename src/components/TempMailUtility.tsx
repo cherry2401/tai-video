@@ -113,9 +113,8 @@ const TempMailUtility: React.FC = () => {
 
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 md:p-6">
         <div className="max-w-xl mx-auto">
-          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 px-3.5 py-2.5 flex items-center justify-between gap-2">
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 px-3.5 py-2 flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Email tam</p>
               <p
                 className={`truncate ${
                   account?.email
