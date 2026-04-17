@@ -28,6 +28,8 @@ dist-ssr
 
 # Non-frontend files accidentally added
 Web Video Download API V3.json
+Xvideos Download API.json
+Xnxx Download API.json
 functions/api/_middleware.ts
 functions/cors.ts
 public/_redirects
