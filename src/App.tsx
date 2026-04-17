@@ -17,6 +17,7 @@ import ShopeeAffiliate from './components/ShopeeAffiliate';
 import InstagramDownload from './components/InstagramDownload';
 import ZingMp3Download from './components/ZingMp3Download';
 import XvideosDownload from './components/XvideosDownload';
+import XnxxDownload from './components/XnxxDownload';
 import SoundCloudDownload from './components/SoundCloudDownload';
 import { analyzeLinks } from './services/geminiService';
 import { enrichResultWithDownload } from './services/n8nService';
@@ -45,7 +46,7 @@ const App: React.FC = () => {
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Tool Sub-state
-  const [activeTool, setActiveTool] = useState<'instagram' | 'zing' | 'xvideos' | 'soundcloud'>('instagram');
+  const [activeTool, setActiveTool] = useState<'instagram' | 'zing' | 'xvideos' | 'xnxx' | 'soundcloud'>('instagram');
 
   // Translation Helper
   const t = translations[language];
@@ -204,6 +205,15 @@ const App: React.FC = () => {
               >
                 Xvideos
               </button>
+              <button
+                onClick={() => setActiveTool('xnxx')}
+                className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${activeTool === 'xnxx'
+                  ? 'bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-md transform scale-105'
+                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                  }`}
+              >
+                XNXX
+              </button>
             </div>
           </div>
 
@@ -212,6 +222,7 @@ const App: React.FC = () => {
           {activeTool === 'zing' && <ZingMp3Download />}
           {activeTool === 'soundcloud' && <SoundCloudDownload />}
           {activeTool === 'xvideos' && <XvideosDownload />}
+          {activeTool === 'xnxx' && <XnxxDownload />}
         </div>
       );
     }

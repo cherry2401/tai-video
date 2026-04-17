@@ -1,0 +1,183 @@
+{
+  "name": "Xnxx Download API",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "xnxx",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        -64
+      ],
+      "id": "b4e2cd36-a6f3-4c40-8dcf-395e4e89e001",
+      "name": "Webhook",
+      "webhookId": "e7f5272e-2b7b-40b8-9891-3e4b20117d68"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "search",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "f2d1f11a-dbd3-41eb-bb4c-1f3e7032c000"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Search"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f4de4ce2-96ba-43ff-9f8d-c7d0d760cb01",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "download",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Download"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        -64
+      ],
+      "id": "0ea8b80f-cb0f-4ae8-9f52-beb2ce7fb002",
+      "name": "Switch Action"
+    },
+    {
+      "parameters": {
+        "url": "https://api.satoru.click/api/xnxx",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.body.url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -16,
+        48
+      ],
+      "id": "8782de33-13e1-4bcb-9a78-24718ec1f003",
+      "name": "Download API"
+    },
+    {
+      "parameters": {
+        "url": "https://api.satoru.click/api/xnxx-search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.body.query }}"
+            },
+            {
+              "name": "page",
+              "value": "={{ $json.body.page || 0 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -16,
+        -176
+      ],
+      "id": "d5beaf6c-5792-4f10-94ac-c3f59f5c7004",
+      "name": "Search API"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Action": {
+      "main": [
+        [
+          {
+            "node": "Search API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "versionId": "091dc1b8-f719-42af-8dbd-6ea4a1fb7999",
+  "meta": {
+    "instanceId": "e998c53fce0bdd89201ebc2db25ae5c1a5ff8cb3c0fad506042105770bfd7eb3"
+  },
+  "id": "xnxxWorkflow01",
+  "tags": []
+}
