@@ -20,6 +20,7 @@ import XvideosDownload from './components/XvideosDownload';
 import XnxxDownload from './components/XnxxDownload';
 import SoundCloudDownload from './components/SoundCloudDownload';
 import TempMailUtility from './components/TempMailUtility';
+import TwoFaUtility from './components/TwoFaUtility';
 import { analyzeLinks } from './services/geminiService';
 import { enrichResultWithDownload } from './services/n8nService';
 import { isShopeeUrl } from './services/affiliateService';
@@ -48,7 +49,7 @@ const App: React.FC = () => {
 
   // Tool Sub-state
   const [activeTool, setActiveTool] = useState<'instagram' | 'zing' | 'xvideos' | 'xnxx' | 'soundcloud'>('instagram');
-  const [activeUtility, setActiveUtility] = useState<'tempmail'>('tempmail');
+  const [activeUtility, setActiveUtility] = useState<'tempmail' | 'twofa'>('tempmail');
 
   // Translation Helper
   const t = translations[language];
@@ -232,7 +233,7 @@ const App: React.FC = () => {
     if (activeTab === NavItem.VIDEO) {
       return (
         <div className="w-full max-w-4xl mx-auto">
-          <div className="hidden md:block overflow-x-auto pb-4 mb-4 md:mb-8 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+          <div className="overflow-x-auto pb-4 mb-4 md:mb-8 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
             <div className="flex md:justify-center gap-3 w-max md:w-auto">
               <button
                 onClick={() => setActiveUtility('tempmail')}
@@ -244,10 +245,21 @@ const App: React.FC = () => {
               >
                 Tempmail
               </button>
+              <button
+                onClick={() => setActiveUtility('twofa')}
+                className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${
+                  activeUtility === 'twofa'
+                    ? 'bg-gradient-to-r from-indigo-600 to-blue-500 text-white shadow-md transform scale-105'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                }`}
+              >
+                2FA
+              </button>
             </div>
           </div>
 
           {activeUtility === 'tempmail' && <TempMailUtility />}
+          {activeUtility === 'twofa' && <TwoFaUtility />}
         </div>
       );
     }
