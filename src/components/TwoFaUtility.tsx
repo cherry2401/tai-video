@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, Copy, ShieldCheck } from 'lucide-react';
+import { Language } from '../utils/translations';
 
 const TOTP_PERIOD_SECONDS = 30;
 const TOTP_DIGITS = 6;
@@ -8,10 +9,10 @@ const normalizeSecret = (value: string): string => {
   return value.toUpperCase().replace(/[\s-]/g, '');
 };
 
-const base32ToBytes = (base32: string): Uint8Array => {
+const base32ToBytes = (base32: string, language: Language): Uint8Array => {
   const cleaned = base32.replace(/=+$/g, '');
   if (!cleaned || !/^[A-Z2-7]+$/.test(cleaned)) {
-    throw new Error('Secret không hợp lệ. Chỉ cho phép A-Z, 2-7.');
+    throw new Error(language === 'vi' ? 'Secret không hợp lệ. Chỉ cho phép A-Z, 2-7.' : 'Invalid secret. Only A-Z and 2-7 are allowed.');
   }
 
   let bits = 0;
@@ -26,7 +27,7 @@ const base32ToBytes = (base32: string): Uint8Array => {
     if (charCode >= 50 && charCode <= 55) idx = charCode - 24;
 
     if (idx < 0 || idx > 31) {
-      throw new Error('Secret Base32 không hợp lệ.');
+      throw new Error(language === 'vi' ? 'Secret Base32 không hợp lệ.' : 'Invalid Base32 secret.');
     }
 
     value = (value << 5) | idx;
@@ -41,8 +42,8 @@ const base32ToBytes = (base32: string): Uint8Array => {
   return new Uint8Array(bytes);
 };
 
-const generateTotp = async (secret: string, unixSeconds: number): Promise<string> => {
-  const keyBytes = base32ToBytes(secret);
+const generateTotp = async (secret: string, unixSeconds: number, language: Language): Promise<string> => {
+  const keyBytes = base32ToBytes(secret, language);
   const counter = Math.floor(unixSeconds / TOTP_PERIOD_SECONDS);
   const counterBytes = new Uint8Array(8);
 
@@ -65,7 +66,12 @@ const generateTotp = async (secret: string, unixSeconds: number): Promise<string
   return String(binary % 10 ** TOTP_DIGITS).padStart(TOTP_DIGITS, '0');
 };
 
-const TwoFaUtility: React.FC = () => {
+interface TwoFaUtilityProps {
+  language: Language;
+}
+
+const TwoFaUtility: React.FC<TwoFaUtilityProps> = ({ language }) => {
+  const isVi = language === 'vi';
   const [secretInput, setSecretInput] = useState('');
   const [otp, setOtp] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -91,14 +97,14 @@ const TwoFaUtility: React.FC = () => {
 
     const run = async () => {
       try {
-        const currentOtp = await generateTotp(secret, Math.floor(nowMs / 1000));
+        const currentOtp = await generateTotp(secret, Math.floor(nowMs / 1000), language);
         if (cancelled) return;
         setOtp(currentOtp);
         setError(null);
       } catch (err) {
         if (cancelled) return;
         setOtp('');
-        setError(err instanceof Error ? err.message : 'Secret không hợp lệ.');
+        setError(err instanceof Error ? err.message : isVi ? 'Secret không hợp lệ.' : 'Invalid secret.');
       }
     };
 
@@ -106,7 +112,7 @@ const TwoFaUtility: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [secretInput, nowMs]);
+  }, [secretInput, nowMs, language, isVi]);
 
   const secondsPassed = Math.floor(nowMs / 1000) % TOTP_PERIOD_SECONDS;
   const secondsLeft = TOTP_PERIOD_SECONDS - secondsPassed;
@@ -123,34 +129,36 @@ const TwoFaUtility: React.FC = () => {
     <div className="w-full max-w-4xl mx-auto animate-fadeIn pb-20">
       <div className="text-center mb-7 space-y-2">
         <h1 className="text-3xl md:text-4xl font-black tracking-wide text-gray-900 dark:text-gray-100">2FA</h1>
-        <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">Nhập secret và lấy mã OTP 6 số tự động cập nhật mỗi 30 giây.</p>
+        <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">
+          {isVi ? 'Nhập secret và lấy mã OTP 6 số tự động cập nhật mỗi 30 giây.' : 'Enter your secret to generate a 6-digit OTP that refreshes every 30 seconds.'}
+        </p>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 md:p-6 space-y-5">
+      <div className="bg-white dark:bg-[#1f2747]/95 rounded-2xl shadow-[0_8px_22px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.30)] border border-gray-200 dark:border-indigo-900/60 p-5 md:p-6 space-y-5">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Khóa bí mật</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{isVi ? 'Khóa bí mật' : 'Secret key'}</label>
           <input
             type="text"
             value={secretInput}
             onChange={(e) => setSecretInput(e.target.value)}
-            placeholder="VD: JBSWY3DPEHPK3PXP"
-            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/30 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100"
+            placeholder={isVi ? 'VD: JBSWY3DPEHPK3PXP' : 'e.g. JBSWY3DPEHPK3PXP'}
+            className="w-full px-4 py-3 bg-gray-50 dark:bg-[#2b3458] border border-gray-300 dark:border-indigo-900/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100"
           />
         </div>
 
-        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 p-4">
+        <div className="rounded-xl border border-gray-200 dark:border-indigo-900/60 bg-gray-50 dark:bg-[#2b3458]/55 p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Mã OTP</p>
+              <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{isVi ? 'Mã OTP' : 'OTP code'}</p>
               <p className="mt-1 font-mono text-3xl md:text-4xl tracking-[0.18em] text-gray-900 dark:text-gray-100">{otp || '------'}</p>
             </div>
             <button
               onClick={copyOtp}
               disabled={!otp}
-              className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 flex items-center gap-2"
+              className="px-3 py-2 rounded-md border border-gray-300 dark:border-indigo-900/70 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2b3458] disabled:opacity-50 flex items-center gap-2"
             >
               <Copy size={14} />
-              {copied ? 'Đã copy' : 'Copy'}
+              {copied ? (isVi ? 'Đã copy' : 'Copied') : 'Copy'}
             </button>
           </div>
 
@@ -162,7 +170,7 @@ const TwoFaUtility: React.FC = () => {
               </span>
               <span>{secondsLeft}s</span>
             </div>
-            <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+            <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-[#2b3458] overflow-hidden">
               <div className="h-full bg-blue-600 transition-all duration-1000 ease-linear" style={{ width: `${progressPercent}%` }} />
             </div>
           </div>
@@ -180,3 +188,4 @@ const TwoFaUtility: React.FC = () => {
 };
 
 export default TwoFaUtility;
+

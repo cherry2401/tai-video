@@ -243,10 +243,10 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
       {results.map((result) => (
         <div
           key={result.id}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden animate-fadeIn transition-colors duration-300"
+          className="bg-white dark:bg-[#1f2747]/95 rounded-lg shadow-[0_8px_22px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.30)] border border-gray-200 dark:border-indigo-900/60 overflow-hidden animate-fadeIn transition-colors duration-300"
         >
           <div className="flex flex-col md:flex-row">
-            <div className="w-full md:w-48 h-32 bg-gray-200 dark:bg-gray-700 relative shrink-0">
+            <div className="w-full md:w-48 h-32 bg-gray-200 dark:bg-[#2b3458] relative shrink-0">
               {result.thumbnail ? (
                 <img src={result.thumbnail} alt={result.title} className="w-full h-full object-cover" />
               ) : (
@@ -296,7 +296,7 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
                     href={result.originalUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 px-3 py-1.5 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-indigo-900/70 px-3 py-1.5 rounded hover:bg-gray-50 dark:hover:bg-[#2b3458] transition-colors"
                   >
                     <ExternalLink size={12} /> {t.source}
                   </a>
@@ -330,7 +330,7 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
           </div>
 
           {hasYouTubeFormats(result) && (
-            <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-700">
+            <div className="px-4 pb-4 border-t border-gray-100 dark:border-indigo-900/60">
               <QualitySelector
                 result={result}
                 formats={result.formats!}
@@ -345,3 +345,4 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
 };
 
 export default ResultList;
+

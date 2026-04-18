@@ -83,7 +83,18 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="bg-white dark:bg-gray-900 text-gray-800 dark:text-white py-4 px-4 md:px-6 shadow-sm dark:shadow-md transition-colors duration-300 border-b border-gray-200 dark:border-gray-800 relative z-50">
+    <header
+      className="bg-white text-gray-800 dark:text-white py-4 px-4 md:px-6 shadow-sm dark:shadow-md transition-colors duration-300 border-b border-gray-200 dark:border-indigo-900/60 sticky top-0 z-50 w-full"
+      style={
+        theme === 'dark'
+          ? {
+              backgroundColor: '#18163f',
+              backgroundImage:
+                'linear-gradient(90deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 27, 75, 0.9) 45%, rgba(22, 30, 72, 0.92) 100%)',
+            }
+          : undefined
+      }
+    >
       <div className="container mx-auto flex justify-between items-center">
         <div
           className="cursor-pointer inline-flex items-center h-10 leading-none"
@@ -92,12 +103,12 @@ const Header: React.FC<HeaderProps> = ({
           <img
             src={theme === 'dark' ? `/logo_taivideo3.svg?v=${logoCacheBust}` : `/logo_taivideo2.svg?v=${logoCacheBust}`}
             alt="TaiVideo logo"
-            className="h-7 md:h-9 w-auto object-contain shrink-0"
+            className="h-7 md:h-8 w-auto object-contain shrink-0"
           />
         </div>
 
         <div className="hidden md:flex flex-1 justify-center">
-          <nav>
+          <nav className="font-geomanist">
             <ul className="flex gap-8 items-center">
               {navItems.map((itemKey) => {
                 // @ts-ignore
@@ -109,10 +120,10 @@ const Header: React.FC<HeaderProps> = ({
                     <a
                       href={`#${itemKey.toLowerCase()}`}
                       onClick={(e) => handleNavClick(itemKey, e)}
-                      className={`block px-4 py-1.5 rounded-full text-base font-bold transition-all duration-200 ${
+                      className={`block px-3 py-1.5 rounded-md text-[15px] font-medium transition-colors duration-200 ${
                         isActive
-                          ? 'bg-green-100 dark:bg-gray-800 text-green-700 dark:text-green-400 shadow-sm transform scale-105'
-                          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                          ? 'text-green-700 dark:text-green-400'
+                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                       }`}
                     >
                       {label}
@@ -187,7 +198,7 @@ const Header: React.FC<HeaderProps> = ({
             onClick={() => setIsMenuOpen(false)}
             className="md:hidden fixed inset-0 z-30 bg-black/20"
           />
-          <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-2xl z-40 animate-slideDown origin-top">
+          <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-2xl z-40 animate-slideDown origin-top font-geomanist">
             <ul className="flex flex-col py-2">
             {navItems.map((itemKey) => {
               // @ts-ignore
@@ -199,7 +210,7 @@ const Header: React.FC<HeaderProps> = ({
                   <li key={itemKey} className="border-b border-gray-50 dark:border-gray-800 last:border-none">
                     <button
                       onClick={() => setIsToolsOpen(!isToolsOpen)}
-                      className={`flex items-center justify-between w-full px-5 py-3.5 text-left text-[16px] font-medium transition-colors ${
+                    className={`flex items-center justify-between w-full px-5 py-3.5 text-left text-[16px] font-medium transition-colors ${
                         isActive ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-gray-300'
                       }`}
                     >
@@ -215,7 +226,7 @@ const Header: React.FC<HeaderProps> = ({
                             activeTool === 'instagram' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'
                           }`}
                         >
-                          Tải Instagram
+                          {language === 'vi' ? 'Tải Instagram' : 'Instagram Downloader'}
                         </button>
                         <button
                           onClick={() => handleToolClick('zing')}
@@ -223,7 +234,7 @@ const Header: React.FC<HeaderProps> = ({
                             activeTool === 'zing' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'
                           }`}
                         >
-                          Tải Zing MP3
+                          {language === 'vi' ? 'Tải Zing MP3' : 'Zing MP3 Downloader'}
                         </button>
                         <button
                           onClick={() => handleToolClick('soundcloud')}
@@ -231,7 +242,7 @@ const Header: React.FC<HeaderProps> = ({
                             activeTool === 'soundcloud' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'
                           }`}
                         >
-                          Tải SoundCloud
+                          {language === 'vi' ? 'Tải SoundCloud' : 'SoundCloud Downloader'}
                         </button>
                         <button
                           onClick={() => handleToolClick('xvideos')}
@@ -239,7 +250,7 @@ const Header: React.FC<HeaderProps> = ({
                             activeTool === 'xvideos' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'
                           }`}
                         >
-                          Tải XVideos
+                          {language === 'vi' ? 'Tải XVideos' : 'XVideos Downloader'}
                         </button>
                         <button
                           onClick={() => handleToolClick('xnxx')}
@@ -247,7 +258,7 @@ const Header: React.FC<HeaderProps> = ({
                             activeTool === 'xnxx' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'
                           }`}
                         >
-                          Tải XNXX
+                          {language === 'vi' ? 'Tải XNXX' : 'XNXX Downloader'}
                         </button>
                       </div>
                     )}
@@ -260,7 +271,7 @@ const Header: React.FC<HeaderProps> = ({
                   <li key={itemKey} className="border-b border-gray-50 dark:border-gray-800 last:border-none">
                     <button
                       onClick={() => setIsUtilitiesOpen(!isUtilitiesOpen)}
-                      className={`flex items-center justify-between w-full px-5 py-3.5 text-left text-[16px] font-medium transition-colors ${
+                    className={`flex items-center justify-between w-full px-5 py-3.5 text-left text-[16px] font-medium transition-colors ${
                         isActive ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-gray-300'
                       }`}
                     >
@@ -292,7 +303,7 @@ const Header: React.FC<HeaderProps> = ({
                             activeUtility === 'outlook' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'
                           }`}
                         >
-                          Outlook Mail
+                          {language === 'vi' ? 'Outlook Mail' : 'Outlook Mail'}
                         </button>
                         <button
                           onClick={() => handleUtilityClick('cdk')}
@@ -315,7 +326,7 @@ const Header: React.FC<HeaderProps> = ({
                     onClick={(e) => handleNavClick(itemKey, e)}
                     className={`block px-5 py-3.5 text-[16px] font-medium transition-colors ${
                       isActive
-                        ? 'text-green-600 dark:text-green-400 bg-green-50/50 dark:bg-green-900/10'
+                        ? 'text-green-600 dark:text-green-400'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                     }`}
                   >
@@ -359,7 +370,7 @@ const Header: React.FC<HeaderProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-[16px] font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                   <Sun size={18} className="text-gray-500" />
-                  Giao diện
+                  {language === 'vi' ? 'Giao diện' : 'Theme'}
                 </span>
                 <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
                   <button

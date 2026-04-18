@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Loader2, Download, Music, Play, AlertCircle, Headphones } from 'lucide-react';
+import { Language } from '../utils/translations';
 
 // Interfaces based on provided API response
 interface SoundCloudTrackInfo {
@@ -34,7 +35,12 @@ interface SoundCloudResponse {
     message?: string;
 }
 
-const SoundCloudDownload: React.FC = () => {
+interface SoundCloudDownloadProps {
+    language: Language;
+}
+
+const SoundCloudDownload: React.FC<SoundCloudDownloadProps> = ({ language }) => {
+    const isVi = language === 'vi';
     const [url, setUrl] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -63,10 +69,10 @@ const SoundCloudDownload: React.FC = () => {
             if (result.success && result.track_info) {
                 setData(result);
             } else {
-                setError(result.message || 'Không thể lấy thông tin bài hát.');
+                setError(result.message || (isVi ? 'Không thể lấy thông tin bài hát.' : 'Unable to fetch song information.'));
             }
         } catch (err) {
-            setError('Lỗi kết nối server.');
+            setError(isVi ? 'Lỗi kết nối server.' : 'Server connection error.');
             console.error(err);
         } finally {
             setLoading(false);
@@ -113,19 +119,19 @@ const SoundCloudDownload: React.FC = () => {
                     <span>SoundCloud Downloader</span>
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Tải nhạc SoundCloud chất lượng cao miễn phí.
+                    {isVi ? 'Tải nhạc SoundCloud chất lượng cao miễn phí.' : 'Download high-quality SoundCloud music for free.'}
                 </p>
             </div>
 
             {/* Input Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
+            <div className="bg-white dark:bg-[#1f2747]/95 rounded-xl shadow-[0_8px_22px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.30)] border border-gray-200 dark:border-indigo-900/60 p-6 md:p-8">
                 <div className="flex flex-col md:flex-row gap-3 mb-6">
                     <input
                         type="text"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
-                        placeholder="Dán link bài hát SoundCloud tại đây..."
-                        className="flex-1 w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none dark:text-white"
+                        placeholder={isVi ? 'Dán link bài hát SoundCloud tại đây...' : 'Paste SoundCloud song URL here...'}
+                        className="flex-1 w-full px-4 py-3 bg-gray-50 dark:bg-[#2b3458] border border-gray-300 dark:border-indigo-900/70 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none dark:text-white"
                         onKeyDown={(e) => e.key === 'Enter' && handleGetLink()}
                     />
                     <button
@@ -134,13 +140,13 @@ const SoundCloudDownload: React.FC = () => {
                         className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin" /> : <Download />}
-                        Lấy Link
+                        {isVi ? 'Lấy link' : 'Get link'}
                     </button>
                 </div>
 
                 {/* Result Section */}
                 {data && data.track_info && (
-                    <div className="animate-fadeIn mt-8 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div className="animate-fadeIn mt-8 p-4 bg-gray-50 dark:bg-[#2b3458]/55 rounded-lg border border-gray-200 dark:border-indigo-900/60">
                         <div className="flex flex-col md:flex-row gap-6">
                             {/* Artwork & Player Trigger */}
                             <div
@@ -198,20 +204,20 @@ const SoundCloudDownload: React.FC = () => {
                                 </div>
 
                                 <div className="pt-4 space-y-2">
-                                    <h4 className="font-semibold text-gray-700 dark:text-gray-200 mb-2">Link Tải Xuống:</h4>
+                                    <h4 className="font-semibold text-gray-700 dark:text-gray-200 mb-2">{isVi ? 'Link tải xuống:' : 'Download links:'}</h4>
                                     <div className="grid grid-cols-1 gap-2">
                                         {displayLinks.map((link, idx) => (
                                             <button
                                                 key={idx}
                                                 onClick={() => triggerDownload(link.url)}
-                                                className="w-full py-2 px-4 bg-orange-100 hover:bg-orange-200 dark:bg-gray-600 dark:hover:bg-gray-500 text-orange-700 dark:text-white rounded-md font-medium text-sm flex items-center justify-center gap-2 transition-colors border border-orange-200 dark:border-gray-500"
+                                                className="w-full py-2 px-4 bg-orange-100 hover:bg-orange-200 dark:bg-[#2b3458] dark:hover:bg-[#33416b] text-orange-700 dark:text-white rounded-md font-medium text-sm flex items-center justify-center gap-2 transition-colors border border-orange-200 dark:border-indigo-900/70"
                                             >
                                                 <Download size={16} />
-                                                {link.format === 'progressive' ? 'Download MP3' : link.quality || 'Download'}
+                                                {link.format === 'progressive' ? (isVi ? 'Tải MP3' : 'Download MP3') : link.quality || (isVi ? 'Tải xuống' : 'Download')}
                                             </button>
                                         ))}
                                         {displayLinks.length === 0 && (
-                                            <p className="text-sm text-red-500">Video này không cho phép tải xuống hoặc bản quyền.</p>
+                                            <p className="text-sm text-red-500">{isVi ? 'Video này không cho phép tải xuống hoặc bị giới hạn bản quyền.' : 'This content is not downloadable or is copyright-restricted.'}</p>
                                         )}
                                     </div>
                                 </div>
@@ -233,3 +239,4 @@ const SoundCloudDownload: React.FC = () => {
 };
 
 export default SoundCloudDownload;
+

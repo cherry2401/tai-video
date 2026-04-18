@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { AlertCircle, Check, FileText, Info, Loader2, ShieldCheck, Zap } from 'lucide-react';
+import { Language } from '../utils/translations';
 
 type CdkStage = 'verify' | 'token' | 'activate' | 'success';
 
@@ -65,9 +66,9 @@ const getApiCandidates = (path: string): string[] => {
   return [...new Set(candidates)];
 };
 
-const fetchJson = async <T,>(url: string, body: Record<string, string>): Promise<T> => {
+const fetchJson = async <T,>(url: string, body: Record<string, string>, language: Language): Promise<T> => {
   const candidates = getApiCandidates(url);
-  let lastError = 'Yêu cầu thất bại. Vui lòng thử lại.';
+  let lastError = language === 'vi' ? 'Yêu cầu thất bại. Vui lòng thử lại.' : 'Request failed. Please try again.';
 
   for (let i = 0; i < candidates.length; i += 1) {
     const target = candidates[i];
@@ -95,7 +96,9 @@ const fetchJson = async <T,>(url: string, body: Record<string, string>): Promise
     }
 
     const detail = payload?.message || payload?.error || rawText?.trim();
-    lastError = detail || `Yêu cầu thất bại (HTTP ${response.status}). Vui lòng thử lại.`;
+    lastError = detail || (language === 'vi'
+      ? `Yêu cầu thất bại (HTTP ${response.status}). Vui lòng thử lại.`
+      : `Request failed (HTTP ${response.status}). Please try again.`);
 
     const isLastCandidate = i === candidates.length - 1;
     if (response.status !== 404 || isLastCandidate) {
@@ -105,7 +108,9 @@ const fetchJson = async <T,>(url: string, body: Record<string, string>): Promise
 
   const isLocalhost = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
   if (isLocalhost && lastError.includes('HTTP 404')) {
-    throw new Error('Local dev chưa có route backend CDK. Hãy chạy backend functions hoặc cấu hình VITE_API_BASE_URL.');
+    throw new Error(language === 'vi'
+      ? 'Local dev chưa có route backend CDK. Hãy chạy backend functions hoặc cấu hình VITE_API_BASE_URL.'
+      : 'CDK backend route is missing in local dev. Run backend functions or configure VITE_API_BASE_URL.');
   }
 
   throw new Error(lastError);
@@ -153,7 +158,12 @@ const parseEmailFromTokenPayload = (value: unknown): string | null => {
 
 const normalizeCdkInput = (value: string): string => value.trim().toUpperCase();
 
-const ChatGptCdkUtility: React.FC = () => {
+interface ChatGptCdkUtilityProps {
+  language: Language;
+}
+
+const ChatGptCdkUtility: React.FC<ChatGptCdkUtilityProps> = ({ language }) => {
+  const isVi = language === 'vi';
   const [stage, setStage] = useState<CdkStage>('verify');
   const [cdkKey, setCdkKey] = useState('');
   const [tokenInput, setTokenInput] = useState('');
@@ -185,7 +195,7 @@ const ChatGptCdkUtility: React.FC = () => {
   const verifyCdk = async () => {
     const normalized = normalizeCdkInput(cdkKey);
     if (!normalized || normalized.length < 16) {
-      setErrorMessage('Mã CDK không hợp lệ. Vui lòng kiểm tra lại.');
+      setErrorMessage(isVi ? 'Mã CDK không hợp lệ. Vui lòng kiểm tra lại.' : 'Invalid CDK key. Please check again.');
       return;
     }
 
@@ -194,10 +204,10 @@ const ChatGptCdkUtility: React.FC = () => {
     setStatusMessage(null);
 
     try {
-      const payload = await fetchJson<VerifyResponse>('/api/cdk-verify', { cdk: normalized });
+      const payload = await fetchJson<VerifyResponse>('/api/cdk-verify', { cdk: normalized }, language);
       if (payload.used) {
         const usedBy = payload.usedBy?.trim();
-        setErrorMessage(usedBy ? `CDK này đã được sử dụng bởi: ${usedBy}` : 'CDK này đã được sử dụng. Vui lòng thử mã khác.');
+        setErrorMessage(usedBy ? (isVi ? `CDK này đã được sử dụng bởi: ${usedBy}` : `This CDK has already been used by: ${usedBy}`) : (isVi ? 'CDK này đã được sử dụng. Vui lòng thử mã khác.' : 'This CDK has already been used. Please try another key.'));
         return;
       }
 
@@ -206,7 +216,7 @@ const ChatGptCdkUtility: React.FC = () => {
       setVerifiedPackage(payload.packageName);
       setStage('token');
     } catch (error) {
-      setErrorMessage((error as Error).message || 'Không thể xác minh CDK.');
+      setErrorMessage((error as Error).message || (isVi ? 'Không thể xác minh CDK.' : 'Unable to verify CDK.'));
     } finally {
       setLoadingVerify(false);
     }
@@ -215,7 +225,7 @@ const ChatGptCdkUtility: React.FC = () => {
   const parseToken = async () => {
     const raw = tokenInput.trim();
     if (!raw) {
-      setErrorMessage('Vui lòng dán Access Token (JSON đầy đủ).');
+      setErrorMessage(isVi ? 'Vui lòng dán Access Token (JSON đầy đủ).' : 'Please paste the full Access Token JSON.');
       return;
     }
 
@@ -235,7 +245,7 @@ const ChatGptCdkUtility: React.FC = () => {
       const payload = await fetchJson<ParseResponse>('/api/cdk-parse', {
         cdk: verifiedCdk || normalizeCdkInput(cdkKey),
         sessionJson: raw,
-      });
+      }, language);
 
       setAccountInfo({
         email: payload.email || parsedEmail || 'unknown-session@local',
@@ -246,7 +256,7 @@ const ChatGptCdkUtility: React.FC = () => {
 
       setStage('activate');
     } catch (error) {
-      setErrorMessage((error as Error).message || 'Không thể phân tích Access Token. Vui lòng kiểm tra dữ liệu đầu vào.');
+      setErrorMessage((error as Error).message || (isVi ? 'Không thể phân tích Access Token. Vui lòng kiểm tra dữ liệu đầu vào.' : 'Unable to parse Access Token. Please verify input data.'));
     } finally {
       setLoadingParse(false);
     }
@@ -254,31 +264,31 @@ const ChatGptCdkUtility: React.FC = () => {
 
   const activateCdk = async () => {
     if (!accountInfo) {
-      setErrorMessage('Chưa có dữ liệu tài khoản để kích hoạt.');
+      setErrorMessage(isVi ? 'Chưa có dữ liệu tài khoản để kích hoạt.' : 'No account data to activate.');
       return;
     }
 
     const raw = tokenInput.trim();
     if (!raw) {
-      setErrorMessage('Thiếu Session JSON để kích hoạt.');
+      setErrorMessage(isVi ? 'Thiếu Session JSON để kích hoạt.' : 'Missing Session JSON for activation.');
       return;
     }
 
     setLoadingActivate(true);
     setErrorMessage(null);
-    setStatusMessage('Yêu cầu kích hoạt đã được chấp nhận. Đang chờ kết quả cuối cùng...');
+    setStatusMessage(isVi ? 'Yêu cầu kích hoạt đã được chấp nhận. Đang chờ kết quả cuối cùng...' : 'Activation request accepted. Waiting for final result...');
 
     try {
       const payload = await fetchJson<ActivateResponse>('/api/cdk-activate', {
         cdk: verifiedCdk || normalizeCdkInput(cdkKey),
         sessionJson: raw,
-      });
+      }, language);
 
       setStatusMessage(payload.message || null);
       setStage('success');
     } catch (error) {
       setStatusMessage(null);
-      setErrorMessage((error as Error).message || 'Kích hoạt thất bại.');
+      setErrorMessage((error as Error).message || (isVi ? 'Kích hoạt thất bại.' : 'Activation failed.'));
     } finally {
       setLoadingActivate(false);
     }
@@ -291,14 +301,14 @@ const ChatGptCdkUtility: React.FC = () => {
           <img src="/chatgot.png" alt="ChatGPT logo" className="w-7 h-7 md:w-8 md:h-8 object-contain" />
           <span>ChatGPT CDK</span>
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">Kích hoạt tài khoản nhanh chóng và an toàn</p>
+        <p className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">{isVi ? 'Kích hoạt tài khoản nhanh chóng và an toàn' : 'Activate your account quickly and securely'}</p>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 md:p-5">
+      <div className="bg-white dark:bg-[#1f2747]/95 rounded-3xl shadow-[0_8px_22px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.30)] border border-gray-200 dark:border-indigo-900/60 p-4 md:p-5">
         {stage !== 'success' ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 items-start">
-            <div className="order-2 lg:order-1 rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 md:p-4">
-              <h2 className="text-xl md:text-2xl leading-tight font-bold text-gray-900 dark:text-gray-100 mb-3">Trước khi bắt đầu</h2>
+            <div className="order-2 lg:order-1 rounded-3xl border border-gray-200 dark:border-indigo-900/60 bg-white dark:bg-[#1f2747]/95 p-3 md:p-4">
+              <h2 className="text-xl md:text-2xl leading-tight font-bold text-gray-900 dark:text-gray-100 mb-3">{isVi ? 'Trước khi bắt đầu' : 'Before you start'}</h2>
 
               <div className="space-y-3">
                 <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/30 dark:bg-emerald-900/10 p-3 md:p-4">
@@ -307,9 +317,9 @@ const ChatGptCdkUtility: React.FC = () => {
                       <ShieldCheck size={15} />
                     </div>
                     <div>
-                      <p className="text-emerald-500 text-sm font-semibold">Bước 1</p>
-                      <p className="text-base md:text-lg leading-[1.2] font-bold text-gray-900 dark:text-gray-100">Nhập và xác minh CDK</p>
-                      <p className="text-gray-500 dark:text-gray-400 mt-1 text-xs md:text-sm leading-relaxed">Đảm bảo CDK hợp lệ và đúng gói sản phẩm.</p>
+                      <p className="text-emerald-500 text-sm font-semibold">{isVi ? 'Bước 1' : 'Step 1'}</p>
+                      <p className="text-base md:text-lg leading-[1.2] font-bold text-gray-900 dark:text-gray-100">{isVi ? 'Nhập và xác minh CDK' : 'Enter and verify CDK'}</p>
+                      <p className="text-gray-500 dark:text-gray-400 mt-1 text-xs md:text-sm leading-relaxed">{isVi ? 'Đảm bảo CDK hợp lệ và đúng gói sản phẩm.' : 'Make sure your CDK is valid and matches the correct package.'}</p>
                     </div>
                   </div>
                 </div>
@@ -320,23 +330,23 @@ const ChatGptCdkUtility: React.FC = () => {
                       <FileText size={15} />
                     </div>
                     <div>
-                      <p className="text-emerald-500 text-sm font-semibold">Bước 2</p>
-                      <p className="text-base md:text-lg leading-[1.2] font-bold text-gray-900 dark:text-gray-100">Đăng nhập và lấy AuthSession</p>
-                      <p className="text-gray-500 dark:text-gray-400 mt-1 text-xs md:text-sm leading-relaxed">Mở ChatGPT, đăng nhập, sau đó mở trang AuthSession và sao chép toàn bộ JSON.</p>
+                      <p className="text-emerald-500 text-sm font-semibold">{isVi ? 'Bước 2' : 'Step 2'}</p>
+                      <p className="text-base md:text-lg leading-[1.2] font-bold text-gray-900 dark:text-gray-100">{isVi ? 'Đăng nhập và lấy AuthSession' : 'Sign in and get AuthSession'}</p>
+                      <p className="text-gray-500 dark:text-gray-400 mt-1 text-xs md:text-sm leading-relaxed">{isVi ? 'Mở ChatGPT, đăng nhập, sau đó mở trang AuthSession và sao chép toàn bộ JSON.' : 'Open ChatGPT, sign in, then open the AuthSession page and copy the full JSON.'}</p>
                       <div className="flex flex-wrap gap-2.5 mt-3">
                         <button
                           type="button"
                           onClick={() => window.open('https://chatgpt.com', '_blank', 'noopener,noreferrer')}
                           className="px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-700 text-xs md:text-sm text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                         >
-                          Mở ChatGPT
+                          {isVi ? 'Mở ChatGPT' : 'Open ChatGPT'}
                         </button>
                         <button
                           type="button"
                           onClick={() => window.open('https://chatgpt.com/api/auth/session', '_blank', 'noopener,noreferrer')}
                           className="px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-700 text-xs md:text-sm text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                         >
-                          Mở trang AuthSession
+                          {isVi ? 'Mở trang AuthSession' : 'Open AuthSession page'}
                         </button>
                       </div>
                     </div>
@@ -349,17 +359,17 @@ const ChatGptCdkUtility: React.FC = () => {
                       <Zap size={15} />
                     </div>
                     <div>
-                      <p className="text-emerald-500 text-sm font-semibold">Bước 3</p>
-                      <p className="text-base md:text-lg leading-[1.2] font-bold text-gray-900 dark:text-gray-100">Sau khi xác thực, bấm Kích hoạt để hoàn tất</p>
-                      <p className="text-gray-500 dark:text-gray-400 mt-1 text-xs md:text-sm leading-relaxed">Quá trình kích hoạt có thể mất một lúc, vui lòng chờ.</p>
+                      <p className="text-emerald-500 text-sm font-semibold">{isVi ? 'Bước 3' : 'Step 3'}</p>
+                      <p className="text-base md:text-lg leading-[1.2] font-bold text-gray-900 dark:text-gray-100">{isVi ? 'Sau khi xác thực, bấm Kích hoạt để hoàn tất' : 'After verification, click Activate to finish'}</p>
+                      <p className="text-gray-500 dark:text-gray-400 mt-1 text-xs md:text-sm leading-relaxed">{isVi ? 'Quá trình kích hoạt có thể mất một lúc, vui lòng chờ.' : 'Activation may take a moment, please wait.'}</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="order-1 lg:order-2 rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 md:p-4">
-              <h2 className="text-xl md:text-2xl leading-tight font-bold text-gray-900 dark:text-gray-100 mb-3">Khu vực kích hoạt</h2>
+            <div className="order-1 lg:order-2 rounded-3xl border border-gray-200 dark:border-indigo-900/60 bg-white dark:bg-[#1f2747]/95 p-3 md:p-4">
+              <h2 className="text-xl md:text-2xl leading-tight font-bold text-gray-900 dark:text-gray-100 mb-3">{isVi ? 'Khu vực kích hoạt' : 'Activation area'}</h2>
 
               <div className="md:hidden mb-4">
                 <div className="space-y-3 text-base font-bold text-gray-900 dark:text-gray-100">
@@ -369,8 +379,8 @@ const ChatGptCdkUtility: React.FC = () => {
                     >
                       {activeStep > 1 ? <Check size={16} /> : 1}
                     </div>
-                    <span className="leading-tight">Xác minh CDK</span>
-                    <div className="absolute left-[19px] top-[40px] h-3 w-px bg-gray-200 dark:bg-gray-700" />
+                    <span className="leading-tight">{isVi ? 'Xác minh CDK' : 'Verify CDK'}</span>
+                    <div className="absolute left-[19px] top-[40px] h-3 w-px bg-gray-200 dark:bg-indigo-900/60" />
                   </div>
                   <div className="relative flex items-center gap-3 pb-3">
                     <div
@@ -378,8 +388,8 @@ const ChatGptCdkUtility: React.FC = () => {
                     >
                       {activeStep > 2 ? <Check size={16} /> : 2}
                     </div>
-                    <span className="leading-tight">Dán Token</span>
-                    <div className="absolute left-[19px] top-[40px] h-3 w-px bg-gray-200 dark:bg-gray-700" />
+                    <span className="leading-tight">{isVi ? 'Dán Token' : 'Paste token'}</span>
+                    <div className="absolute left-[19px] top-[40px] h-3 w-px bg-gray-200 dark:bg-indigo-900/60" />
                   </div>
                   <div className="flex items-center gap-3">
                     <div
@@ -387,7 +397,7 @@ const ChatGptCdkUtility: React.FC = () => {
                     >
                       3
                     </div>
-                    <span className="leading-tight">Kích hoạt</span>
+                    <span className="leading-tight">{isVi ? 'Kích hoạt' : 'Activate'}</span>
                   </div>
                 </div>
               </div>
@@ -399,7 +409,7 @@ const ChatGptCdkUtility: React.FC = () => {
                   >
                     {activeStep > 1 ? <Check size={16} /> : 1}
                   </div>
-                  <span className="leading-tight">Xác minh CDK</span>
+                  <span className="leading-tight">{isVi ? 'Xác minh CDK' : 'Verify CDK'}</span>
                 </div>
                 <div className="flex items-center gap-3 min-w-0 justify-center">
                   <div
@@ -407,7 +417,7 @@ const ChatGptCdkUtility: React.FC = () => {
                   >
                     {activeStep > 2 ? <Check size={16} /> : 2}
                   </div>
-                  <span className="leading-tight">Dán Token</span>
+                  <span className="leading-tight">{isVi ? 'Dán Token' : 'Paste token'}</span>
                 </div>
                 <div className="flex items-center gap-3 min-w-0 justify-end">
                   <div
@@ -415,7 +425,7 @@ const ChatGptCdkUtility: React.FC = () => {
                   >
                     3
                   </div>
-                  <span className="leading-tight">Kích hoạt</span>
+                  <span className="leading-tight">{isVi ? 'Kích hoạt' : 'Activate'}</span>
                 </div>
               </div>
 
@@ -427,7 +437,7 @@ const ChatGptCdkUtility: React.FC = () => {
                       value={cdkKey}
                       onChange={(event) => setCdkKey(event.target.value)}
                       placeholder="B90D0E6E-64E7-4992-BA93-060B83B7CC78"
-                      className="w-full rounded-2xl border border-emerald-200 dark:border-emerald-700 px-4 py-2.5 text-xs md:text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900/20 outline-none"
+                      className="w-full rounded-2xl border border-emerald-200 dark:border-emerald-700 px-4 py-2.5 text-xs md:text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#2b3458] outline-none"
                     />
                   </label>
 
@@ -437,7 +447,7 @@ const ChatGptCdkUtility: React.FC = () => {
                     className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xs md:text-sm hover:brightness-110 disabled:opacity-70 flex items-center justify-center gap-2"
                   >
                     {loadingVerify ? <Loader2 size={16} className="animate-spin" /> : null}
-                    Xác minh CDK
+                    {isVi ? 'Xác minh CDK' : 'Verify CDK'}
                   </button>
                 </div>
               )}
@@ -445,27 +455,27 @@ const ChatGptCdkUtility: React.FC = () => {
               {stage === 'token' && (
                 <div className="space-y-3">
                   <div className="rounded-2xl border border-emerald-100 dark:border-emerald-800/40 bg-emerald-50/30 dark:bg-emerald-900/10 px-4 py-3 flex items-center justify-between gap-4">
-                    <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">Gói</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">{isVi ? 'Gói' : 'Package'}</span>
                     <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs md:text-sm text-right">{verifiedPackage}</span>
                   </div>
 
                   <label className="block">
-                    <span className="block text-gray-700 dark:text-gray-300 text-xs md:text-sm font-semibold mb-1.5">Access Token (JSON đầy đủ)</span>
+                    <span className="block text-gray-700 dark:text-gray-300 text-xs md:text-sm font-semibold mb-1.5">{isVi ? 'Access Token (JSON đầy đủ)' : 'Access Token (full JSON)'}</span>
                     <textarea
                       rows={7}
                       value={tokenInput}
                       onChange={(event) => setTokenInput(event.target.value)}
-                      placeholder="Dán toàn bộ JSON AuthSession vào đây..."
-                      className="w-full rounded-2xl border border-gray-300 dark:border-gray-600 p-3.5 text-xs md:text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900/20 outline-none resize-y"
+                      placeholder={isVi ? 'Dán toàn bộ JSON AuthSession vào đây...' : 'Paste full AuthSession JSON here...'}
+                      className="w-full rounded-2xl border border-gray-300 dark:border-indigo-900/70 p-3.5 text-xs md:text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#2b3458] outline-none resize-y"
                     />
                   </label>
 
                   <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
                     <button
                       onClick={() => setStage('verify')}
-                      className="px-4 py-2.5 rounded-2xl border border-gray-300 dark:border-gray-600 text-xs md:text-sm text-gray-700 dark:text-gray-200 font-bold"
+                      className="px-4 py-2.5 rounded-2xl border border-gray-300 dark:border-indigo-900/70 text-xs md:text-sm text-gray-700 dark:text-gray-200 font-bold"
                     >
-                      Quay lại
+                      {isVi ? 'Quay lại' : 'Back'}
                     </button>
                     <button
                       onClick={parseToken}
@@ -473,7 +483,7 @@ const ChatGptCdkUtility: React.FC = () => {
                       className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs md:text-sm font-bold hover:brightness-110 disabled:opacity-70 flex items-center gap-2"
                     >
                       {loadingParse ? <Loader2 size={16} className="animate-spin" /> : null}
-                      Phân tích tài khoản
+                      {isVi ? 'Phân tích tài khoản' : 'Parse account'}
                     </button>
                   </div>
                 </div>
@@ -481,28 +491,28 @@ const ChatGptCdkUtility: React.FC = () => {
 
               {stage === 'activate' && accountInfo && (
                 <div className="space-y-3">
-                  <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-900/20 p-4 space-y-3">
+                  <div className="rounded-2xl border border-gray-200 dark:border-indigo-900/60 bg-gray-50/30 dark:bg-[#2b3458]/55 p-4 space-y-3">
                     <div className="flex justify-between items-center gap-4">
-                      <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">Mã CDK</span>
+                      <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">{isVi ? 'Mã CDK' : 'CDK key'}</span>
                       <span className="font-bold text-gray-900 dark:text-gray-100 text-xs md:text-sm text-right break-all">{cdkKey}</span>
                     </div>
                     <div className="flex justify-between items-center gap-4">
-                      <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">Email tài khoản</span>
+                      <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">{isVi ? 'Email tài khoản' : 'Account email'}</span>
                       <span className="font-bold text-gray-900 dark:text-gray-100 text-xs md:text-sm text-right break-all">{accountInfo.email}</span>
                     </div>
                     <div className="flex justify-between items-center gap-4">
-                      <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">Gói hiện tại</span>
+                      <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">{isVi ? 'Gói hiện tại' : 'Current plan'}</span>
                       <span className="font-bold text-gray-900 dark:text-gray-100 text-xs md:text-sm text-right">{accountInfo.currentPlan}</span>
                     </div>
                     <div className="flex justify-between items-center gap-4">
-                      <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">Sản phẩm</span>
+                      <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm">{isVi ? 'Sản phẩm' : 'Product'}</span>
                       <span className="font-bold text-gray-900 dark:text-gray-100 text-xs md:text-sm text-right">{accountInfo.targetPackage}</span>
                     </div>
                   </div>
 
                   <div className="rounded-2xl border border-blue-100 dark:border-blue-800/40 bg-blue-50/30 dark:bg-blue-900/10 p-3 flex items-center gap-2 text-xs md:text-sm text-gray-800 dark:text-gray-100">
                     <Info size={16} className="text-blue-500 shrink-0" />
-                    Session này đang là tài khoản Free và sẵn sàng kích hoạt.
+                    {isVi ? 'Session này đang là tài khoản Free và sẵn sàng kích hoạt.' : 'This session is currently a Free account and ready for activation.'}
                   </div>
 
                   {statusMessage && (
@@ -516,9 +526,9 @@ const ChatGptCdkUtility: React.FC = () => {
                     <button
                       onClick={() => setStage('token')}
                       disabled={loadingActivate}
-                      className="px-4 py-2.5 rounded-2xl border border-gray-300 dark:border-gray-600 text-xs md:text-sm text-gray-700 dark:text-gray-200 font-bold disabled:opacity-60"
+                      className="px-4 py-2.5 rounded-2xl border border-gray-300 dark:border-indigo-900/70 text-xs md:text-sm text-gray-700 dark:text-gray-200 font-bold disabled:opacity-60"
                     >
-                      Quay lại
+                      {isVi ? 'Quay lại' : 'Back'}
                     </button>
                     <button
                       onClick={activateCdk}
@@ -526,7 +536,7 @@ const ChatGptCdkUtility: React.FC = () => {
                       className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs md:text-sm font-bold hover:brightness-110 disabled:opacity-70 flex items-center gap-2"
                     >
                       {loadingActivate ? <Loader2 size={16} className="animate-spin" /> : null}
-                      {loadingActivate ? 'Đang kích hoạt...' : 'Kích hoạt CDK'}
+                      {loadingActivate ? (isVi ? 'Đang kích hoạt...' : 'Activating...') : (isVi ? 'Kích hoạt CDK' : 'Activate CDK')}
                     </button>
                   </div>
                 </div>
@@ -541,38 +551,40 @@ const ChatGptCdkUtility: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto rounded-3xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 md:p-8 text-center">
+          <div className="max-w-2xl mx-auto rounded-3xl border border-gray-200 dark:border-indigo-900/60 bg-white dark:bg-[#1f2747]/95 p-6 md:p-8 text-center">
             <div className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center mx-auto mb-4">
               <Check size={38} />
             </div>
-            <h2 className="text-xl md:text-2xl font-bold text-emerald-600 mb-2">Thành công</h2>
-            <p className="text-base text-emerald-500 font-semibold mb-5">Kích hoạt thành công</p>
+            <h2 className="text-xl md:text-2xl font-bold text-emerald-600 mb-2">{isVi ? 'Thành công' : 'Success'}</h2>
+            <p className="text-base text-emerald-500 font-semibold mb-5">{isVi ? 'Kích hoạt thành công' : 'Activation successful'}</p>
 
-            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-900/20 p-4 text-left space-y-3 mb-4">
+            <div className="rounded-2xl border border-gray-200 dark:border-indigo-900/60 bg-gray-50/30 dark:bg-[#2b3458]/55 p-4 text-left space-y-3 mb-4">
               <div className="flex justify-between items-center">
-                <span className="text-gray-500 dark:text-gray-400 text-sm">Gói</span>
+                <span className="text-gray-500 dark:text-gray-400 text-sm">{isVi ? 'Gói' : 'Package'}</span>
                 <span className="font-bold text-gray-900 dark:text-gray-100 text-base">{accountInfo?.targetPackage || 'Plus 1 Month'}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-500 dark:text-gray-400 text-sm">Email tài khoản</span>
+                <span className="text-gray-500 dark:text-gray-400 text-sm">{isVi ? 'Email tài khoản' : 'Account email'}</span>
                 <span className="font-bold text-gray-900 dark:text-gray-100 text-base">{accountInfo?.email || '-'}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-500 dark:text-gray-400 text-sm">Thời hạn</span>
+                <span className="text-gray-500 dark:text-gray-400 text-sm">{isVi ? 'Thời hạn' : 'Duration'}</span>
                 <span className="font-bold text-gray-900 dark:text-gray-100 text-base">{accountInfo?.duration || '1m'}</span>
               </div>
             </div>
 
             <div className="rounded-2xl border border-blue-100 dark:border-blue-800/40 bg-blue-50/30 dark:bg-blue-900/10 p-3 flex items-center gap-2 text-xs md:text-sm text-gray-800 dark:text-gray-100 text-left mb-4">
               <Info size={16} className="text-blue-500 shrink-0" />
-              Nếu đã kích hoạt thành công nhưng trong ChatGPT vẫn hiện gói Free, hãy bấm Làm mới trạng thái gói hoặc đăng xuất và đăng nhập lại.
+              {isVi
+                ? 'Nếu đã kích hoạt thành công nhưng trong ChatGPT vẫn hiện gói Free, hãy bấm Làm mới trạng thái gói hoặc đăng xuất và đăng nhập lại.'
+                : 'If activation succeeded but ChatGPT still shows Free, refresh plan status or sign out and sign in again.'}
             </div>
 
             <button
               onClick={resetState}
               className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-sm md:text-base hover:brightness-110"
             >
-              Kích hoạt mã khác
+              {isVi ? 'Kích hoạt mã khác' : 'Activate another key'}
             </button>
           </div>
         )}
@@ -582,3 +594,4 @@ const ChatGptCdkUtility: React.FC = () => {
 };
 
 export default ChatGptCdkUtility;
+

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Loader2, Download, Music, Search, AlertCircle, Headphones, Copy, Check } from 'lucide-react';
+import { Language } from '../utils/translations';
 
 interface ZingResponse {
     title: string;
@@ -9,7 +10,12 @@ interface ZingResponse {
     error?: string; // Standardize error handling if API differs
 }
 
-const ZingMp3Download: React.FC = () => {
+interface ZingMp3DownloadProps {
+    language: Language;
+}
+
+const ZingMp3Download: React.FC<ZingMp3DownloadProps> = ({ language }) => {
+    const isVi = language === 'vi';
     const [url, setUrl] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<ZingResponse | null>(null);
@@ -35,10 +41,10 @@ const ZingMp3Download: React.FC = () => {
             if (data.download_url) {
                 setResult(data);
             } else {
-                setError('Không tìm thấy bài hát. Vui lòng kiểm tra lại link.');
+                setError(isVi ? 'Không tìm thấy bài hát. Vui lòng kiểm tra lại link.' : 'Song not found. Please check the link.');
             }
         } catch (err) {
-            setError('Lỗi kết nối server. Vui lòng thử lại sau.');
+            setError(isVi ? 'Lỗi kết nối server. Vui lòng thử lại sau.' : 'Server connection error. Please try again later.');
             console.error(err);
         } finally {
             setLoading(false);
@@ -86,12 +92,12 @@ const ZingMp3Download: React.FC = () => {
                     Zing MP3 Downloader
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">
-                    Tải Nhạc Chất Lượng Cao 320kbps/Lossless từ Zing MP3.
+                    {isVi ? 'Tải Nhạc Chất Lượng Cao 320kbps/Lossless từ Zing MP3.' : 'Download high-quality 320kbps/Lossless music from Zing MP3.'}
                 </p>
             </div>
 
             {/* Input Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8 transition-colors">
+            <div className="bg-white dark:bg-[#1f2747]/95 rounded-lg shadow-[0_8px_22px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.30)] border border-gray-200 dark:border-indigo-900/60 p-6 md:p-8 transition-colors">
                 <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1 relative">
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -102,8 +108,8 @@ const ZingMp3Download: React.FC = () => {
                             value={url}
                             onChange={(e) => setUrl(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="Dán link bài hát Zing MP3..."
-                            className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:outline-none transition-colors dark:text-white"
+                            placeholder={isVi ? 'Dán link bài hát Zing MP3...' : 'Paste Zing MP3 song URL...'}
+                            className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-[#2b3458] border border-gray-300 dark:border-indigo-900/70 rounded-md focus:ring-2 focus:ring-purple-500 focus:outline-none transition-colors dark:text-white"
                         />
                     </div>
                     <button
@@ -112,7 +118,7 @@ const ZingMp3Download: React.FC = () => {
                         className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[150px]"
                     >
                         {loading ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} />}
-                        {loading ? 'Đang Xử Lý' : 'Tải Ngay'}
+                        {loading ? (isVi ? 'Đang xử lý' : 'Processing') : (isVi ? 'Tải ngay' : 'Download')}
                     </button>
                 </div>
 
@@ -126,7 +132,7 @@ const ZingMp3Download: React.FC = () => {
                 {/* Results */}
                 {result && (
                     <div className="mt-10 animate-fadeIn">
-                        <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-gray-200 dark:border-gray-600 p-6 flex flex-col md:flex-row gap-6 items-center">
+                        <div className="bg-gray-50 dark:bg-[#2b3458]/55 rounded-lg border border-gray-200 dark:border-indigo-900/60 p-6 flex flex-col md:flex-row gap-6 items-center">
 
                             {/* Thumbnail */}
                             <div className="w-32 h-32 md:w-48 md:h-48 shrink-0 relative rounded-lg overflow-hidden shadow-md">
@@ -155,7 +161,7 @@ const ZingMp3Download: React.FC = () => {
                                 {/* Audio Player */}
                                 <audio controls className="w-full h-10 mt-2">
                                     <source src={result.download_url} type="audio/mpeg" />
-                                    Trình duyệt của bạn không hỗ trợ phát nhạc.
+                                    {isVi ? 'Trình duyệt của bạn không hỗ trợ phát nhạc.' : 'Your browser does not support audio playback.'}
                                 </audio>
 
                                 {/* Download Button */}
@@ -164,7 +170,7 @@ const ZingMp3Download: React.FC = () => {
                                     className="w-full md:w-auto px-8 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium flex items-center justify-center gap-2 transition-colors shadow-sm"
                                 >
                                     <Download size={18} />
-                                    Tải Nhạc (MP3)
+                                    {isVi ? 'Tải nhạc (MP3)' : 'Download Music (MP3)'}
                                 </button>
                             </div>
                         </div>
@@ -176,3 +182,4 @@ const ZingMp3Download: React.FC = () => {
 };
 
 export default ZingMp3Download;
+

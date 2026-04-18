@@ -23,8 +23,24 @@
     <style>
       @font-face {
         font-family: 'Codec Pro Bold';
-        src: url('/CodecPro-Bold.ttf') format('truetype');
+        src: url('/font/CodecPro-Bold.ttf') format('truetype');
         font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Geomanist';
+        src: url('/font/Geomanist-Regular.otf') format('opentype');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Geomanist';
+        src: url('/font/Geomanist-Medium.otf') format('opentype');
+        font-weight: 500;
         font-style: normal;
         font-display: swap;
       }
@@ -33,8 +49,16 @@
         font-family: 'Codec Pro Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
 
+      .font-geomanist {
+        font-family: 'Geomanist', ui-sans-serif, system-ui, sans-serif;
+      }
+
       body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      html {
+        scrollbar-gutter: stable;
       }
     </style>
   </head>

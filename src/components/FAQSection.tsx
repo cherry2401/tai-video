@@ -60,7 +60,7 @@ const FAQSection: React.FC<FAQSectionProps> = ({ t }) => {
             return (
               <div 
                 key={num}
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-[#1f2747]/95 border border-gray-200 dark:border-indigo-900/60 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
               >
                 <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
                   {t.faq[qKey]}

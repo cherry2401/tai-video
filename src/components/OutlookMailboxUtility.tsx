@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AlertCircle, Inbox, Loader2, Mail, RefreshCw } from 'lucide-react';
+import { Language } from '../utils/translations';
 
 type ReadMode = 'graph' | 'oauth2';
 
@@ -67,7 +68,7 @@ const sanitizeBodyValue = (value?: string): string => {
   return normalizeDisplayText(decoded);
 };
 
-const normalizeMessage = (msg: Record<string, unknown>): OutlookMessage => {
+const normalizeMessage = (msg: Record<string, unknown>, language: Language): OutlookMessage => {
   const fromObj = msg.from as { address?: string; name?: string } | undefined;
   const from =
     typeof msg.from === 'string'
@@ -78,7 +79,7 @@ const normalizeMessage = (msg: Record<string, unknown>): OutlookMessage => {
 
   return {
     id: typeof msg.id === 'string' ? msg.id : undefined,
-    subject: typeof msg.subject === 'string' ? msg.subject : '(Không có tiêu đề)',
+    subject: typeof msg.subject === 'string' ? msg.subject : language === 'vi' ? '(Không có tiêu đề)' : '(No subject)',
     from,
     date: (msg.date as string) || (msg.createdAt as string) || (msg.time as string) || undefined,
     intro: typeof msg.intro === 'string' ? msg.intro : undefined,
@@ -156,7 +157,12 @@ const renderTextWithLinks = (text: string) => {
   );
 };
 
-const OutlookMailboxUtility: React.FC = () => {
+interface OutlookMailboxUtilityProps {
+  language: Language;
+}
+
+const OutlookMailboxUtility: React.FC<OutlookMailboxUtilityProps> = ({ language }) => {
+  const isVi = language === 'vi';
   const [mode, setMode] = useState<ReadMode>('oauth2');
   const [credentialText, setCredentialText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -196,7 +202,7 @@ const OutlookMailboxUtility: React.FC = () => {
   const readMailbox = async () => {
     const credential = parseCredential(credentialText);
     if (!credential) {
-      setError('Sai định dạng. Dùng: email|password|refresh_token|client_id hoặc email|refresh_token|client_id');
+      setError(isVi ? 'Sai định dạng. Dùng: email|password|refresh_token|client_id hoặc email|refresh_token|client_id' : 'Invalid format. Use: email|password|refresh_token|client_id or email|refresh_token|client_id');
       return;
     }
 
@@ -220,20 +226,20 @@ const OutlookMailboxUtility: React.FC = () => {
       const data = (await response.json()) as unknown;
       if (!response.ok) {
         const message = (data as { message?: string; msg?: string })?.message || (data as { msg?: string })?.msg;
-        throw new Error(message || 'Không thể đọc mailbox từ DongVan API.');
+        throw new Error(message || (isVi ? 'Không thể đọc mailbox từ DongVan API.' : 'Cannot read mailbox from DongVan API.'));
       }
 
       const rawMessages = extractMessages(data);
-      const normalized = rawMessages.map(normalizeMessage);
+      const normalized = rawMessages.map((message) => normalizeMessage(message, language));
       setMessages(normalized);
       setActiveEmail(credential.email);
       if (normalized.length === 0) {
-        setError('Không có thư hoặc API không trả danh sách thư cho tài khoản này.');
+        setError(isVi ? 'Không có thư hoặc API không trả danh sách thư cho tài khoản này.' : 'No emails found or API did not return mailbox data for this account.');
       }
     } catch (err) {
       setMessages([]);
       setActiveEmail('');
-      setError(err instanceof Error ? err.message : 'Lỗi đọc mailbox.');
+      setError(err instanceof Error ? err.message : isVi ? 'Lỗi đọc mailbox.' : 'Mailbox read failed.');
     } finally {
       setLoading(false);
     }
@@ -245,7 +251,7 @@ const OutlookMailboxUtility: React.FC = () => {
       const clean = sanitizeBodyValue(candidate);
       if (clean) return clean;
     }
-    return 'Không có nội dung thư.';
+    return isVi ? 'Không có nội dung thư.' : 'No message content.';
   };
 
   return (
@@ -255,21 +261,21 @@ const OutlookMailboxUtility: React.FC = () => {
           <img src="/outlook.svg" alt="Outlook logo" className="w-7 h-7 md:w-8 md:h-8 object-contain" />
           <span>Outlook / Hotmail</span>
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">Đọc inbox bằng token theo chuẩn DongVanFB API.</p>
+        <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">{isVi ? 'Đọc inbox bằng token theo chuẩn DongVanFB API.' : 'Read inbox by token using DongVanFB API format.'}</p>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 md:p-6">
+      <div className="bg-white dark:bg-[#1f2747]/95 rounded-2xl shadow-[0_8px_22px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.30)] border border-gray-200 dark:border-indigo-900/60 p-5 md:p-6">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Chế độ:</span>
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{isVi ? 'Chế độ:' : 'Mode:'}</span>
           <button
             onClick={() => setMode('graph')}
-            className={`px-3 py-1.5 rounded-md text-sm font-semibold ${mode === 'graph' ? 'bg-emerald-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
+            className={`px-3 py-1.5 rounded-md text-sm font-semibold ${mode === 'graph' ? 'bg-emerald-600 text-white' : 'bg-gray-100 dark:bg-[#2b3458] text-gray-700 dark:text-gray-200'}`}
           >
             Graph API
           </button>
           <button
             onClick={() => setMode('oauth2')}
-            className={`px-3 py-1.5 rounded-md text-sm font-semibold ${mode === 'oauth2' ? 'bg-emerald-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
+            className={`px-3 py-1.5 rounded-md text-sm font-semibold ${mode === 'oauth2' ? 'bg-emerald-600 text-white' : 'bg-gray-100 dark:bg-[#2b3458] text-gray-700 dark:text-gray-200'}`}
           >
             OAuth2
           </button>
@@ -280,7 +286,7 @@ const OutlookMailboxUtility: React.FC = () => {
           onChange={(e) => setCredentialText(e.target.value)}
           rows={6}
           placeholder="email|password|refresh_token|client_id"
-          className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-sm resize-y"
+          className="w-full p-3 rounded-lg border border-gray-300 dark:border-indigo-900/70 bg-white dark:bg-[#2b3458] text-gray-800 dark:text-gray-100 text-sm resize-y"
         />
 
         <div className="mt-3 flex items-center justify-end gap-2">
@@ -290,17 +296,17 @@ const OutlookMailboxUtility: React.FC = () => {
             className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold disabled:opacity-60 flex items-center gap-2"
           >
             {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-            Đọc hòm thư
+            {isVi ? 'Đọc hòm thư' : 'Read mailbox'}
           </button>
         </div>
 
-        <div className="mt-6 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden bg-white dark:bg-gray-900/20">
-          <div className="px-4 md:px-6 py-3.5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div className="mt-6 border border-gray-200 dark:border-indigo-900/60 rounded-2xl overflow-hidden bg-white dark:bg-[#2b3458]/45">
+          <div className="px-4 md:px-6 py-3.5 border-b border-gray-200 dark:border-indigo-900/60 flex items-center justify-between">
             <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100 font-semibold">
               <Inbox size={16} />
-              Thư đến {activeEmail ? `(${activeEmail})` : ''}
+              {(isVi ? 'Thư đến' : 'Inbox')} {activeEmail ? `(${activeEmail})` : ''}
             </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400">{messages.length} thư</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{messages.length} {isVi ? 'thư' : 'emails'}</span>
           </div>
 
           <div className="min-h-[260px] max-h-[700px] overflow-y-auto">
@@ -308,7 +314,7 @@ const OutlookMailboxUtility: React.FC = () => {
               <div className="h-full min-h-[260px] flex items-center justify-center text-center px-6">
                 <div>
                   <Mail className="mx-auto text-gray-400" size={30} />
-                  <p className="text-gray-700 dark:text-gray-200 font-semibold mt-4">Chưa có dữ liệu thư</p>
+                  <p className="text-gray-700 dark:text-gray-200 font-semibold mt-4">{isVi ? 'Chưa có dữ liệu thư' : 'No mailbox data yet'}</p>
                 </div>
               </div>
             )}
@@ -325,15 +331,15 @@ const OutlookMailboxUtility: React.FC = () => {
                         onClick={() => setExpandedMessageId((prev) => (prev === key ? null : key))}
                         className="w-full text-left px-4 md:px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors"
                       >
-                        <p className="font-semibold text-gray-900 dark:text-gray-100">{message.subject || '(Không có tiêu đề)'}</p>
+                        <p className="font-semibold text-gray-900 dark:text-gray-100">{message.subject || (isVi ? '(Không có tiêu đề)' : '(No subject)')}</p>
                         <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                          Từ: {message.from || 'N/A'} {message.date ? `• ${message.date}` : ''}
+                          {isVi ? 'Từ' : 'From'}: {message.from || 'N/A'} {message.date ? `• ${message.date}` : ''}
                         </p>
                         <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 break-words">{message.intro || '...'}</p>
                       </button>
 
                       {isExpanded && (
-                        <div className="px-4 md:px-6 pb-4 pt-0 border-t border-gray-200/80 dark:border-gray-700/80">
+                        <div className="px-4 md:px-6 pb-4 pt-0 border-t border-gray-200/80 dark:border-indigo-900/60">
                           <p className="text-sm leading-6 whitespace-pre-wrap break-words text-gray-800 dark:text-gray-200 py-3">
                             {renderTextWithLinks(getMessageBody(message))}
                           </p>
@@ -359,3 +365,4 @@ const OutlookMailboxUtility: React.FC = () => {
 };
 
 export default OutlookMailboxUtility;
+

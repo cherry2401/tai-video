@@ -11,6 +11,7 @@ import { Translation } from '../utils/translations';
 
 interface SupportedPlatformsProps {
   t: Translation;
+  theme: 'light' | 'dark';
 }
 
 interface Platform {
@@ -20,7 +21,7 @@ interface Platform {
   customIconUrl?: string;
 }
 
-const SupportedPlatforms: React.FC<SupportedPlatformsProps> = ({ t }) => {
+const SupportedPlatforms: React.FC<SupportedPlatformsProps> = ({ t, theme }) => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -73,11 +74,19 @@ const SupportedPlatforms: React.FC<SupportedPlatformsProps> = ({ t }) => {
     <div className="w-full max-w-6xl mx-auto mt-0 px-4 pb-24">
       <div 
         ref={sectionRef}
-        className={`bg-[#e9eff6] dark:bg-gray-800/80 rounded-[2.5rem] p-6 md:p-12 flex flex-col lg:flex-row gap-12 items-center transition-all duration-1000 ease-out transform ${
+        className={`bg-[#e9eff6] dark:bg-[#1f2747]/92 border border-transparent dark:border-indigo-900/60 rounded-[2.5rem] p-6 md:p-12 flex flex-col lg:flex-row gap-12 items-center transition-all duration-1000 ease-out transform ${
             isVisible 
             ? 'opacity-100 translate-y-0 blur-0' 
             : 'opacity-0 translate-y-20 blur-sm'
         }`}
+        style={
+          theme === 'dark'
+            ? {
+                backgroundColor: 'rgba(31, 39, 71, 0.95)',
+                borderColor: 'rgba(49, 46, 129, 0.55)',
+              }
+            : undefined
+        }
       >
         {/* Left Column: Platform Grid */}
         <div className="flex-1 w-full order-2 lg:order-1">
@@ -87,7 +96,7 @@ const SupportedPlatforms: React.FC<SupportedPlatformsProps> = ({ t }) => {
                   return (
                     <div 
                       key={index}
-                      className="flex items-center gap-2 bg-white dark:bg-gray-700 px-3 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-default select-none"
+                      className="flex items-center gap-2 bg-white dark:bg-[#2b3458] px-3 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-default select-none border border-transparent dark:border-indigo-900/50"
                     >
                       {platform.customIconUrl ? (
                         <img 

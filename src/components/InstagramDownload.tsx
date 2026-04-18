@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Loader2, Download, Instagram, Search, AlertCircle, PlayCircle, Image as ImageIcon, Copy, Check } from 'lucide-react';
+import { Language } from '../utils/translations';
 
 interface MediaItem {
     type: 'Photo' | 'Video';
@@ -15,7 +16,12 @@ interface InstagramResponse {
     attachments?: MediaItem[];
 }
 
-const InstagramDownload: React.FC = () => {
+interface InstagramDownloadProps {
+    language: Language;
+}
+
+const InstagramDownload: React.FC<InstagramDownloadProps> = ({ language }) => {
+    const isVi = language === 'vi';
     const [url, setUrl] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<InstagramResponse | null>(null);
@@ -50,10 +56,10 @@ const InstagramDownload: React.FC = () => {
             if (data.success && data.found) {
                 setResult(data);
             } else {
-                setError(data.message || 'Không tìm thấy media. Vui lòng kiểm tra lại link (phải là Public).');
+                setError(data.message || (isVi ? 'Không tìm thấy media. Vui lòng kiểm tra lại link (phải là Public).' : 'Media not found. Please check the link (must be Public).'));
             }
         } catch (err) {
-            setError('Lỗi kết nối server. Vui lòng thử lại sau.');
+            setError(isVi ? 'Lỗi kết nối server. Vui lòng thử lại sau.' : 'Server connection error. Please try again later.');
             console.error(err);
         } finally {
             setLoading(false);
@@ -110,12 +116,12 @@ const InstagramDownload: React.FC = () => {
                     Instagram Downloader
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">
-                    Tải Ảnh, Video, Reels, Stories từ Instagram miễn phí - chất lượng gốc.
+                    {isVi ? 'Tải Ảnh, Video, Reels, Stories từ Instagram miễn phí - chất lượng gốc.' : 'Download Photos, Videos, Reels, and Stories from Instagram for free in original quality.'}
                 </p>
             </div>
 
             {/* Input Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8 transition-colors">
+            <div className="bg-white dark:bg-[#1f2747]/95 rounded-lg shadow-[0_8px_22px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.30)] border border-gray-200 dark:border-indigo-900/60 p-6 md:p-8 transition-colors">
                 <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1 relative">
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -126,8 +132,8 @@ const InstagramDownload: React.FC = () => {
                             value={url}
                             onChange={(e) => setUrl(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="Dán link Instagram (ví dụ: https://www.instagram.com/p/...)"
-                            className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-pink-500 focus:outline-none transition-colors dark:text-white"
+                            placeholder={isVi ? 'Dán link Instagram (ví dụ: https://www.instagram.com/p/...)' : 'Paste Instagram URL (e.g. https://www.instagram.com/p/...)'}
+                            className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-[#2b3458] border border-gray-300 dark:border-indigo-900/70 rounded-md focus:ring-2 focus:ring-pink-500 focus:outline-none transition-colors dark:text-white"
                         />
                     </div>
                     <button
@@ -136,7 +142,7 @@ const InstagramDownload: React.FC = () => {
                         className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[150px]"
                     >
                         {loading ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} />}
-                        {loading ? 'Đang Xử Lý' : 'Tải Ngay'}
+                        {loading ? (isVi ? 'Đang xử lý' : 'Processing') : (isVi ? 'Tải ngay' : 'Download')}
                     </button>
                 </div>
 
@@ -151,20 +157,20 @@ const InstagramDownload: React.FC = () => {
                 {result && (
                     <div className="mt-10 animate-fadeIn">
                         <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
-                            Kết quả tìm thấy ({result.attachments?.length || 0})
+                            {isVi ? `Kết quả tìm thấy (${result.attachments?.length || 0})` : `Results found (${result.attachments?.length || 0})`}
                         </h3>
 
                         {/* Caption Section */}
                         {result.message && (
-                            <div className="mb-8 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                            <div className="mb-8 p-4 bg-gray-50 dark:bg-[#2b3458]/55 rounded-lg border border-gray-200 dark:border-indigo-900/60">
                                 <div className="flex justify-between items-start mb-2">
-                                    <h4 className="font-medium text-gray-700 dark:text-gray-300">Caption</h4>
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300">{isVi ? 'Mô tả' : 'Caption'}</h4>
                                     <button
                                         onClick={handleCopyCaption}
                                         className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-medium bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded"
                                     >
                                         {captionCopied ? <Check size={14} /> : <Copy size={14} />}
-                                        {captionCopied ? 'Đã sao chép' : 'Sao chép'}
+                                        {captionCopied ? (isVi ? 'Đã sao chép' : 'Copied') : (isVi ? 'Sao chép' : 'Copy')}
                                     </button>
                                 </div>
                                 <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap max-h-40 overflow-y-auto pr-2 custom-scrollbar">
@@ -175,7 +181,7 @@ const InstagramDownload: React.FC = () => {
 
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                             {result.attachments?.map((item, index) => (
-                                <div key={index} className="bg-gray-50 dark:bg-gray-700/30 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-shadow">
+                                <div key={index} className="bg-gray-50 dark:bg-[#2b3458]/55 rounded-lg overflow-hidden border border-gray-200 dark:border-indigo-900/60 shadow-sm hover:shadow-md transition-shadow">
                                     {/* Media Preview */}
                                     <div className="aspect-[4/5] relative flex items-center justify-center bg-black/5 dark:bg-black/20 group">
                                         {item.type === 'Video' ? (
@@ -214,7 +220,7 @@ const InstagramDownload: React.FC = () => {
                                             className="flex items-center justify-center gap-1.5 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs md:text-sm font-medium transition-colors shadow-sm"
                                         >
                                             <Download size={14} />
-                                            {item.type === 'Video' ? 'Video' : 'Ảnh'}
+                                            {item.type === 'Video' ? 'Video' : (isVi ? 'Ảnh' : 'Photo')}
                                         </button>
                                     </div>
                                 </div>
@@ -228,3 +234,4 @@ const InstagramDownload: React.FC = () => {
 };
 
 export default InstagramDownload;
+

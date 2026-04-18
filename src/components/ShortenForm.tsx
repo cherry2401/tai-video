@@ -5,13 +5,15 @@ import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 
 interface ShortenFormProps {
   t: Translation;
+  language?: string;
 }
 
 interface ShortenResponse {
   shortCode: string;
 }
 
-const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
+const ShortenForm: React.FC<ShortenFormProps> = ({ t, language = 'vi' }) => {
+  const isVi = language === 'vi';
   const [longUrl, setLongUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
   const [isCopied, setIsCopied] = useState(false);
@@ -38,12 +40,12 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
         const generatedUrl = `${currentDomain}/${data.shortCode}`;
         setShortUrl(generatedUrl);
       } else {
-        alert('Không thể rút gọn link. Vui lòng thử lại.');
+        alert(isVi ? 'Không thể rút gọn link. Vui lòng thử lại.' : 'Cannot shorten this URL. Please try again.');
       }
 
     } catch (e) {
       console.error("Shorten error", e);
-      alert("Lỗi kết nối server");
+      alert(isVi ? 'Lỗi kết nối server' : 'Server connection error');
     } finally {
       setLoading(false);
     }
@@ -91,7 +93,7 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
         </h1>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8 transition-colors duration-300">
+      <div className="bg-white dark:bg-[#1f2747]/95 rounded-lg shadow-[0_8px_22px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.30)] border border-gray-200 dark:border-indigo-900/60 p-6 md:p-8 transition-colors duration-300">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -102,7 +104,7 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
               value={longUrl}
               onChange={(e) => setLongUrl(e.target.value)}
               placeholder={t.shorten.placeholder}
-              className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors dark:text-white"
+              className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-[#2b3458] border border-gray-300 dark:border-indigo-900/70 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors dark:text-white"
             />
           </div>
           <button
@@ -145,7 +147,7 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
             </div>
 
             {/* QR Code Section */}
-            <div className="p-6 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 flex flex-col md:flex-row items-center gap-8">
+            <div className="p-6 bg-gray-50 dark:bg-[#2b3458]/55 rounded-lg border border-gray-200 dark:border-indigo-900/60 flex flex-col md:flex-row items-center gap-8">
               <div className="bg-white p-2 rounded-lg shadow-sm">
                 <div className="hidden">
                   <QRCodeCanvas
@@ -188,7 +190,7 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
                 </h3>
 
                 <p className="text-sm text-gray-500 dark:text-gray-400 flex justify-center md:justify-start">
-                  - Quét mã để truy cập nhanh trên điện thoại.
+                  {isVi ? '- Quét mã để truy cập nhanh trên điện thoại.' : '- Scan this code to open quickly on your phone.'}
                 </p>
 
                 <div className="flex flex-wrap justify-center md:justify-start gap-3">
@@ -215,3 +217,4 @@ const ShortenForm: React.FC<ShortenFormProps> = ({ t }) => {
 };
 
 export default ShortenForm;
+

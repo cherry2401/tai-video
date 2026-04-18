@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Loader2, Download, Search, AlertCircle, Eye, Play } from 'lucide-react';
+import { Language } from '../utils/translations';
 
 interface XnxxSearchResult {
   title: string;
@@ -34,7 +35,12 @@ interface XnxxResponse {
   message?: string;
 }
 
-const XnxxDownload: React.FC = () => {
+interface XnxxDownloadProps {
+  language: Language;
+}
+
+const XnxxDownload: React.FC<XnxxDownloadProps> = ({ language }) => {
+  const isVi = language === 'vi';
   const [mode, setMode] = useState<'search' | 'download'>('search');
   const [query, setQuery] = useState('');
   const [url, setUrl] = useState('');
@@ -69,10 +75,10 @@ const XnxxDownload: React.FC = () => {
       if (Array.isArray(videos) && videos.length > 0) {
         setSearchResults(videos);
       } else {
-        setError(data.message || 'Không tìm thấy kết quả nào.');
+        setError(data.message || (isVi ? 'Không tìm thấy kết quả nào.' : 'No results found.'));
       }
     } catch (err) {
-      setError('Lỗi kết nối server.');
+      setError(isVi ? 'Lỗi kết nối server.' : 'Server connection error.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -103,10 +109,10 @@ const XnxxDownload: React.FC = () => {
         };
         setDownloadData(normalized);
       } else {
-        setError(res.message || 'Không thể lấy link tải. Video có thể đã bị xóa hoặc lỗi server.');
+        setError(res.message || (isVi ? 'Không thể lấy link tải. Video có thể đã bị xóa hoặc lỗi server.' : 'Cannot fetch download link. Video may be removed or server failed.'));
       }
     } catch (err) {
-      setError('Lỗi lấy link download.');
+      setError(isVi ? 'Lỗi lấy link download.' : 'Failed to fetch download link.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -123,7 +129,7 @@ const XnxxDownload: React.FC = () => {
         <h1 className="text-2xl md:text-4xl font-bold text-[#334155] dark:text-gray-100 flex flex-col items-center justify-center gap-2">
           <span className="text-4xl md:text-5xl font-black tracking-wide text-gray-900 dark:text-gray-100">XNXX</span>
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 text-sm">Tìm kiếm & Tải video Full HD miễn phí.</p>
+        <p className="text-gray-500 dark:text-gray-400 text-sm">{isVi ? 'Tìm kiếm & Tải video Full HD miễn phí.' : 'Search and download Full HD videos for free.'}</p>
       </div>
 
       <div className="flex justify-center gap-4 mb-8">
@@ -132,22 +138,22 @@ const XnxxDownload: React.FC = () => {
           className={`px-6 py-2 rounded-full font-bold transition-all ${
             mode === 'search'
               ? 'bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-md transform scale-105'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2b3458]'
           }`}
         >
           <Search className="inline-block w-4 h-4 mr-2" />
-          Tìm Kiếm
+          {isVi ? 'Tìm kiếm' : 'Search'}
         </button>
         <button
           onClick={() => setMode('download')}
           className={`px-6 py-2 rounded-full font-bold transition-all ${
             mode === 'download'
               ? 'bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-md transform scale-105'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2b3458]'
           }`}
         >
           <Download className="inline-block w-4 h-4 mr-2" />
-          Tải Link
+          {isVi ? 'Tải link' : 'Download URL'}
         </button>
       </div>
 
@@ -159,8 +165,8 @@ const XnxxDownload: React.FC = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Nhập từ khóa (vd: vietnam...)"
-              className="w-full pl-5 pr-14 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-gray-600 focus:outline-none shadow-sm dark:text-white"
+              placeholder={isVi ? 'Nhập từ khóa (vd: vietnam...)' : 'Enter keyword (e.g. vietnam...)'}
+              className="w-full pl-5 pr-14 py-3 bg-white dark:bg-[#1f2747]/95 border border-gray-300 dark:border-indigo-900/70 rounded-full focus:ring-2 focus:ring-gray-600 focus:outline-none shadow-[0_7px_18px_rgba(15,23,42,0.07)] dark:shadow-[0_8px_18px_rgba(2,6,23,0.28)] dark:text-white"
             />
             <button
               onClick={handleSearch}
@@ -177,9 +183,9 @@ const XnxxDownload: React.FC = () => {
                 <div
                   key={index}
                   onClick={() => handleGetLink(item.url)}
-                  className="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all cursor-pointer"
+                  className="group bg-white dark:bg-[#1f2747]/95 rounded-lg overflow-hidden shadow-sm border border-gray-200 dark:border-indigo-900/60 hover:shadow-md transition-all cursor-pointer"
                 >
-                  <div className="relative aspect-video bg-gray-200 dark:bg-gray-700">
+                  <div className="relative aspect-video bg-gray-200 dark:bg-[#2b3458]">
                     <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
                     {item.duration && (
                       <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">{item.duration}</div>
@@ -208,14 +214,14 @@ const XnxxDownload: React.FC = () => {
       )}
 
       {mode === 'download' && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
+        <div className="bg-white dark:bg-[#1f2747]/95 rounded-xl shadow-[0_8px_22px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_26px_rgba(2,6,23,0.30)] border border-gray-200 dark:border-indigo-900/60 p-6 md:p-8">
           <div className="flex flex-col md:flex-row gap-3 mb-6">
             <input
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="Dán link video XNXX tại đây..."
-              className="flex-1 w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-600 focus:outline-none dark:text-white"
+              placeholder={isVi ? 'Dán link video XNXX tại đây...' : 'Paste XNXX URL here...'}
+              className="flex-1 w-full px-4 py-3 bg-gray-50 dark:bg-[#2b3458] border border-gray-300 dark:border-indigo-900/70 rounded-lg focus:ring-2 focus:ring-gray-600 focus:outline-none dark:text-white"
             />
             <button
               onClick={() => handleGetLink(url)}
@@ -223,12 +229,12 @@ const XnxxDownload: React.FC = () => {
               className="bg-gray-900 hover:bg-black text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50"
             >
               {loading ? <Loader2 className="animate-spin" /> : <Download />}
-              Lấy Link
+              {isVi ? 'Lấy link' : 'Get link'}
             </button>
           </div>
 
           {downloadData && (
-            <div className="animate-fadeIn mt-8 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-gray-200 dark:border-gray-600">
+            <div className="animate-fadeIn mt-8 p-4 bg-gray-50 dark:bg-[#2b3458]/55 rounded-lg border border-gray-200 dark:border-indigo-900/60">
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="w-full md:w-1/3 aspect-video rounded-lg overflow-hidden bg-black relative">
                   <img src={downloadData.thumbnail as string} alt={downloadData.title} className="w-full h-full object-contain" />
@@ -243,7 +249,7 @@ const XnxxDownload: React.FC = () => {
                         onClick={() => triggerDownload(downloadData.videoUrls.low)}
                         className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium text-sm flex items-center justify-center gap-2"
                       >
-                        <Download size={16} /> Tải Chất Lượng Thường
+                        <Download size={16} /> {isVi ? 'Tải chất lượng thường' : 'Download Standard Quality'}
                       </button>
                     )}
                     {downloadData.videoUrls.high && (
@@ -251,12 +257,12 @@ const XnxxDownload: React.FC = () => {
                         onClick={() => triggerDownload(downloadData.videoUrls.high)}
                         className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium text-sm flex items-center justify-center gap-2"
                       >
-                        <Download size={16} /> Tải Chất Lượng Cao (HD)
+                        <Download size={16} /> {isVi ? 'Tải chất lượng cao (HD)' : 'Download High Quality (HD)'}
                       </button>
                     )}
                   </div>
                   <p className="text-xs text-gray-500 italic mt-2 text-center">
-                    *Nếu không tự tải, video sẽ mở trong tab mới. Hãy bấm menu 3 chấm ở góc video để lưu.
+                    {isVi ? '*Nếu không tự tải, video sẽ mở trong tab mới. Hãy bấm menu 3 chấm ở góc video để lưu.' : '*If auto-download does not start, the video will open in a new tab. Use the 3-dot menu on the player to save it.'}
                   </p>
                 </div>
               </div>

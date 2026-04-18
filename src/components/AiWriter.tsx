@@ -105,7 +105,7 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
             </div>
 
             {/* Main Input Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 md:p-8 transition-colors text-left">
+            <div className="bg-white dark:bg-[#1f2747]/95 rounded-xl shadow-lg border border-gray-200 dark:border-indigo-900/60 p-6 md:p-8 transition-colors text-left">
 
                 {/* Prompt Input */}
                 <div className="mb-4">
@@ -113,7 +113,7 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
                         placeholder={t.aiWriter.promptPlaceholder}
-                        className="w-full h-32 p-4 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none transition-colors dark:text-white resize-none text-base"
+                        className="w-full h-32 p-4 bg-gray-50 dark:bg-[#2b3458] border border-gray-300 dark:border-indigo-900/70 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none transition-colors dark:text-white resize-none text-base"
                     />
                 </div>
 
@@ -123,7 +123,7 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
                         {t.aiWriter.uploadLabel}
                     </label>
                     <div className="flex items-center gap-4">
-                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 transition-colors">
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-indigo-900/70 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-[#2b3458] dark:bg-[#2b3458] hover:bg-gray-100 transition-colors">
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                 <UploadCloud className="w-8 h-8 mb-3 text-gray-400" />
                                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
@@ -175,7 +175,7 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
                         <select
                             value={genre}
                             onChange={(e) => setGenre(e.target.value)}
-                            className="w-full p-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 dark:text-white"
+                            className="w-full p-2.5 bg-gray-50 dark:bg-[#2b3458] border border-gray-300 dark:border-indigo-900/70 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 dark:text-white"
                         >
                             <option value="sales">{t.aiWriter.options.genre.sales}</option>
                             <option value="story">{t.aiWriter.options.genre.story}</option>
@@ -191,7 +191,7 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
                         <select
                             value={style}
                             onChange={(e) => setStyle(e.target.value)}
-                            className="w-full p-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 dark:text-white"
+                            className="w-full p-2.5 bg-gray-50 dark:bg-[#2b3458] border border-gray-300 dark:border-indigo-900/70 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 dark:text-white"
                         >
                             <option value="professional">{t.aiWriter.options.style.professional}</option>
                             <option value="humorous">{t.aiWriter.options.style.humorous}</option>
@@ -207,7 +207,7 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
                         <select
                             value={length}
                             onChange={(e) => setLength(e.target.value)}
-                            className="w-full p-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 dark:text-white"
+                            className="w-full p-2.5 bg-gray-50 dark:bg-[#2b3458] border border-gray-300 dark:border-indigo-900/70 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 dark:text-white"
                         >
                             <option value="short">{t.aiWriter.options.length.short}</option>
                             <option value="medium">{t.aiWriter.options.length.medium}</option>
@@ -221,7 +221,7 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
                         <select
                             value={platform}
                             onChange={(e) => setPlatform(e.target.value)}
-                            className="w-full p-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 dark:text-white"
+                            className="w-full p-2.5 bg-gray-50 dark:bg-[#2b3458] border border-gray-300 dark:border-indigo-900/70 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 dark:text-white"
                         >
                             <option value="facebook">{t.aiWriter.options.platform.facebook}</option>
                             <option value="instagram">{t.aiWriter.options.platform.instagram}</option>
@@ -251,7 +251,7 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
                                 value={adminKey}
                                 onChange={(e) => setAdminKey(e.target.value)}
                                 placeholder={t.aiWriter.adminKeyPlaceholder}
-                                className="w-full md:w-1/2 p-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-yellow-500 focus:outline-none dark:text-white"
+                                className="w-full md:w-1/2 p-2 text-sm bg-gray-50 dark:bg-[#2b3458] border border-gray-300 dark:border-indigo-900/70 rounded focus:ring-1 focus:ring-yellow-500 focus:outline-none dark:text-white"
                             />
                         </div>
                     )}
@@ -300,7 +300,7 @@ const AiWriter: React.FC<AiWriterProps> = ({ t, language }) => {
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 md:p-8 min-h-[200px]">
+                    <div className="bg-white dark:bg-[#1f2747]/95 rounded-xl shadow-lg border border-gray-200 dark:border-indigo-900/60 p-6 md:p-8 min-h-[200px]">
                         <div className="prose dark:prose-invert max-w-none">
                             <Markdown>{result}</Markdown>
                         </div>

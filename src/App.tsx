@@ -55,6 +55,18 @@ const App: React.FC = () => {
 
   // Translation Helper
   const t = translations[language];
+  const appBackgroundStyle =
+    theme === 'dark'
+      ? {
+          backgroundColor: '#0b1230',
+          backgroundImage:
+            'radial-gradient(1200px 700px at 10% 0%, rgba(99, 102, 241, 0.26), transparent 60%), radial-gradient(1000px 600px at 90% 10%, rgba(56, 189, 248, 0.18), transparent 58%), linear-gradient(135deg, #0b1230 0%, #1c1b47 45%, #2c2a63 100%)',
+        }
+      : {
+          backgroundColor: '#fcfeff',
+          backgroundImage:
+            'radial-gradient(760px 240px at 50% -110px, rgba(110, 231, 183, 0.07), transparent 74%), radial-gradient(940px 300px at 8% -140px, rgba(186, 230, 253, 0.08), transparent 76%), radial-gradient(820px 280px at 92% -150px, rgba(165, 243, 252, 0.07), transparent 77%), radial-gradient(1200px 520px at 50% 0%, rgba(255, 255, 255, 0.5), transparent 66%), linear-gradient(180deg, #f9fffd 0%, #fbfdff 30%, #fcfdff 60%, #fdfdff 100%)',
+        };
 
   // Theme Logic
   useEffect(() => {
@@ -102,7 +114,7 @@ const App: React.FC = () => {
 
     } catch (error) {
       console.error("Error processing links:", error);
-      alert("Có lỗi xảy ra khi xử lý links. Vui lòng thử lại.");
+      alert(language === 'vi' ? 'Có lỗi xảy ra khi xử lý links. Vui lòng thử lại.' : 'An error occurred while processing links. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +149,7 @@ const App: React.FC = () => {
 
     } catch (error) {
       console.error('Error enriching results:', error);
-      alert('Không thể lấy link download. Vui lòng thử lại.');
+      alert(language === 'vi' ? 'Không thể lấy link download. Vui lòng thử lại.' : 'Cannot fetch download links. Please try again.');
     } finally {
       setIsProcessingDownload(false);
     }
@@ -161,7 +173,7 @@ const App: React.FC = () => {
     }
 
     if (activeTab === NavItem.RUT_GON) {
-      return <ShortenForm t={t} />;
+      return <ShortenForm t={t} language={language} />;
     }
 
     if (activeTab === NavItem.AI_WRITER) {
@@ -178,7 +190,7 @@ const App: React.FC = () => {
                 onClick={() => setActiveTool('instagram')}
                 className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${activeTool === 'instagram'
                   ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md transform scale-105'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                  : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2b3458] border border-gray-100 dark:border-indigo-900/60'
                   }`}
               >
                 Instagram
@@ -187,7 +199,7 @@ const App: React.FC = () => {
                 onClick={() => setActiveTool('zing')}
                 className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${activeTool === 'zing'
                   ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-md transform scale-105'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                  : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2b3458] border border-gray-100 dark:border-indigo-900/60'
                   }`}
               >
                 Zing MP3
@@ -196,7 +208,7 @@ const App: React.FC = () => {
                 onClick={() => setActiveTool('soundcloud')}
                 className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${activeTool === 'soundcloud'
                   ? 'bg-orange-600 text-white shadow-md transform scale-105'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                  : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2b3458] border border-gray-100 dark:border-indigo-900/60'
                   }`}
               >
                 SoundCloud
@@ -205,7 +217,7 @@ const App: React.FC = () => {
                 onClick={() => setActiveTool('xvideos')}
                 className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${activeTool === 'xvideos'
                   ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-md transform scale-105'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                  : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2b3458] border border-gray-100 dark:border-indigo-900/60'
                   }`}
               >
                 Xvideos
@@ -214,7 +226,7 @@ const App: React.FC = () => {
                 onClick={() => setActiveTool('xnxx')}
                 className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${activeTool === 'xnxx'
                   ? 'bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-md transform scale-105'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                  : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2b3458] border border-gray-100 dark:border-indigo-900/60'
                   }`}
               >
                 XNXX
@@ -223,11 +235,11 @@ const App: React.FC = () => {
           </div>
 
           {/* Tool Content */}
-          {activeTool === 'instagram' && <InstagramDownload />}
-          {activeTool === 'zing' && <ZingMp3Download />}
-          {activeTool === 'soundcloud' && <SoundCloudDownload />}
-          {activeTool === 'xvideos' && <XvideosDownload />}
-          {activeTool === 'xnxx' && <XnxxDownload />}
+          {activeTool === 'instagram' && <InstagramDownload language={language} />}
+          {activeTool === 'zing' && <ZingMp3Download language={language} />}
+          {activeTool === 'soundcloud' && <SoundCloudDownload language={language} />}
+          {activeTool === 'xvideos' && <XvideosDownload language={language} />}
+          {activeTool === 'xnxx' && <XnxxDownload language={language} />}
         </div>
       );
     }
@@ -242,7 +254,7 @@ const App: React.FC = () => {
                 className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${
                   activeUtility === 'tempmail'
                     ? 'bg-gradient-to-r from-sky-600 to-cyan-500 text-white shadow-md transform scale-105'
-                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                    : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2b3458] border border-gray-100 dark:border-indigo-900/60'
                 }`}
               >
                 Tempmail
@@ -252,7 +264,7 @@ const App: React.FC = () => {
                 className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${
                   activeUtility === 'twofa'
                     ? 'bg-gradient-to-r from-indigo-600 to-blue-500 text-white shadow-md transform scale-105'
-                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                    : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2b3458] border border-gray-100 dark:border-indigo-900/60'
                 }`}
               >
                 2FA
@@ -262,7 +274,7 @@ const App: React.FC = () => {
                 className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${
                   activeUtility === 'outlook'
                     ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-md transform scale-105'
-                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                    : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2b3458] border border-gray-100 dark:border-indigo-900/60'
                 }`}
               >
                 Outlook
@@ -272,7 +284,7 @@ const App: React.FC = () => {
                 className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${
                   activeUtility === 'cdk'
                     ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-md transform scale-105'
-                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700'
+                    : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2b3458] border border-gray-100 dark:border-indigo-900/60'
                 }`}
               >
                 ChatGPT CDK
@@ -280,10 +292,10 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {activeUtility === 'tempmail' && <TempMailUtility />}
-          {activeUtility === 'twofa' && <TwoFaUtility />}
-          {activeUtility === 'outlook' && <OutlookMailboxUtility />}
-          {activeUtility === 'cdk' && <ChatGptCdkUtility />}
+          {activeUtility === 'tempmail' && <TempMailUtility language={language} />}
+          {activeUtility === 'twofa' && <TwoFaUtility language={language} />}
+          {activeUtility === 'outlook' && <OutlookMailboxUtility language={language} />}
+          {activeUtility === 'cdk' && <ChatGptCdkUtility language={language} />}
         </div>
       );
     }
@@ -300,7 +312,7 @@ const App: React.FC = () => {
           </p>
         </div>
 
-        <DownloadForm onDownload={handleDownload} isLoading={isLoading || isProcessingDownload} t={t} />
+        <DownloadForm onDownload={handleDownload} isLoading={isLoading || isProcessingDownload} t={t} theme={theme} />
 
         {/* NEW: Shopee Affiliate Iframe (Updated with hidden support) */}
         {currentShopeeUrl && !affiliateTracked && (
@@ -319,7 +331,7 @@ const App: React.FC = () => {
             <div className="flex items-center justify-center gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                Đang lấy link download từ server...
+                {language === 'vi' ? 'Đang lấy link download từ server...' : 'Fetching download links from server...'}
               </p>
             </div>
           </div>
@@ -331,7 +343,7 @@ const App: React.FC = () => {
 
         <TutorialSection t={t} />
 
-        <SupportedPlatforms t={t} />
+        <SupportedPlatforms t={t} theme={theme} />
 
         <FAQSection t={t} />
       </>
@@ -341,16 +353,22 @@ const App: React.FC = () => {
   // If redirecting, show a simple loading screen instead of the main app
   if (isRedirecting) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8fafc] dark:bg-gray-950 text-gray-600 dark:text-gray-300">
+      <div
+        className="min-h-screen flex flex-col items-center justify-center bg-[#f8fafc] text-gray-600 dark:text-gray-300 transition-colors duration-300"
+        style={appBackgroundStyle}
+      >
         <Loader2 size={48} className="animate-spin text-blue-500 mb-4" />
-        <h2 className="text-xl font-semibold">Đang chuyển hướng...</h2>
-        <p className="text-sm mt-2">Vui lòng đợi trong giây lát</p>
+        <h2 className="text-xl font-semibold">{language === 'vi' ? 'Đang chuyển hướng...' : 'Redirecting...'}</h2>
+        <p className="text-sm mt-2">{language === 'vi' ? 'Vui lòng đợi trong giây lát' : 'Please wait a moment'}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8fafc] dark:bg-gray-950 transition-colors duration-300">
+    <div
+      className="flex flex-col min-h-screen bg-[#f8fafc] transition-colors duration-300"
+      style={appBackgroundStyle}
+    >
       <Header
         theme={theme}
         toggleTheme={toggleTheme}
@@ -373,6 +391,7 @@ const App: React.FC = () => {
       </main>
 
       <Footer
+        theme={theme}
         t={t}
         onPrivacyClick={() => {
           setCurrentView('privacy');
