@@ -36,6 +36,7 @@ const Header: React.FC<HeaderProps> = ({
   const [isUtilitiesOpen, setIsUtilitiesOpen] = useState(false);
   const [isLangMobileOpen, setIsLangMobileOpen] = useState(false);
   const [isLangDesktopOpen, setIsLangDesktopOpen] = useState(false);
+  const [logoCacheBust] = useState(() => Date.now().toString());
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -85,17 +86,14 @@ const Header: React.FC<HeaderProps> = ({
     <header className="bg-white dark:bg-gray-900 text-gray-800 dark:text-white py-4 px-4 md:px-6 shadow-sm dark:shadow-md transition-colors duration-300 border-b border-gray-200 dark:border-gray-800 relative z-50">
       <div className="container mx-auto flex justify-between items-center">
         <div
-          className="cursor-pointer inline-flex items-center h-10 gap-2 md:gap-2.5 leading-none"
+          className="cursor-pointer inline-flex items-center h-10 leading-none"
           onClick={() => setActiveTab(NavItem.HOME)}
         >
           <img
-            src="/logo_taivideo.svg"
+            src={theme === 'dark' ? `/logo_taivideo3.svg?v=${logoCacheBust}` : `/logo_taivideo2.svg?v=${logoCacheBust}`}
             alt="TaiVideo logo"
-            className="w-10 h-10 md:w-9 md:h-9 md:translate-y-[0.5px] object-contain shrink-0"
+            className="h-7 md:h-9 w-auto object-contain shrink-0"
           />
-          <span className="hidden md:inline-flex items-center translate-y-[3px] font-codec-pro-bold text-[1.85rem] lg:text-[2rem] leading-none tracking-[-0.01em] text-gray-900 dark:text-gray-100">
-            tai<span className="text-green-700 dark:text-green-400">video</span>
-          </span>
         </div>
 
         <div className="hidden md:flex flex-1 justify-center">
@@ -182,8 +180,15 @@ const Header: React.FC<HeaderProps> = ({
       </div>
 
       {isMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-2xl z-40 animate-slideDown origin-top">
-          <ul className="flex flex-col py-2">
+        <>
+          <button
+            type="button"
+            aria-label="Close menu overlay"
+            onClick={() => setIsMenuOpen(false)}
+            className="md:hidden fixed inset-0 z-30 bg-black/20"
+          />
+          <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-2xl z-40 animate-slideDown origin-top">
+            <ul className="flex flex-col py-2">
             {navItems.map((itemKey) => {
               // @ts-ignore
               const label = t.nav[itemKey] || itemKey;
@@ -372,8 +377,9 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
               </div>
             </li>
-          </ul>
-        </div>
+            </ul>
+          </div>
+        </>
       )}
     </header>
   );

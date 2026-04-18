@@ -487,7 +487,17 @@ const TempMailUtility: React.FC = () => {
               title={`Tự động làm mới mỗi ${AUTO_REFRESH_SECONDS}s`}
             >
               <RefreshCw size={14} className={autoRefreshEnabled && account?.token ? 'animate-spin' : ''} />
-              {autoRefreshEnabled ? `Làm mới tự động (${autoRefreshCountdown}s)` : 'Bật làm mới tự động'}
+              {autoRefreshEnabled ? (
+                <>
+                  <span className="md:hidden">{`Auto-refresh (${autoRefreshCountdown}s)`}</span>
+                  <span className="hidden md:inline">{`Làm mới tự động (${autoRefreshCountdown}s)`}</span>
+                </>
+              ) : (
+                <>
+                  <span className="md:hidden">Auto-refresh</span>
+                  <span className="hidden md:inline">Bật làm mới tự động</span>
+                </>
+              )}
             </button>
           </div>
 
