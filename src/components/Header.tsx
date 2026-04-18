@@ -53,6 +53,11 @@ const Header: React.FC<HeaderProps> = ({
   ];
 
   const currentLangLabel = languages.find((l) => l.code === language)?.label;
+  const darkHeaderGradientStyle = {
+    backgroundColor: '#18163f',
+    backgroundImage: 'linear-gradient(90deg, #0f172a 0%, #1e1b4b 45%, #161e48 100%)',
+  };
+  const mobileMenuStyle = theme === 'dark' ? darkHeaderGradientStyle : undefined;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -89,15 +94,7 @@ const Header: React.FC<HeaderProps> = ({
           ? '!border-b-0 shadow-none dark:shadow-none'
           : 'border-b border-gray-200 dark:border-indigo-900/60 shadow-sm dark:shadow-md'
       }`}
-      style={
-        theme === 'dark'
-          ? {
-              backgroundColor: '#18163f',
-              backgroundImage:
-                'linear-gradient(90deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 27, 75, 0.9) 45%, rgba(22, 30, 72, 0.92) 100%)',
-            }
-          : undefined
-      }
+      style={theme === 'dark' ? darkHeaderGradientStyle : undefined}
     >
       <div className="container mx-auto flex justify-between items-center">
         <div
@@ -202,7 +199,10 @@ const Header: React.FC<HeaderProps> = ({
             onClick={() => setIsMenuOpen(false)}
             className="md:hidden absolute inset-x-0 top-full h-screen z-30 bg-black/20"
           />
-          <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-900 border-t-[0.5px] border-gray-200/70 dark:border-gray-800/70 shadow-none z-40 animate-slideDown origin-top font-geomanist">
+          <div
+            className="md:hidden absolute top-[calc(100%-1px)] left-0 w-full bg-white border-b border-gray-200/70 dark:border-indigo-900/35 shadow-none z-40 animate-slideDown origin-top font-geomanist"
+            style={mobileMenuStyle}
+          >
             <ul className="flex flex-col m-0 p-0 list-none">
             {navItems.map((itemKey) => {
               // @ts-ignore
@@ -211,7 +211,7 @@ const Header: React.FC<HeaderProps> = ({
 
               if (itemKey === NavItem.TOOL) {
                 return (
-                  <li key={itemKey} className="border-b border-gray-50 dark:border-gray-800 last:border-none">
+                  <li key={itemKey} className="border-b border-gray-50 dark:border-indigo-900/40 last:border-none">
                     <button
                       onClick={() => setIsToolsOpen(!isToolsOpen)}
                     className={`flex items-center justify-between w-full px-5 py-3.5 text-left text-[16px] font-medium transition-colors ${
@@ -223,7 +223,7 @@ const Header: React.FC<HeaderProps> = ({
                     </button>
 
                     {isToolsOpen && (
-                      <div className="bg-gray-50 dark:bg-gray-800/50 px-5 py-2 space-y-1">
+                      <div className="bg-gray-50 dark:bg-transparent px-5 py-2 space-y-1">
                         <button
                           onClick={() => handleToolClick('instagram')}
                           className={`block w-full text-left py-2.5 px-2 rounded text-[15px] ${
@@ -272,7 +272,7 @@ const Header: React.FC<HeaderProps> = ({
 
               if (itemKey === NavItem.VIDEO) {
                 return (
-                  <li key={itemKey} className="border-b border-gray-50 dark:border-gray-800 last:border-none">
+                  <li key={itemKey} className="border-b border-gray-50 dark:border-indigo-900/40 last:border-none">
                     <button
                       onClick={() => setIsUtilitiesOpen(!isUtilitiesOpen)}
                     className={`flex items-center justify-between w-full px-5 py-3.5 text-left text-[16px] font-medium transition-colors ${
@@ -284,7 +284,7 @@ const Header: React.FC<HeaderProps> = ({
                     </button>
 
                     {isUtilitiesOpen && (
-                      <div className="bg-gray-50 dark:bg-gray-800/50 px-5 py-2 space-y-1">
+                      <div className="bg-gray-50 dark:bg-transparent px-5 py-2 space-y-1">
                         <button
                           onClick={() => handleUtilityClick('tempmail')}
                           className={`block w-full text-left py-2.5 px-2 rounded text-[15px] ${
@@ -324,14 +324,14 @@ const Header: React.FC<HeaderProps> = ({
               }
 
               return (
-                <li key={itemKey} className="border-b border-gray-50 dark:border-gray-800 last:border-none">
+                <li key={itemKey} className="border-b border-gray-50 dark:border-indigo-900/40 last:border-none">
                   <a
                     href={`#${itemKey.toLowerCase()}`}
                     onClick={(e) => handleNavClick(itemKey, e)}
                     className={`block px-5 py-3.5 text-[16px] font-medium transition-colors ${
                       isActive
                         ? 'text-green-600 dark:text-green-400'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                     }`}
                   >
                     {label}
@@ -340,10 +340,10 @@ const Header: React.FC<HeaderProps> = ({
               );
             })}
 
-            <li className="border-b border-gray-50 dark:border-gray-800">
+            <li className="border-b border-gray-50 dark:border-indigo-900/40">
               <button
                 onClick={() => setIsLangMobileOpen(!isLangMobileOpen)}
-                className="flex items-center justify-between w-full px-5 py-3.5 text-left text-[16px] font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-center justify-between w-full px-5 py-3.5 text-left text-[16px] font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
               >
                 <div className="flex items-center gap-2">
                   <Globe size={18} className="text-gray-500" />
@@ -352,7 +352,7 @@ const Header: React.FC<HeaderProps> = ({
                 {isLangMobileOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
               </button>
               {isLangMobileOpen && (
-                <div className="bg-gray-50 dark:bg-gray-800/50 px-5 py-2 grid grid-cols-2 gap-2">
+                <div className="bg-gray-50 dark:bg-transparent px-5 py-2 grid grid-cols-2 gap-2">
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
@@ -360,7 +360,9 @@ const Header: React.FC<HeaderProps> = ({
                         setLanguage(lang.code);
                       }}
                       className={`text-left py-2 px-2 rounded text-[14px] ${
-                        language === lang.code ? 'text-green-600 font-bold bg-green-100/50' : 'text-gray-600 dark:text-gray-400'
+                        language === lang.code
+                          ? 'text-green-600 font-bold bg-green-100/50 dark:bg-green-500/10'
+                          : 'text-gray-600 dark:text-gray-400'
                       }`}
                     >
                       {lang.label}
@@ -376,7 +378,7 @@ const Header: React.FC<HeaderProps> = ({
                   <Sun size={18} className="text-gray-500" />
                   {language === 'vi' ? 'Giao diện' : 'Theme'}
                 </span>
-                <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
+                <div className="flex items-center gap-2 bg-gray-100 dark:bg-white/10 rounded-full p-1">
                   <button
                     onClick={() => theme === 'dark' && toggleTheme()}
                     className={`p-1.5 rounded-full ${theme === 'light' ? 'bg-white shadow-sm text-orange-500' : 'text-gray-400'}`}
