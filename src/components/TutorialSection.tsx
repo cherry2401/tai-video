@@ -117,7 +117,7 @@ const TutorialSection: React.FC<TutorialSectionProps> = ({ t }) => {
         >
           <div className="flex-1 flex justify-center lg:justify-end order-1">
              {/* Visual: Browser/App Input Mockup */}
-             <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 transform transition-transform hover:-translate-y-2 duration-500">
+             <div className="w-full max-w-md max-[380px]:max-w-[calc(100vw-3rem)] bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-3 sm:p-6 transform transition-transform hover:-translate-y-2 duration-500">
                 <div className="flex items-center gap-2 mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
                     <div className="flex gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-red-400"></div>
@@ -127,14 +127,14 @@ const TutorialSection: React.FC<TutorialSectionProps> = ({ t }) => {
                 </div>
                 <div className="space-y-4">
                     <div className="h-4 w-1/3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                    <div className="flex gap-2">
-                        <div className="flex-1 h-12 bg-gray-100 dark:bg-gray-900 border border-blue-500 rounded-lg flex items-center px-4 text-sm text-gray-500 overflow-hidden whitespace-nowrap">
+                    <div className="flex gap-2 sm:gap-3">
+                        <div className="flex-1 h-10 sm:h-12 min-w-0 bg-gray-100 dark:bg-gray-900 border border-blue-500 rounded-lg flex items-center px-2.5 sm:px-4 text-xs sm:text-sm text-gray-500 overflow-hidden whitespace-nowrap">
                             <span className="animate-typing overflow-hidden whitespace-nowrap border-r-2 border-blue-500 pr-1">
                               https://tiktok.com/@user/video...
                             </span>
                         </div>
-                        <div className="w-24 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-green-500/30">
-                            <Download size={20} />
+                        <div className="w-14 sm:w-24 h-10 sm:h-12 shrink-0 bg-green-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-green-500/30">
+                            <Download size={18} />
                         </div>
                     </div>
                     <div className="h-2 w-full bg-gray-100 dark:bg-gray-900 rounded"></div>

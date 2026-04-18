@@ -84,7 +84,11 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header
-      className="bg-white text-gray-800 dark:text-white py-4 px-4 md:px-6 shadow-sm dark:shadow-md transition-colors duration-300 border-b border-gray-200 dark:border-indigo-900/60 sticky top-0 z-50 w-full"
+      className={`bg-white text-gray-800 dark:text-white py-4 px-4 md:px-6 transition-colors duration-300 sticky top-0 z-50 w-full ${
+        isMenuOpen
+          ? '!border-b-0 shadow-none dark:shadow-none'
+          : 'border-b border-gray-200 dark:border-indigo-900/60 shadow-sm dark:shadow-md'
+      }`}
       style={
         theme === 'dark'
           ? {
@@ -196,10 +200,10 @@ const Header: React.FC<HeaderProps> = ({
             type="button"
             aria-label="Close menu overlay"
             onClick={() => setIsMenuOpen(false)}
-            className="md:hidden fixed inset-0 z-30 bg-black/20"
+            className="md:hidden absolute inset-x-0 top-full h-screen z-30 bg-black/20"
           />
-          <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-2xl z-40 animate-slideDown origin-top font-geomanist">
-            <ul className="flex flex-col py-2">
+          <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-900 border-t-[0.5px] border-gray-200/70 dark:border-gray-800/70 shadow-none z-40 animate-slideDown origin-top font-geomanist">
+            <ul className="flex flex-col m-0 p-0 list-none">
             {navItems.map((itemKey) => {
               // @ts-ignore
               const label = t.nav[itemKey] || itemKey;
