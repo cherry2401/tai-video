@@ -19,6 +19,7 @@ interface ParsedAccountInfo {
   currentPlan: string;
   targetPackage: string;
   duration: string;
+  hasSubscription: boolean;
 }
 
 interface ParseResponse {
@@ -123,6 +124,11 @@ const normalizePlanLabel = (value: string): string => {
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 };
 
+const hasActivePaidPlan = (currentPlan: string, hasSubscription: boolean): boolean => {
+  if (hasSubscription) return true;
+  return normalizePlanLabel(currentPlan).toLowerCase() !== 'free';
+};
+
 const stepLabelMap: Record<Exclude<CdkStage, 'success'>, number> = {
   verify: 1,
   token: 2,
@@ -175,6 +181,7 @@ const ChatGptCdkUtility: React.FC<ChatGptCdkUtilityProps> = ({ language }) => {
   const [loadingVerify, setLoadingVerify] = useState(false);
   const [loadingParse, setLoadingParse] = useState(false);
   const [loadingActivate, setLoadingActivate] = useState(false);
+  const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
 
   const activeStep = useMemo(() => (stage === 'success' ? 3 : stepLabelMap[stage]), [stage]);
 
@@ -190,6 +197,7 @@ const ChatGptCdkUtility: React.FC<ChatGptCdkUtilityProps> = ({ language }) => {
     setLoadingVerify(false);
     setLoadingParse(false);
     setLoadingActivate(false);
+    setShowOverwriteConfirm(false);
   };
 
   const verifyCdk = async () => {
@@ -252,7 +260,9 @@ const ChatGptCdkUtility: React.FC<ChatGptCdkUtilityProps> = ({ language }) => {
         currentPlan: normalizePlanLabel(payload.currentPlan),
         targetPackage: verifiedPackage,
         duration: parseDurationFromPackage(verifiedPackage),
+        hasSubscription: payload.hasSubscription,
       });
+      setShowOverwriteConfirm(false);
 
       setStage('activate');
     } catch (error) {
@@ -262,9 +272,15 @@ const ChatGptCdkUtility: React.FC<ChatGptCdkUtilityProps> = ({ language }) => {
     }
   };
 
-  const activateCdk = async () => {
+  const activateCdk = async (force = false) => {
     if (!accountInfo) {
       setErrorMessage(isVi ? 'Chưa có dữ liệu tài khoản để kích hoạt.' : 'No account data to activate.');
+      return;
+    }
+
+    const requiresConfirm = hasActivePaidPlan(accountInfo.currentPlan, accountInfo.hasSubscription);
+    if (requiresConfirm && !force) {
+      setShowOverwriteConfirm(true);
       return;
     }
 
@@ -274,6 +290,7 @@ const ChatGptCdkUtility: React.FC<ChatGptCdkUtilityProps> = ({ language }) => {
       return;
     }
 
+    setShowOverwriteConfirm(false);
     setLoadingActivate(true);
     setErrorMessage(null);
     setStatusMessage(isVi ? 'Yêu cầu kích hoạt đã được chấp nhận. Đang chờ kết quả cuối cùng...' : 'Activation request accepted. Waiting for final result...');
@@ -510,10 +527,67 @@ const ChatGptCdkUtility: React.FC<ChatGptCdkUtilityProps> = ({ language }) => {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-blue-100 dark:border-blue-800/40 bg-blue-50/30 dark:bg-blue-900/10 p-3 flex items-center gap-2 text-xs md:text-sm text-gray-800 dark:text-gray-100">
-                    <Info size={16} className="text-blue-500 shrink-0" />
-                    {isVi ? 'Session này đang là tài khoản Free và sẵn sàng kích hoạt.' : 'This session is currently a Free account and ready for activation.'}
-                  </div>
+                  {hasActivePaidPlan(accountInfo.currentPlan, accountInfo.hasSubscription) ? (
+                    <>
+                      <div className="rounded-2xl border border-amber-200 dark:border-amber-700/40 bg-amber-50/60 dark:bg-amber-900/20 p-3 flex items-start gap-2 text-xs md:text-sm text-amber-900 dark:text-amber-100">
+                        <Info size={16} className="text-amber-500 shrink-0" />
+                        {isVi
+                          ? `Session này đang là tài khoản ${accountInfo.currentPlan}. Kích hoạt sẽ ghi đè gói hiện tại.`
+                          : `This session is currently on ${accountInfo.currentPlan}. Activation will overwrite the current plan.`}
+                      </div>
+                      <div className="rounded-2xl border border-amber-200 dark:border-amber-700/40 bg-amber-50/60 dark:bg-amber-900/20 p-3 flex items-start gap-2 text-xs md:text-sm text-amber-900 dark:text-amber-100">
+                        <Info size={16} className="text-amber-500 shrink-0" />
+                        {isVi
+                          ? `Tài khoản này đã có gói đang hoạt động: ${accountInfo.currentPlan}.`
+                          : `This account already has an active ${accountInfo.currentPlan} plan.`}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="rounded-2xl border border-blue-100 dark:border-blue-800/40 bg-blue-50/30 dark:bg-blue-900/10 p-3 flex items-center gap-2 text-xs md:text-sm text-gray-800 dark:text-gray-100">
+                      <Info size={16} className="text-blue-500 shrink-0" />
+                      {isVi ? 'Session này đang là tài khoản Free và sẵn sàng kích hoạt.' : 'This session is currently a Free account and ready for activation.'}
+                    </div>
+                  )}
+
+                  {showOverwriteConfirm && hasActivePaidPlan(accountInfo.currentPlan, accountInfo.hasSubscription) && (
+                    <div className="fixed inset-0 z-[80] bg-black/45 flex items-center justify-center p-4">
+                      <div className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-indigo-900/60 bg-white dark:bg-[#1f2747] p-4 md:p-5 shadow-xl">
+                        <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-gray-100">
+                          {isVi ? 'Cảnh báo ghi đè' : 'Overwrite warning'}
+                        </h3>
+                        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                          {isVi
+                            ? `Tài khoản này đã là ${accountInfo.currentPlan}. Kích hoạt lại sẽ đặt lại chu kỳ thanh toán.`
+                            : `This account is already on ${accountInfo.currentPlan}. Reactivation will reset the billing cycle.`}
+                        </p>
+                        <div className="mt-4 flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowOverwriteConfirm(false)}
+                            className="px-4 py-2 rounded-xl border border-gray-300 dark:border-indigo-900/70 text-sm text-gray-700 dark:text-gray-200 font-semibold"
+                          >
+                            {isVi ? 'Hủy' : 'Cancel'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => activateCdk(true)}
+                            className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-bold hover:brightness-110"
+                          >
+                            {isVi ? 'Tôi đã hiểu' : 'I understand'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {hasActivePaidPlan(accountInfo.currentPlan, accountInfo.hasSubscription) && (
+                    <div className="rounded-2xl border border-amber-200 dark:border-amber-700/40 bg-amber-50/60 dark:bg-amber-900/20 p-3 flex items-start gap-2 text-xs md:text-sm text-amber-900 dark:text-amber-100">
+                      <Info size={16} className="text-amber-500 shrink-0" />
+                      {isVi
+                        ? 'Bạn sẽ thấy hộp xác nhận trước khi kích hoạt để tránh ghi đè nhầm.'
+                        : 'You will see a confirmation dialog before activation to avoid accidental overwrite.'}
+                    </div>
+                  )}
 
                   {statusMessage && (
                     <div className="rounded-2xl border border-blue-100 dark:border-blue-800/40 bg-blue-50/30 dark:bg-blue-900/10 p-3 flex items-center gap-2 text-xs md:text-sm text-gray-800 dark:text-gray-100">
@@ -561,15 +635,15 @@ const ChatGptCdkUtility: React.FC<ChatGptCdkUtilityProps> = ({ language }) => {
             <div className="rounded-2xl border border-gray-200 dark:border-indigo-900/60 bg-gray-50/30 dark:bg-[#2b3458]/55 p-4 text-left space-y-3 mb-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 dark:text-gray-400 text-sm">{isVi ? 'Gói' : 'Package'}</span>
-                <span className="font-bold text-gray-900 dark:text-gray-100 text-base">{accountInfo?.targetPackage || 'Plus 1 Month'}</span>
+                <span className="font-bold text-gray-900 dark:text-gray-100 text-sm md:text-base">{accountInfo?.targetPackage || 'Plus 1 Month'}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 dark:text-gray-400 text-sm">{isVi ? 'Email tài khoản' : 'Account email'}</span>
-                <span className="font-bold text-gray-900 dark:text-gray-100 text-base">{accountInfo?.email || '-'}</span>
+                <span className="font-bold text-gray-900 dark:text-gray-100 text-sm md:text-base">{accountInfo?.email || '-'}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 dark:text-gray-400 text-sm">{isVi ? 'Thời hạn' : 'Duration'}</span>
-                <span className="font-bold text-gray-900 dark:text-gray-100 text-base">{accountInfo?.duration || '1m'}</span>
+                <span className="font-bold text-gray-900 dark:text-gray-100 text-sm md:text-base">{accountInfo?.duration || '1m'}</span>
               </div>
             </div>
 
