@@ -561,15 +561,15 @@ const ChatGptCdkUtility: React.FC<ChatGptCdkUtilityProps> = ({ language }) => {
             <div className="rounded-2xl border border-gray-200 dark:border-indigo-900/60 bg-gray-50/30 dark:bg-[#2b3458]/55 p-4 text-left space-y-3 mb-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 dark:text-gray-400 text-sm">{isVi ? 'Gói' : 'Package'}</span>
-                <span className="font-bold text-gray-900 dark:text-gray-100 text-base">{accountInfo?.targetPackage || 'Plus 1 Month'}</span>
+                <span className="font-bold text-gray-900 dark:text-gray-100 text-sm md:text-base">{accountInfo?.targetPackage || 'Plus 1 Month'}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 dark:text-gray-400 text-sm">{isVi ? 'Email tài khoản' : 'Account email'}</span>
-                <span className="font-bold text-gray-900 dark:text-gray-100 text-base">{accountInfo?.email || '-'}</span>
+                <span className="font-bold text-gray-900 dark:text-gray-100 text-sm md:text-base">{accountInfo?.email || '-'}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 dark:text-gray-400 text-sm">{isVi ? 'Thời hạn' : 'Duration'}</span>
-                <span className="font-bold text-gray-900 dark:text-gray-100 text-base">{accountInfo?.duration || '1m'}</span>
+                <span className="font-bold text-gray-900 dark:text-gray-100 text-sm md:text-base">{accountInfo?.duration || '1m'}</span>
               </div>
             </div>
 
