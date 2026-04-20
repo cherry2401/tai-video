@@ -13,8 +13,8 @@ interface HeaderProps {
   setActiveTab: (tab: NavItem) => void;
   activeTool: string;
   setActiveTool: (tool: 'instagram' | 'zing' | 'soundcloud' | 'xvideos' | 'xnxx') => void;
-  activeUtility: 'tempmail' | 'twofa' | 'outlook' | 'cdk';
-  setActiveUtility: (utility: 'tempmail' | 'twofa' | 'outlook' | 'cdk') => void;
+  activeUtility: 'tempmail' | 'twofa' | 'outlook' | 'cdk' | 'cdkV2';
+  setActiveUtility: (utility: 'tempmail' | 'twofa' | 'outlook' | 'cdk' | 'cdkV2') => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -81,7 +81,7 @@ const Header: React.FC<HeaderProps> = ({
     setIsMenuOpen(false);
   };
 
-  const handleUtilityClick = (utility: 'tempmail' | 'twofa' | 'outlook' | 'cdk') => {
+  const handleUtilityClick = (utility: 'tempmail' | 'twofa' | 'outlook' | 'cdk' | 'cdkV2') => {
     setActiveUtility(utility);
     setActiveTab(NavItem.VIDEO);
     setIsMenuOpen(false);
@@ -316,6 +316,14 @@ const Header: React.FC<HeaderProps> = ({
                           }`}
                         >
                           ChatGPT CDK
+                        </button>
+                        <button
+                          onClick={() => handleUtilityClick('cdkV2')}
+                          className={`block w-full text-left py-2.5 px-2 rounded text-[15px] ${
+                            activeUtility === 'cdkV2' ? 'text-green-600 font-semibold' : 'text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          ChatGPT CDK V2
                         </button>
                       </div>
                     )}

@@ -23,6 +23,7 @@ import TempMailUtility from './components/TempMailUtility';
 import TwoFaUtility from './components/TwoFaUtility';
 import OutlookMailboxUtility from './components/OutlookMailboxUtility';
 import ChatGptCdkUtility from './components/ChatGptCdkUtility';
+import ChatGptCdkV2Utility from './components/ChatGptCdkV2Utility';
 import { analyzeLinks } from './services/geminiService';
 import { enrichResultWithDownload } from './services/n8nService';
 import { isShopeeUrl } from './services/affiliateService';
@@ -51,7 +52,7 @@ const App: React.FC = () => {
 
   // Tool Sub-state
   const [activeTool, setActiveTool] = useState<'instagram' | 'zing' | 'xvideos' | 'xnxx' | 'soundcloud'>('instagram');
-  const [activeUtility, setActiveUtility] = useState<'tempmail' | 'twofa' | 'outlook' | 'cdk'>('tempmail');
+  const [activeUtility, setActiveUtility] = useState<'tempmail' | 'twofa' | 'outlook' | 'cdk' | 'cdkV2'>('tempmail');
 
   // Translation Helper
   const t = translations[language];
@@ -246,7 +247,7 @@ const App: React.FC = () => {
 
     if (activeTab === NavItem.VIDEO) {
       return (
-        <div className={`w-full mx-auto ${activeUtility === 'cdk' ? 'max-w-[1760px]' : 'max-w-4xl'}`}>
+        <div className={`w-full mx-auto ${(activeUtility === 'cdk' || activeUtility === 'cdkV2') ? 'max-w-[1760px]' : 'max-w-4xl'}`}>
           <div className="hidden md:block overflow-x-auto pb-4 mb-4 md:mb-8 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
             <div className="flex md:justify-center gap-3 w-max md:w-auto">
               <button
@@ -289,6 +290,16 @@ const App: React.FC = () => {
               >
                 ChatGPT CDK
               </button>
+              <button
+                onClick={() => setActiveUtility('cdkV2')}
+                className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${
+                  activeUtility === 'cdkV2'
+                    ? 'bg-gradient-to-r from-emerald-500 to-lime-500 text-white shadow-md transform scale-105'
+                    : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2b3458] border border-gray-100 dark:border-indigo-900/60'
+                }`}
+              >
+                ChatGPT CDK V2
+              </button>
             </div>
           </div>
 
@@ -296,6 +307,7 @@ const App: React.FC = () => {
           {activeUtility === 'twofa' && <TwoFaUtility language={language} />}
           {activeUtility === 'outlook' && <OutlookMailboxUtility language={language} />}
           {activeUtility === 'cdk' && <ChatGptCdkUtility language={language} />}
+          {activeUtility === 'cdkV2' && <ChatGptCdkV2Utility language={language} />}
         </div>
       );
     }
