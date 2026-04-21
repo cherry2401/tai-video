@@ -32,6 +32,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const navItems = Object.values(NavItem);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
   const [isUtilitiesOpen, setIsUtilitiesOpen] = useState(false);
   const [isLangMobileOpen, setIsLangMobileOpen] = useState(false);
@@ -69,6 +70,19 @@ const Header: React.FC<HeaderProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (isMenuOpen) {
+      setIsMenuVisible(true);
+      return undefined;
+    }
+
+    const closeTimer = window.setTimeout(() => {
+      setIsMenuVisible(false);
+    }, 220);
+
+    return () => window.clearTimeout(closeTimer);
+  }, [isMenuOpen]);
+
   const handleNavClick = (item: NavItem, e: React.MouseEvent) => {
     e.preventDefault();
     setActiveTab(item);
@@ -104,7 +118,7 @@ const Header: React.FC<HeaderProps> = ({
           <img
             src={theme === 'dark' ? `/logo_taivideo3.svg?v=${logoCacheBust}` : `/logo_taivideo2.svg?v=${logoCacheBust}`}
             alt="TaiVideo logo"
-            className="h-7 md:h-8 w-auto object-contain shrink-0"
+            className="h-6 md:h-7 w-auto object-contain shrink-0"
           />
         </div>
 
@@ -191,16 +205,20 @@ const Header: React.FC<HeaderProps> = ({
         </button>
       </div>
 
-      {isMenuOpen && (
+      {isMenuVisible && (
         <>
           <button
             type="button"
             aria-label="Close menu overlay"
             onClick={() => setIsMenuOpen(false)}
-            className="md:hidden absolute inset-x-0 top-full h-screen z-30 bg-black/20"
+            className={`md:hidden absolute inset-x-0 top-full h-screen z-30 bg-black/20 transition-opacity duration-200 ${
+              isMenuOpen ? 'opacity-100' : 'opacity-0'
+            }`}
           />
           <div
-            className="md:hidden absolute top-[calc(100%-1px)] left-0 w-full bg-white border-b border-gray-200/70 dark:border-indigo-900/35 shadow-none z-40 animate-slideDown origin-top font-geomanist"
+            className={`md:hidden absolute top-[calc(100%-1px)] left-0 w-full bg-white border-b border-gray-200/70 dark:border-indigo-900/35 shadow-none dark:shadow-[0_12px_28px_rgba(2,6,23,0.45)] z-40 origin-top font-geomanist transition-all duration-200 ease-out ${
+              isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+            }`}
             style={mobileMenuStyle}
           >
             <ul className="flex flex-col m-0 p-0 list-none">
