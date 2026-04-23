@@ -4,7 +4,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-const upstreamUrl = 'https://vankai.io.vn/api/old/external/public/check-user';
 const rateLimitWindowMs = 60_000;
 const rateLimitMaxRequests = 10;
 const ipHits = new Map<string, number[]>();
@@ -16,7 +15,7 @@ interface ParseRequestBody {
 
 interface SessionPayload {
   user?: { email?: string };
-  account?: { planType?: string };
+  account?: { planType?: string; structure?: string };
   accessToken?: string;
   sessionToken?: string;
 }
@@ -51,6 +50,13 @@ const isRateLimited = (request: Request) => {
   ipHits.set(ip, hits);
   return false;
 };
+
+const normalizePlan = (value?: string) => {
+  const normalized = String(value || '').trim().toLowerCase();
+  return normalized || 'free';
+};
+
+const hasSubscription = (plan: string) => !['free', 'trial', 'none', 'unknown'].includes(plan);
 
 export const onRequestOptions: PagesFunction = async () => new Response(null, { headers: corsHeaders });
 
@@ -93,41 +99,18 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
       return json({ message: 'Session JSON is missing required token fields.' }, 400);
     }
 
-    const upstream = await fetch(upstreamUrl, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        cdk,
-        user: sessionJson,
-      }),
-    });
-
-    const payload = (await upstream.json().catch(() => null)) as
-      | { user?: string; verified?: boolean; has_sub?: boolean; extra?: unknown }
-      | null;
-
-    if (!upstream.ok || !payload) {
-      return json({ message: 'Unable to parse account right now.' }, upstream.status || 502);
+    if (parsedSession.account?.structure === 'workspace') {
+      return json({ message: 'Workspace sessions are not supported for activation.' }, 400);
     }
 
-    if (!payload.verified) {
-      return json({
-        message: 'Session is not eligible for activation.',
-        verified: false,
-        email: payload.user || parsedSession.user.email,
-        hasSubscription: Boolean(payload.has_sub),
-      }, 400);
-    }
+    const currentPlan = normalizePlan(parsedSession.account?.planType);
 
     return json({
       verified: true,
-      email: payload.user || parsedSession.user.email,
-      currentPlan: payload.has_sub ? parsedSession.account?.planType || 'paid' : parsedSession.account?.planType || 'free',
-      hasSubscription: Boolean(payload.has_sub),
-      extra: payload.extra ?? null,
+      email: parsedSession.user.email,
+      currentPlan,
+      hasSubscription: hasSubscription(currentPlan),
+      extra: null,
     });
   } catch {
     return json({ message: 'Internal server error while parsing account.' }, 500);
