@@ -4,7 +4,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-const upstreamBaseUrl = 'https://rayrayactive.com/api/new/chatgpt/keys';
+const upstreamBaseUrl = 'https://activatecdk.me/shop/api/activate/chatgpt';
 const rateLimitWindowMs = 60_000;
 const rateLimitMaxRequests = 15;
 const ipHits = new Map<string, number[]>();
@@ -90,7 +90,7 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
       return json({ ok: false, state: 'invalid', message: 'Invalid CDK format.' }, 400);
     }
 
-    const upstream = await fetch(`${upstreamBaseUrl}/${encodeURIComponent(cdk)}`, {
+    const upstream = await fetch(`${upstreamBaseUrl}/keys/${encodeURIComponent(cdk)}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -98,16 +98,6 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
     });
 
     const payload = await parseUpstreamBody(upstream);
-
-    if (upstream.status === 429) {
-      return json({
-        ok: false,
-        state: 'error',
-        message: payload?.message || 'CDK provider is rate limited. Please retry in 60s.',
-        upstreamStatus: 429,
-        errorCode: 'UPSTREAM_RATE_LIMIT',
-      }, 429);
-    }
 
     if (!upstream.ok || !payload) {
       return json(
@@ -123,7 +113,7 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
     }
 
     if (!payload.code) {
-      return json({ ok: false, state: 'invalid', message: payload.message || payload.error || 'CDK not found.', errorCode: 'CDK_NOT_FOUND' }, 404);
+      return json({ ok: false, state: 'invalid', message: 'CDK not found.', errorCode: 'CDK_NOT_FOUND' }, 404);
     }
 
     const normalizedStatus = String(payload.status || '').toLowerCase();
