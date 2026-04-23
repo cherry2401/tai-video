@@ -4,28 +4,32 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-const startUrl = 'https://vankai.io.vn/api/old/stocks/public/outstock';
-const pollBaseUrl = 'https://vankai.io.vn/api/old/stocks/public/outstock';
+const upstreamBaseUrl = 'https://rayrayactive.com/api/new/chatgpt/keys';
+const startUrl = `${upstreamBaseUrl}/activate-session`;
 const rateLimitWindowMs = 60_000;
 const rateLimitMaxRequests = 5;
 const ipHits = new Map<string, number[]>();
-const maxPollAttempts = 10;
-const pollDelayMs = 1000;
+const maxPollAttempts = 60;
+const pollDelayMs = 5000;
 
 interface ActivateRequestBody {
   cdk?: string;
   sessionJson?: string;
 }
 
-interface TaskPayload {
-  task_id?: string;
-  cdk?: string;
-  pending?: boolean;
-  success?: boolean;
-  message?: string;
+interface UpstreamActivatePayload {
   status?: string;
-  error?: string | null;
-  progress?: number;
+  code?: string;
+  message?: string;
+  error?: string;
+}
+
+interface UpstreamKeyPayload {
+  code?: string;
+  status?: string;
+  activated_email?: string | null;
+  message?: string;
+  error?: string;
 }
 
 interface SessionPayload {
@@ -67,6 +71,22 @@ const isRateLimited = (request: Request) => {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const parseJsonSafely = async <T>(response: Response): Promise<T | null> => {
+  const raw = await response.text();
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+};
+
+const normalizeStatus = (value?: string) => String(value || '').trim().toLowerCase();
+
+const successStatuses = new Set(['used', 'activated', 'active', 'completed', 'success', 'ok']);
+const failedStatuses = new Set(['failed', 'error', 'invalid', 'expired', 'revoked', 'blocked', 'disabled']);
+
 export const onRequestOptions: PagesFunction = async () => new Response(null, { headers: corsHeaders });
 
 export const onRequestPost: PagesFunction = async ({ request }) => {
@@ -107,66 +127,79 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
     const startResponse = await fetch(startUrl, {
       method: 'POST',
       headers: {
-        Accept: '*/*',
+        Accept: 'application/json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        cdk,
-        user: sessionJson,
+        code: cdk,
+        session: sessionJson,
       }),
     });
 
-    const taskId = (await startResponse.text()).trim();
-    if (!startResponse.ok || !taskId) {
-      return json({ message: 'Unable to start activation.' }, startResponse.status || 502);
+    const startPayload = await parseJsonSafely<UpstreamActivatePayload>(startResponse);
+    const startStatus = normalizeStatus(startPayload?.status);
+
+    if (startResponse.status === 429) {
+      return json({ message: startPayload?.message || 'CDK provider is rate limited. Please retry in 60s.' }, 429);
     }
 
-    let lastPayload: TaskPayload | null = null;
+    if (!startResponse.ok || startStatus !== 'ok') {
+      return json({ message: startPayload?.message || startPayload?.error || 'Unable to start activation.' }, startResponse.status || 502);
+    }
+
+    let lastPayload: UpstreamKeyPayload | null = null;
+    let lastStatus = 'pending';
 
     for (let attempt = 0; attempt < maxPollAttempts; attempt += 1) {
-      await sleep(pollDelayMs);
+      if (attempt > 0) {
+        await sleep(pollDelayMs);
+      }
 
-      const pollResponse = await fetch(`${pollBaseUrl}/${encodeURIComponent(taskId)}`, {
+      const pollResponse = await fetch(`${upstreamBaseUrl}/${encodeURIComponent(cdk)}`, {
         method: 'GET',
         headers: { Accept: 'application/json' },
       });
 
-      const pollPayload = (await pollResponse.json().catch(() => null)) as TaskPayload | null;
+      const pollPayload = await parseJsonSafely<UpstreamKeyPayload>(pollResponse);
       if (!pollResponse.ok || !pollPayload) {
-        return json({ message: 'Unable to check activation status.' }, pollResponse.status || 502);
+        const message = pollPayload?.message || pollPayload?.error || 'Unable to check activation status.';
+        return json({ message }, pollResponse.status || 502);
       }
 
       lastPayload = pollPayload;
+      lastStatus = normalizeStatus(pollPayload.status) || 'pending';
 
-      if (!pollPayload.pending) {
-        if (pollPayload.success) {
-          return json({
-            success: true,
-            taskId,
-            cdk: pollPayload.cdk || cdk,
-            status: pollPayload.status || 'finish',
-            message: pollPayload.message || 'Activation completed successfully.',
-            progress: pollPayload.progress || 0,
-          });
-        }
+      if (successStatuses.has(lastStatus)) {
+        return json({
+          success: true,
+          taskId: cdk,
+          cdk: pollPayload.code || cdk,
+          status: pollPayload.status || 'activated',
+          message: 'Activation completed successfully.',
+          progress: 100,
+        });
+      }
 
+      if (failedStatuses.has(lastStatus)) {
         return json({
           success: false,
-          taskId,
+          taskId: cdk,
+          cdk: pollPayload.code || cdk,
           status: pollPayload.status || 'failed',
-          message: pollPayload.error || pollPayload.message || 'Activation failed.',
-          progress: pollPayload.progress || 0,
+          message: pollPayload.message || pollPayload.error || 'Activation failed.',
+          progress: 0,
         }, 400);
       }
     }
 
     return json({
       success: false,
-      taskId,
-      status: lastPayload?.status || 'pending',
-      message: 'Activation is still processing. Please try again shortly.',
-      progress: lastPayload?.progress || 0,
-    }, 202);
+      taskId: cdk,
+      cdk,
+      status: lastPayload?.status || lastStatus,
+      message: 'Activation request accepted. Waiting for final status...',
+      progress: 0,
+    }, 504);
   } catch {
     return json({ message: 'Internal server error while activating CDK.' }, 500);
   }
