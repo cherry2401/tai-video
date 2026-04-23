@@ -21,7 +21,7 @@ interface SessionPayload {
   sessionToken?: string;
 }
 
-const cdkPattern = /^[A-F0-9-]{16,64}$/;
+const cdkPattern = /^[A-Z0-9-]{16,64}$/;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
