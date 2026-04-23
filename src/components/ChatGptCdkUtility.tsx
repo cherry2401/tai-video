@@ -37,6 +37,9 @@ interface ActivateResponse {
   progress: number;
 }
 
+const pollAttempts = 30;
+const pollIntervalMs = 4000;
+
 const parseDurationFromPackage = (packageName: string): string => {
   const normalized = packageName.toLowerCase();
   if (normalized.includes('1m')) return '1m';
@@ -157,6 +160,7 @@ const parseEmailFromTokenPayload = (value: unknown): string | null => {
 };
 
 const normalizeCdkInput = (value: string): string => value.trim().toUpperCase();
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 interface ChatGptCdkUtilityProps {
   language: Language;
@@ -285,7 +289,26 @@ const ChatGptCdkUtility: React.FC<ChatGptCdkUtilityProps> = ({ language }) => {
       }, language);
 
       setStatusMessage(payload.message || null);
-      setStage('success');
+      if (payload.success) {
+        setStage('success');
+        return;
+      }
+      const activeCdk = payload.cdk || verifiedCdk || normalizeCdkInput(cdkKey);
+      for (let i = 0; i < pollAttempts; i += 1) {
+        if (i > 0) await sleep(pollIntervalMs);
+        const verify = await fetchJson<VerifyResponse>('/api/cdk-verify', { cdk: activeCdk }, language);
+        if (verify.used) {
+          setStatusMessage(isVi ? 'Kích hoạt thành công.' : 'Activation successful.');
+          setStage('success');
+          return;
+        }
+        setStatusMessage(isVi
+          ? `Yêu cầu đã gửi, đang chờ xử lý... (${i + 1}/${pollAttempts})`
+          : `Request accepted, waiting for final status... (${i + 1}/${pollAttempts})`);
+      }
+      throw new Error(isVi
+        ? 'Đã gửi yêu cầu kích hoạt nhưng chưa thấy trạng thái hoàn tất. Vui lòng chờ thêm 1-2 phút rồi kiểm tra lại.'
+        : 'Activation request was sent but final status is not ready yet. Please wait 1-2 minutes and retry.');
     } catch (error) {
       setStatusMessage(null);
       setErrorMessage((error as Error).message || (isVi ? 'Kích hoạt thất bại.' : 'Activation failed.'));
