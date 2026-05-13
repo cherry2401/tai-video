@@ -59,6 +59,15 @@ const Header: React.FC<HeaderProps> = ({
     backgroundImage: 'linear-gradient(90deg, #0f172a 0%, #1e1b4b 45%, #161e48 100%)',
   };
   const mobileMenuStyle = theme === 'dark' ? darkHeaderGradientStyle : undefined;
+  const desktopShellClass = theme === 'dark'
+    ? 'md:bg-[#0f1433]/88 md:border-indigo-900/70 md:shadow-[0_20px_45px_rgba(2,6,23,0.55)]'
+    : 'md:bg-white/90 md:border-slate-200/80 md:shadow-[0_18px_36px_rgba(15,23,42,0.12)]';
+  const desktopNavLinkClass = theme === 'dark'
+    ? 'text-gray-200 hover:text-white'
+    : 'text-gray-600 hover:text-gray-900';
+  const desktopNavActiveClass = theme === 'dark'
+    ? 'text-white bg-white/10'
+    : 'text-slate-900 bg-slate-100/80';
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -103,106 +112,106 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header
-      className={`bg-white text-gray-800 dark:text-white py-4 px-4 md:px-6 transition-colors duration-300 sticky top-0 z-50 w-full ${
+      className={`bg-white text-gray-800 dark:text-white py-3 md:py-4 px-4 md:px-6 transition-colors duration-300 sticky top-0 z-50 w-full border-b md:border-b-0 ${
         isMenuOpen
           ? '!border-b-0 shadow-none dark:shadow-none'
-          : 'border-b border-gray-200 dark:border-indigo-900/60 shadow-sm dark:shadow-md'
+          : 'border-gray-200 dark:border-indigo-900/60 shadow-sm md:shadow-none dark:shadow-md md:dark:shadow-none'
       }`}
       style={theme === 'dark' ? darkHeaderGradientStyle : undefined}
     >
-      <div className="container mx-auto flex justify-between items-center">
-        <div
-          className="cursor-pointer inline-flex items-center h-10 leading-none"
-          onClick={() => setActiveTab(NavItem.HOME)}
-        >
-          <img
-            src={theme === 'dark' ? `/logo_taivideo3.svg?v=${logoCacheBust}` : `/logo_taivideo2.svg?v=${logoCacheBust}`}
-            alt="TaiVideo logo"
-            className="h-6 md:h-7 w-auto object-contain shrink-0"
-          />
-        </div>
+      <div className="container mx-auto">
+        <div className={`flex justify-between items-center md:rounded-[26px] md:border md:backdrop-blur-md md:px-6 lg:px-8 md:h-[76px] ${desktopShellClass}`}>
+          <div
+            className="cursor-pointer inline-flex items-center h-10 leading-none"
+            onClick={() => setActiveTab(NavItem.HOME)}
+          >
+            <img
+              src={theme === 'dark' ? `/logo_taivideo3.svg?v=${logoCacheBust}` : `/logo_taivideo2.svg?v=${logoCacheBust}`}
+              alt="TaiVideo logo"
+              className="h-6 md:h-7 w-auto object-contain shrink-0"
+            />
+          </div>
 
-        <div className="hidden md:flex flex-1 justify-center">
-          <nav className="font-geomanist">
-            <ul className="flex gap-8 items-center">
-              {navItems.map((itemKey) => {
-                // @ts-ignore
-                const label = t.nav[itemKey] || itemKey;
-                const isActive = activeTab === itemKey;
+          <div className="hidden md:flex flex-1 justify-center">
+            <nav className="font-geomanist">
+              <ul className="flex gap-2 lg:gap-3 items-center">
+                {navItems.map((itemKey) => {
+                  // @ts-ignore
+                  const label = t.nav[itemKey] || itemKey;
+                  const isActive = activeTab === itemKey;
 
-                return (
-                  <li key={itemKey}>
-                    <a
-                      href={`#${itemKey.toLowerCase()}`}
-                      onClick={(e) => handleNavClick(itemKey, e)}
-                      className={`block px-3 py-1.5 rounded-md text-[15px] font-medium transition-colors duration-200 ${
-                        isActive
-                          ? 'text-green-700 dark:text-green-400'
-                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                  return (
+                    <li key={itemKey}>
+                      <a
+                        href={`#${itemKey.toLowerCase()}`}
+                        onClick={(e) => handleNavClick(itemKey, e)}
+                        className={`block px-4 py-2 rounded-xl text-[15px] font-semibold transition-all duration-200 ${
+                          isActive ? desktopNavActiveClass : desktopNavLinkClass
+                        }`}
+                      >
+                        {label}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          </div>
+
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Sun size={20} className={`${theme === 'light' ? 'text-orange-500' : 'text-gray-400'}`} />
+              <button
+                onClick={toggleTheme}
+                className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 focus:outline-none ${
+                  theme === 'dark' ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
+              >
+                <div
+                  className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                    theme === 'dark' ? 'translate-x-6' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+              <Moon size={20} className={`${theme === 'dark' ? 'text-blue-400' : 'text-gray-400'}`} />
+            </div>
+
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsLangDesktopOpen(!isLangDesktopOpen)}
+                className="flex items-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none font-semibold"
+              >
+                <Globe size={20} />
+                <span>{currentLangLabel}</span>
+              </button>
+              {isLangDesktopOpen && (
+                <div className="absolute top-full right-0 mt-2 w-40 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-2 z-50 animate-fadeIn overflow-hidden">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        setLanguage(lang.code);
+                        setIsLangDesktopOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                        language === lang.code ? 'font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700/50' : ''
                       }`}
                     >
-                      {label}
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-        </div>
-
-        <div className="hidden md:flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Sun size={20} className={`${theme === 'light' ? 'text-orange-500' : 'text-gray-400'}`} />
-            <button
-              onClick={toggleTheme}
-              className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 focus:outline-none ${
-                theme === 'dark' ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
-            >
-              <div
-                className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
-                  theme === 'dark' ? 'translate-x-6' : 'translate-x-0'
-                }`}
-              />
-            </button>
-            <Moon size={20} className={`${theme === 'dark' ? 'text-blue-400' : 'text-gray-400'}`} />
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setIsLangDesktopOpen(!isLangDesktopOpen)}
-              className="flex items-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none font-semibold"
-            >
-              <Globe size={20} />
-              <span>{currentLangLabel}</span>
-            </button>
-            {isLangDesktopOpen && (
-              <div className="absolute top-full right-0 mt-2 w-40 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-2 z-50 animate-fadeIn overflow-hidden">
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => {
-                      setLanguage(lang.code);
-                      setIsLangDesktopOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                      language === lang.code ? 'font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700/50' : ''
-                    }`}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <button
+            className="md:hidden p-2 text-gray-700 dark:text-gray-200 focus:outline-none"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X size={28} className="text-green-600" /> : <Menu size={28} className="text-green-600" />}
+          </button>
         </div>
-
-        <button
-          className="md:hidden p-2 text-gray-700 dark:text-gray-200 focus:outline-none"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          {isMenuOpen ? <X size={28} className="text-green-600" /> : <Menu size={28} className="text-green-600" />}
-        </button>
       </div>
 
       {isMenuVisible && (
