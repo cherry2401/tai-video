@@ -36,11 +36,10 @@ function getQualityColor(height: number): string {
 const QualitySelector: React.FC<{
   result: DownloadResult;
   formats: VideoFormat[];
-  onDownloadStart: (result: DownloadResult) => void;
-}> = ({ result, formats, onDownloadStart }) => {
+}> = ({ result, formats }) => {
   const [selectedFormat, setSelectedFormat] = useState<VideoFormat | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [proxyDownloadUrl, setProxyDownloadUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const uniqueFormats = formats.reduce<VideoFormat[]>((acc, f) => {
@@ -58,7 +57,7 @@ const QualitySelector: React.FC<{
     setSelectedFormat(format);
     setIsDownloading(true);
     setError(null);
-    setDownloadUrl(null);
+    setProxyDownloadUrl(null);
 
     try {
       const data = await fetchDownloadWithFormat(
@@ -68,33 +67,14 @@ const QualitySelector: React.FC<{
 
       if (data.downloadUrl) {
         const rawUrl = data.downloadUrl;
-        setDownloadUrl(rawUrl);
-        onDownloadStart({ ...result, downloadUrl: rawUrl, quality: format.height + 'p' });
-
-        // Auto-trigger download via proxy
         const proxyUrl = getProxyUrl(rawUrl, result.title || data.title || 'video');
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        setProxyDownloadUrl(proxyUrl);
 
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         if (isMobile) {
           window.open(proxyUrl, '_blank');
         } else {
-          // Desktop: try blob download, fallback to proxy
-          try {
-            const resp = await fetch(rawUrl);
-            if (!resp.ok) throw new Error('fetch failed');
-            const blob = await resp.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = blobUrl;
-            a.download = `${(result.title || 'video').replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${format.height}p.mp4`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(blobUrl);
-            document.body.removeChild(a);
-          } catch {
-            window.location.href = proxyUrl;
-          }
+          window.location.href = proxyUrl;
         }
       } else {
         setError('Không nhận được link tải');
@@ -124,7 +104,7 @@ const QualitySelector: React.FC<{
               className={`relative flex items-center gap-2 px-3 py-2 rounded-lg border text-left transition-all text-sm
                 ${isSelected && isDownloading
                   ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                  : isSelected && downloadUrl
+                  : isSelected && proxyDownloadUrl
                     ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
                     : 'border-gray-200 dark:border-gray-600 hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20'
                 }
@@ -146,7 +126,7 @@ const QualitySelector: React.FC<{
               {isSelected && isDownloading && (
                 <Loader2 size={14} className="animate-spin text-blue-500 shrink-0" />
               )}
-              {isSelected && downloadUrl && (
+              {isSelected && proxyDownloadUrl && (
                 <CheckCircle size={14} className="text-green-500 shrink-0" />
               )}
             </button>
@@ -160,10 +140,10 @@ const QualitySelector: React.FC<{
         </p>
       )}
 
-      {downloadUrl && (
+      {proxyDownloadUrl && (
         <div className="mt-3 flex justify-center">
           <a
-            href={downloadUrl}
+            href={proxyDownloadUrl}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1 text-xs text-white bg-green-600 px-6 py-2.5 rounded-lg hover:bg-green-700 transition-colors shadow-md"
@@ -193,37 +173,10 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
     const safeTitle = (result.title || 'video').replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(result.downloadUrl)}&filename=${safeTitle}.mp4`;
 
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    if (isMobile) {
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
       window.open(proxyUrl, '_blank');
     } else {
-      const tryDirectDownload = async () => {
-        try {
-          if (btn) btn.innerHTML = '⏳ Đang tải về máy...';
-
-          const response = await fetch(result.downloadUrl!);
-          if (!response.ok) throw new Error('Fetch failed');
-
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.style.display = 'none';
-          a.href = url;
-          a.download = `${safeTitle}.mp4`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-
-          if (btn) btn.innerHTML = '✅ Đã tải xong';
-        } catch (e) {
-          console.log('Direct download blocked (CORS), falling back to Proxy...');
-          window.location.href = proxyUrl;
-        }
-      };
-
-      tryDirectDownload();
+      window.location.href = proxyUrl;
     }
 
     setTimeout(() => {
@@ -334,7 +287,6 @@ const ResultList: React.FC<ResultListProps> = ({ results, t }) => {
               <QualitySelector
                 result={result}
                 formats={result.formats!}
-                onDownloadStart={handleDownloadClick}
               />
             </div>
           )}
