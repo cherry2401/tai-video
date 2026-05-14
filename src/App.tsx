@@ -280,26 +280,6 @@ const App: React.FC = () => {
               >
                 Outlook
               </button>
-              <button
-                onClick={() => setActiveUtility('cdk')}
-                className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${
-                  activeUtility === 'cdk'
-                    ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-md transform scale-105'
-                    : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2b3458] border border-gray-100 dark:border-indigo-900/60'
-                }`}
-              >
-                ChatGPT CDK
-              </button>
-              <button
-                onClick={() => setActiveUtility('cdkV2')}
-                className={`flex-shrink-0 px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap ${
-                  activeUtility === 'cdkV2'
-                    ? 'bg-gradient-to-r from-emerald-500 to-lime-500 text-white shadow-md transform scale-105'
-                    : 'bg-white dark:bg-[#1f2747]/95 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2b3458] border border-gray-100 dark:border-indigo-900/60'
-                }`}
-              >
-                ChatGPT CDK V2
-              </button>
             </div>
           </div>
 
